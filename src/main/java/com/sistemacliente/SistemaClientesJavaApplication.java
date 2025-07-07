@@ -1,13 +1,18 @@
-package com.sistemaclliente;
+package com.sistemacliente;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+
 public class SistemaClientesJavaApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SistemaClientesJavaApplication.class, args);
+		System.out.println("Sistema clientes conectado.");
 	}
 
 }
+
+
+
