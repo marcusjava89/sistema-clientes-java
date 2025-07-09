@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.sistemacliente.ClienteNotFoundException;
+
 @RestControllerAdvice
 public class ValidationExceptionHandler {
 	
@@ -34,4 +36,14 @@ public class ValidationExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 	}
 	
+	@ExceptionHandler(ClienteNotFoundException.class)
+	public ResponseEntity<String> handlerClienteNotFoundException(ClienteNotFoundException ex){
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+	}
+	
 }
+
+
+
+
+

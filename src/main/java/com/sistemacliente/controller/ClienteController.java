@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,9 +30,15 @@ public class ClienteController {
 	}
 	
 	@PostMapping(value = "/salvarCliente")
-	public ResponseEntity<?> salvarCliente(@Valid @RequestBody Cliente cliente){
+	public ResponseEntity<Cliente> salvarCliente(@Valid @RequestBody Cliente cliente){
 		Cliente clienteNovo = clienteService.adicionarCliente(cliente);
 		return ResponseEntity.status(HttpStatus.CREATED).body(clienteNovo);
+	}
+	
+	@GetMapping(value = "/cliente/{id}")
+	public ResponseEntity<Cliente> encontrarClientePorId(@PathVariable Long id){
+		Cliente cliente = clienteService.buscarClientePorId(id);
+		return ResponseEntity.ok(cliente);
 	}
 	
 }
