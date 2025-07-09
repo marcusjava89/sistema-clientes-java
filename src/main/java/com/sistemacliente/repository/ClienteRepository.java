@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 @Transactional
 public interface ClienteRepository extends JpaRepository<Cliente, Long>{
 	
-	
-
 }
+
+
+
+
