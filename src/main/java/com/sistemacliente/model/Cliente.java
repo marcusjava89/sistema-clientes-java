@@ -12,6 +12,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "cliente")
@@ -33,6 +34,11 @@ public class Cliente implements Serializable{
 	@NotBlank(message = "E-mail não pode ser vazio.")
 	@Column(name = "email", nullable = false)
 	private String email;
+	
+	@NotBlank(message = "CPF não pode ser vazio.")
+	@Pattern(regexp = "\\d{11}", message = "Digite os 11 dígitos do CPF sem ponto e hífen.")
+	@Column(name = "cpf", nullable = false, unique = true)
+	private String cpf;
 
 	public Long getId() {
 		return id;
@@ -57,10 +63,18 @@ public class Cliente implements Serializable{
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	
+	public String getCpf() {
+		return cpf;
+	}
+	
+	public void setCpf(String cpf) {
+		this.cpf = cpf;
+	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(email, id, nome);
+		return Objects.hash(id);
 	}
 
 	@Override
@@ -72,9 +86,9 @@ public class Cliente implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		Cliente other = (Cliente) obj;
-		return Objects.equals(email, other.email) && Objects.equals(id, other.id) && Objects.equals(nome, other.nome);
+		return Objects.equals(id, other.id);
 	}
-	
+
 	
 
 }

@@ -31,6 +31,23 @@ public class ClienteService {
 		return clienteEncontrado;
 	}
 	
+	public void deletarClientePorId(Long id) {
+		Cliente clienteEncontrado = clienteRepository.findById(id)
+				.orElseThrow(() -> new ClienteNotFoundException(id));
+		
+		clienteRepository.delete(clienteEncontrado);
+	}
+	
+	public Cliente atualizarClienteService(Long id, Cliente cliente) {
+		Cliente clienteEncontrado = clienteRepository.findById(id)
+				.orElseThrow(() -> new ClienteNotFoundException(id));
+		
+		clienteEncontrado.setNome(cliente.getNome()); ;
+		clienteEncontrado.setEmail(cliente.getEmail()); ;
+		
+		return clienteRepository.saveAndFlush(clienteEncontrado);	
+	}
+	
 }
 
 
