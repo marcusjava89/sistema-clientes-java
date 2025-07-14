@@ -41,14 +41,17 @@ public class ClienteService {
 	public Cliente atualizarClienteService(Long id, Cliente cliente) {
 		Cliente clienteEncontrado = clienteRepository.findById(id)
 				.orElseThrow(() -> new ClienteNotFoundException(id));
-		
 		clienteEncontrado.setNome(cliente.getNome()); ;
 		clienteEncontrado.setEmail(cliente.getEmail()); ;
 		
 		return clienteRepository.saveAndFlush(clienteEncontrado);	
 	}
 	
+	
+	
 }
+
+
 
 
 

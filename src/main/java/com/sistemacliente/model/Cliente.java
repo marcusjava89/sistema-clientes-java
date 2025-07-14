@@ -3,6 +3,8 @@ package com.sistemacliente.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.springframework.beans.BeanUtils;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,24 +21,28 @@ import jakarta.validation.constraints.Pattern;
 @SequenceGenerator(name = "seq_cliente", sequenceName = "seq_cliente", initialValue = 1, 
 allocationSize = 1)
 public class Cliente implements Serializable{
+	
+	public Cliente() {
 
+	}
+
+	public Cliente(ClienteRequestDTO dto) {
+		BeanUtils.copyProperties(dto, this);
+	}
+
+	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_cliente")
 	private Long id;
 	
-	@NotBlank(message = "Nome não pode ser vazio.")
 	@Column(name = "nome", nullable = false)
 	private String nome;
 	
-	@Email(message = "Formato inválido do e-mail.")
-	@NotBlank(message = "E-mail não pode ser vazio.")
 	@Column(name = "email", nullable = false)
 	private String email;
 	
-	@NotBlank(message = "CPF não pode ser vazio.")
-	@Pattern(regexp = "\\d{11}", message = "Digite os 11 dígitos do CPF sem ponto e hífen.")
 	@Column(name = "cpf", nullable = false, unique = true)
 	private String cpf;
 
