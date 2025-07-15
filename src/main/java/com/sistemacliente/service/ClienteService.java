@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sistemacliente.ClienteNotFoundException;
+import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.model.Cliente;
 import com.sistemacliente.repository.ClienteRepository;
 

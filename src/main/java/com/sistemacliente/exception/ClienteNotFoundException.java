@@ -1,4 +1,4 @@
-package com.sistemacliente;
+package com.sistemacliente.exception;
 
 public class ClienteNotFoundException extends RuntimeException{
 	public ClienteNotFoundException(Long id) {

@@ -5,6 +5,8 @@ import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
 
+import com.sistemacliente.model.dto.ClienteRequestDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
