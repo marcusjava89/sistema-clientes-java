@@ -39,17 +39,17 @@ public class ClienteService {
 	public void deletarClientePorId(Long id) {
 		Cliente clienteEncontrado = repository.findById(id)
 				.orElseThrow(() -> new ClienteNotFoundException(id));
-		
 		repository.delete(clienteEncontrado);
 	}
 	
-	public Cliente atualizarClienteService(Long id, Cliente cliente) {
+	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO dto) {
 		Cliente clienteEncontrado = repository.findById(id)
 				.orElseThrow(() -> new ClienteNotFoundException(id));
-		clienteEncontrado.setNome(cliente.getNome()); ;
-		clienteEncontrado.setEmail(cliente.getEmail()); ;
 		
-		return repository.saveAndFlush(clienteEncontrado);	
+		clienteEncontrado.setNome(dto.getNome());
+		clienteEncontrado.setEmail(dto.getEmail()); 
+		clienteEncontrado.setCpf(dto.getCpf()); 		
+		return new ClienteResponseDTO(repository.saveAndFlush(clienteEncontrado));	
 	}
 	
 	
