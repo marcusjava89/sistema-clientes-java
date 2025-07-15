@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.model.Cliente;
+import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.repository.ClienteRepository;
 
 @Service
@@ -16,8 +17,9 @@ public class ClienteService {
 	private ClienteRepository clienteRepository;
 	
 	/*lista de todos os clientes*/
-	public List<Cliente> listagemCliente (){
-		return clienteRepository.findAll();
+	public List<ClienteResponseDTO> listagemCliente (){
+		List<Cliente> lista = clienteRepository.findAll();
+		return lista.stream().map(ClienteResponseDTO::new).toList();
 	}
 
 	public Cliente adicionarCliente(Cliente cliente) {
