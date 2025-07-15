@@ -29,11 +29,11 @@ public class ClienteService {
 		return new ClienteResponseDTO(salvo);
 	}
 	
-	public Cliente buscarClientePorId(Long id) {
+	public ClienteResponseDTO buscarClientePorId(Long id) {
 		Cliente clienteEncontrado = repository.findById(id)
 				.orElseThrow(() -> new ClienteNotFoundException(id));
-		
-		return clienteEncontrado;
+		ClienteResponseDTO response= new ClienteResponseDTO(clienteEncontrado);
+		return response;
 	}
 	
 	public void deletarClientePorId(Long id) {
