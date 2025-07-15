@@ -29,7 +29,6 @@ public class ClienteController {
 	
 	@GetMapping(value = "/listarclientes")
 	public ResponseEntity<List<ClienteResponseDTO>> listarClientes(){
-		
 		List<ClienteResponseDTO> listaDeClientes = service.listagemCliente();
 		return ResponseEntity.ok(listaDeClientes);
 	}
@@ -42,9 +41,9 @@ public class ClienteController {
 	}
 	
 	@GetMapping(value = "/encontrarcliente/{id}")
-	public ResponseEntity<Cliente> encontrarClientePorId(@PathVariable Long id){
-		Cliente cliente = service.buscarClientePorId(id);
-		return ResponseEntity.ok(cliente);
+	public ResponseEntity<ClienteResponseDTO> encontrarClientePorId(@PathVariable Long id){
+		ClienteResponseDTO encontrado = service.buscarClientePorId(id);
+		return ResponseEntity.ok(encontrado);
 	}
 	
 	@DeleteMapping(value = "/deletarporid/{id}")
@@ -56,9 +55,7 @@ public class ClienteController {
 	@PutMapping(value = "/clientes/{id}")
 	public ResponseEntity<Cliente> 
 	atualizarCliente(@PathVariable Long id, @Valid @RequestBody Cliente cliente){
-		Cliente clienteAtualizado = service.atualizarClienteService(id, cliente);
 		
-		return ResponseEntity.ok(clienteAtualizado);
 	}
 	
 }
