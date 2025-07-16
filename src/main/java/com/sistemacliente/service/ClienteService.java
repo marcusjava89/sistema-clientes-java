@@ -52,6 +52,12 @@ public class ClienteService {
 		return new ClienteResponseDTO(repository.saveAndFlush(clienteEncontrado));	
 	}
 	
+	public ClienteResponseDTO encontrarPorCpf(String cpf) {
+		Cliente cliente = repository.findByCpf(cpf)
+				.orElseThrow(() -> new ClienteNotFoundException(cpf));
+		return new ClienteResponseDTO(cliente);
+	}
+	
 	
 	
 }

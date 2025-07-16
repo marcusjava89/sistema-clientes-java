@@ -53,9 +53,16 @@ public class ClienteController {
 	}
 	
 	@PutMapping(value = "/clientes/{id}")
-	public ResponseEntity<Cliente> 
-	atualizarCliente(@PathVariable Long id, @Valid @RequestBody Cliente cliente){
-		
+	public ResponseEntity<ClienteResponseDTO> 
+	atualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteRequestDTO dto){
+		ClienteResponseDTO response = service.atualizarCliente(id, dto);
+		return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping(value = "/clientecpf/{cpf}")
+	public ResponseEntity<ClienteResponseDTO> encontrarClienteporCpf(@PathVariable String cpf){
+		ClienteResponseDTO response = service.encontrarPorCpf(cpf);
+		return ResponseEntity.ok(response);
 	}
 	
 }
