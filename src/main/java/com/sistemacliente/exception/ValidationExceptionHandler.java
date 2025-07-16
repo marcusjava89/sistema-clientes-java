@@ -39,6 +39,11 @@ public class ValidationExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 	
+	@ExceptionHandler(CpfJaCadastradoException.class)
+	 public ResponseEntity<String> handlerCpfJaCadastradoException(CpfJaCadastradoException ex){
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+	}
+	
 }
 
 

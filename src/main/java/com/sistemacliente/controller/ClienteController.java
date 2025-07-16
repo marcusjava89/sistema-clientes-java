@@ -60,7 +60,7 @@ public class ClienteController {
 	}
 	
 	@GetMapping(value = "/clientecpf/{cpf}")
-	public ResponseEntity<ClienteResponseDTO> encontrarClienteporCpf(@PathVariable String cpf){
+	public ResponseEntity<ClienteResponseDTO> encontrarClientePorCpf(@PathVariable String cpf){
 		ClienteResponseDTO response = service.encontrarPorCpf(cpf);
 		return ResponseEntity.ok(response);
 	}
