@@ -3,9 +3,12 @@ package com.sistemacliente.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.sistemacliente.exception.ClienteNotFoundException;
+import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.model.Cliente;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
@@ -23,7 +26,12 @@ public class ClienteService {
 		return lista.stream().map(ClienteResponseDTO::new).toList();
 	}
 
-	public ClienteResponseDTO adicionarCliente(ClienteRequestDTO dto) {
+	public ClienteResponseDTO salvarCliente(ClienteRequestDTO dto) {
+		
+		if(repository.findByCpf(dto.getCpf()).isPresent()) {
+			throw new CpfJaCadastradoException(dto.getCpf());
+		}
+		
 		Cliente cliente = new Cliente(dto);
 		Cliente salvo = repository.save(cliente); //Somente a entidade pode ser salva no banco.
 		return new ClienteResponseDTO(salvo);
@@ -58,9 +66,22 @@ public class ClienteService {
 		return new ClienteResponseDTO(cliente);
 	}
 	
+	public Page<ClienteResponseDTO> listaPaginada(int pagina, int itens){
+		PageRequest pageable = PageRequest.of(pagina, itens);
+		Page<Cliente> listaProdutos = repository.findAll(pageable);
+		return listaProdutos.map(ClienteResponseDTO::new);
+	}
 	
+	 
 	
 }
+
+
+
+
+
+
+
 
 
 

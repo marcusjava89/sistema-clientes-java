@@ -3,6 +3,7 @@ package com.sistemacliente.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sistemacliente.model.Cliente;
@@ -36,7 +38,7 @@ public class ClienteController {
 	@PostMapping(value = "/salvarcliente")
 	public ResponseEntity<ClienteResponseDTO> 
 	salvarCliente(@Valid @RequestBody ClienteRequestDTO dto){
-		ClienteResponseDTO clienteNovo = service.adicionarCliente(dto);
+		ClienteResponseDTO clienteNovo = service.salvarCliente(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(clienteNovo);
 	}
 	
@@ -62,7 +64,15 @@ public class ClienteController {
 	@GetMapping(value = "/clientecpf/{cpf}")
 	public ResponseEntity<ClienteResponseDTO> encontrarClientePorCpf(@PathVariable String cpf){
 		ClienteResponseDTO response = service.encontrarPorCpf(cpf);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(response); 
+	}
+	
+	@GetMapping(value = "paginada")
+	public ResponseEntity<Page<ClienteResponseDTO>> 
+	listaPaginada(@RequestParam(defaultValue = "0") int pagina,
+	@RequestParam(defaultValue = "3") int itens){
+		Page<ClienteResponseDTO> lista = service.listaPaginada(pagina, itens);
+		return ResponseEntity.ok(lista);
 	}
 	
 }
