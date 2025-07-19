@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.sistemacliente.exception.ClienteNotFoundException;
@@ -72,7 +73,12 @@ public class ClienteService {
 		return listaProdutos.map(ClienteResponseDTO::new);
 	}
 	
-	 
+	 public Page<ClienteResponseDTO> listaPaginadaPorOrdenacao
+	 (int pagina, int itens, String ordenadoPor) {
+		 PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor).ascending());
+		 Page<Cliente> lista = repository.findAll(pageable);
+		 return lista.map(ClienteResponseDTO::new);
+	 }
 	
 }
 
