@@ -44,6 +44,10 @@ public class ValidationExceptionHandler {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 	}
 	
+	@ExceptionHandler(AlteracaoDeCpfException.class)
+	 public ResponseEntity<String> handlerAlteracaoDeCpfException(AlteracaoDeCpfException ex){
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+	}
 }
 
 

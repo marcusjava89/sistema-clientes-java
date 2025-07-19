@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.model.Cliente;
@@ -53,9 +54,12 @@ public class ClienteService {
 	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO dto) {
 		Cliente clienteEncontrado = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 		
+		if(!clienteEncontrado.getCpf().equals(dto.getCpf())) {
+			throw new AlteracaoDeCpfException();
+		}
+		
 		clienteEncontrado.setNome(dto.getNome());
 		clienteEncontrado.setEmail(dto.getEmail()); 
-		clienteEncontrado.setCpf(dto.getCpf()); 		
 		return new ClienteResponseDTO(repository.saveAndFlush(clienteEncontrado));	
 	}
 	

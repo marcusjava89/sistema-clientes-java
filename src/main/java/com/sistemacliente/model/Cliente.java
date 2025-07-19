@@ -45,7 +45,7 @@ public class Cliente implements Serializable{
 	@Column(name = "email", nullable = false)
 	private String email;
 	
-	@Column(name = "cpf", nullable = false, unique = true)
+	@Column(name = "cpf", nullable = false, unique = true, updatable = false)
 	private String cpf;
 
 	public Long getId() {
