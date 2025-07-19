@@ -39,8 +39,7 @@ public class ClienteService {
 	}
 	
 	public ClienteResponseDTO buscarClientePorId(Long id) {
-		Cliente clienteEncontrado = repository.findById(id)
-				.orElseThrow(() -> new ClienteNotFoundException(id));
+		Cliente clienteEncontrado = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 		ClienteResponseDTO response= new ClienteResponseDTO(clienteEncontrado);
 		return response;
 	}
@@ -52,8 +51,7 @@ public class ClienteService {
 	}
 	
 	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO dto) {
-		Cliente clienteEncontrado = repository.findById(id)
-				.orElseThrow(() -> new ClienteNotFoundException(id));
+		Cliente clienteEncontrado = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 		
 		clienteEncontrado.setNome(dto.getNome());
 		clienteEncontrado.setEmail(dto.getEmail()); 
@@ -67,18 +65,23 @@ public class ClienteService {
 		return new ClienteResponseDTO(cliente);
 	}
 	
-	public Page<ClienteResponseDTO> listaPaginada(int pagina, int itens){
-		PageRequest pageable = PageRequest.of(pagina, itens);
+	public Page<ClienteResponseDTO> listaPaginada(int pagina, int itens){PageRequest pageable = PageRequest.of(pagina, itens);
 		Page<Cliente> listaProdutos = repository.findAll(pageable);
 		return listaProdutos.map(ClienteResponseDTO::new);
 	}
 	
-	 public Page<ClienteResponseDTO> listaPaginadaPorOrdenacao
-	 (int pagina, int itens, String ordenadoPor) {
+	 public Page<ClienteResponseDTO> listaPaginadaPorOrdenacao(int pagina, int itens, String ordenadoPor) {
 		 PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor).ascending());
 		 Page<Cliente> lista = repository.findAll(pageable);
 		 return lista.map(ClienteResponseDTO::new);
 	 }
+	 
+	 public Page<ClienteResponseDTO> buscarPorNome(String nome, int pagina, int itens) {
+		PageRequest pageable = PageRequest.of(pagina, itens);
+		Page<Cliente> lista = repository.findByNomeContainingIgnoreCase(nome, pageable);
+		return lista.map(ClienteResponseDTO::new);
+	 }
+	 
 	
 }
 

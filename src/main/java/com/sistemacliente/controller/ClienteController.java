@@ -85,7 +85,39 @@ public class ClienteController {
 		return ResponseEntity.ok(lista);
 	}
 	
+	@GetMapping(value = "/buscapornome")
+	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorNomePagina(@RequestParam(defaultValue = "") String nome,
+	@RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens){
+		Page<ClienteResponseDTO> lista = service.buscarPorNome(nome, pagina, itens);
+		return ResponseEntity.ok(lista);
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
