@@ -32,7 +32,6 @@ public class Cliente implements Serializable{
 		BeanUtils.copyProperties(dto, this);
 	}
 
-	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
