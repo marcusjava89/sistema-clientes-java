@@ -139,6 +139,25 @@ public class ClienteService {
 		return lista.map(ClienteResponseDTO::new);
 	}
 	
+	public ClienteResponseDTO atualizarEmail(Long id, String email) {
+		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
+		
+		if(email == null || email.isBlank()) {
+			throw new IllegalArgumentException("E-mail não pode ser vazio.");
+		}
+
+		/*Verifica formato do e-mail.*/
+		String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
+				"(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+		if(!email.matches(regexEmail)) {
+			throw new IllegalArgumentException("Formato do e-mail inválido.");
+		}
+		
+		cliente.setEmail(email);
+		Cliente clienteAtualizado = repository.saveAndFlush(cliente);
+		return new ClienteResponseDTO(clienteAtualizado);
+	}
+	
 }
 
 

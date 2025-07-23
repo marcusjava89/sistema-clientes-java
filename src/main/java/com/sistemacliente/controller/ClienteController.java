@@ -111,20 +111,13 @@ public class ClienteController {
 		return ResponseEntity.ok(page);
 	}
 	
+	@PatchMapping(value = "/clientes/{id}/email")
+	public ResponseEntity<ClienteResponseDTO> atualizarEmail(@PathVariable Long id,@RequestParam String email){
+		ClienteResponseDTO response= service.atualizarEmail(id, email);
+		return ResponseEntity.ok(response);
+	}
+	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
