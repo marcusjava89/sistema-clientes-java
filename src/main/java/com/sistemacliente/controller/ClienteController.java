@@ -39,8 +39,7 @@ public class ClienteController {
 	}
 	
 	@PostMapping(value = "/salvarcliente")
-	public ResponseEntity<ClienteResponseDTO> 
-	salvarCliente(@Valid @RequestBody ClienteRequestDTO dto){
+	public ResponseEntity<ClienteResponseDTO> salvarCliente(@Valid @RequestBody ClienteRequestDTO dto){
 		ClienteResponseDTO clienteNovo = service.salvarCliente(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(clienteNovo);
 	}
@@ -54,7 +53,7 @@ public class ClienteController {
 	@DeleteMapping(value = "/deletarporid/{id}")
 	public ResponseEntity<Void> deletarClientePorId(@PathVariable Long id){
 		service.deletarClientePorId(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.noContent().build(); // noContent(), retorno positivo indicando que não há conteúdo.
 	}
 	
 	@PutMapping(value = "/clientes/{id}")
@@ -74,8 +73,8 @@ public class ClienteController {
 	public ResponseEntity<Page<ClienteResponseDTO>> 
 	listaPaginada(@RequestParam(defaultValue = "0") int pagina,
 	@RequestParam(defaultValue = "3") int itens){
-		Page<ClienteResponseDTO> lista = service.listaPaginada(pagina, itens);
-		return ResponseEntity.ok(lista);
+		Page<ClienteResponseDTO> page = service.listaPaginada(pagina, itens);
+		return ResponseEntity.ok(page);
 	}
 	
 	@GetMapping(value = "paginadaordem")
@@ -92,8 +91,8 @@ public class ClienteController {
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorNomePagina(
 	@RequestParam(defaultValue = "") String nome,
 	@RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens){
-		Page<ClienteResponseDTO> lista = service.buscarPorNome(nome, pagina, itens);
-		return ResponseEntity.ok(lista);
+		Page<ClienteResponseDTO> page = service.buscarPorNome(nome, pagina, itens);
+		return ResponseEntity.ok(page);
 	}
 	
 	@PatchMapping(value = "parcial/{id}")
@@ -114,6 +113,13 @@ public class ClienteController {
 	@PatchMapping(value = "/clientes/{id}/email")
 	public ResponseEntity<ClienteResponseDTO> atualizarEmail(@PathVariable Long id,@RequestParam String email){
 		ClienteResponseDTO response= service.atualizarEmail(id, email);
+		return ResponseEntity.ok(response);
+	}
+	
+	@PatchMapping(value = "/clientes/{id}")
+	public ResponseEntity<ClienteResponseDTO> atualizarNomeEmailParcial(@PathVariable Long id, 
+	@RequestBody Map<String, Object> updates){
+		ClienteResponseDTO response = service.atualizarNomeEmailParcial(id, updates);
 		return ResponseEntity.ok(response);
 	}
 	

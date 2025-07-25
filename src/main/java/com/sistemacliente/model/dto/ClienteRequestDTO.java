@@ -47,8 +47,6 @@ public class ClienteRequestDTO {
 		this.cpf = cpf;
 	}
 	
-	
-	
 }
 
 

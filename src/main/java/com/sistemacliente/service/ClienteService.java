@@ -1,6 +1,5 @@
 package com.sistemacliente.service;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +29,9 @@ public class ClienteService {
 	
 	@Autowired
 	private ObjectMapper mapper;
+	
+	String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
+            "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
 	/* lista de todos os clientes */
 	public List<ClienteResponseDTO> listagemCliente() {
@@ -38,7 +40,7 @@ public class ClienteService {
 	}
 
 	public ClienteResponseDTO salvarCliente(ClienteRequestDTO dto) {
-
+		
 		if (repository.findByCpf(dto.getCpf()).isPresent()) {
 			throw new CpfJaCadastradoException(dto.getCpf());
 		}
@@ -50,8 +52,7 @@ public class ClienteService {
 
 	public ClienteResponseDTO buscarClientePorId(Long id) {
 		Cliente clienteEncontrado = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
-		ClienteResponseDTO response = new ClienteResponseDTO(clienteEncontrado);
-		return response;
+		return new ClienteResponseDTO(clienteEncontrado);
 	}
 
 	public void deletarClientePorId(Long id) {
@@ -77,21 +78,21 @@ public class ClienteService {
 	}
 
 	public Page<ClienteResponseDTO> listaPaginada(int pagina, int itens) {
-		PageRequest pageable = PageRequest.of(pagina, itens);
-		Page<Cliente> listaProdutos = repository.findAll(pageable);
-		return listaProdutos.map(ClienteResponseDTO::new);
+		PageRequest pageable = PageRequest.of(pagina, itens); // critério da página
+		Page<Cliente> page = repository.findAll(pageable);
+		return page.map(ClienteResponseDTO::new);
 	}
 
 	public Page<ClienteResponseDTO> listaPaginadaPorOrdenacao(int pagina, int itens, String ordenadoPor) {
 		PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor).ascending());
-		Page<Cliente> lista = repository.findAll(pageable);
-		return lista.map(ClienteResponseDTO::new);
+		Page<Cliente> page = repository.findAll(pageable);
+		return page.map(ClienteResponseDTO::new);
 	}
 
 	public Page<ClienteResponseDTO> buscarPorNome(String nome, int pagina, int itens) {
 		PageRequest pageable = PageRequest.of(pagina, itens);
-		Page<Cliente> lista = repository.findByNomeContainingIgnoreCase(nome, pageable);
-		return lista.map(ClienteResponseDTO::new);
+		Page<Cliente> page = repository.findByNomeContainingIgnoreCase(nome, pageable);
+		return page.map(ClienteResponseDTO::new);
 	}
 
 	public ClienteResponseDTO atualizarParcial(Long id, Map<String, Object> updates) throws JsonMappingException {
@@ -117,9 +118,6 @@ public class ClienteService {
 			if(email == null || email.toString().isBlank()) {
 				throw new IllegalArgumentException("E-mail não pode ser vazio.");
 			}
-		
-			String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
-	                "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 			
 			if(!email.toString().matches(regexEmail)) {
 				throw new IllegalArgumentException("O formato do email está incorreto.");
@@ -135,8 +133,8 @@ public class ClienteService {
 	
 	public Page<ClienteResponseDTO> buscarPorEmail(String email, int pagina, int itens){
 		PageRequest pageable = PageRequest.of(pagina, itens);
-		Page<Cliente> lista = repository.findByEmail(email, pageable);
-		return lista.map(ClienteResponseDTO::new);
+		Page<Cliente> page = repository.findByEmail(email, pageable);
+		return page.map(ClienteResponseDTO::new);
 	}
 	
 	public ClienteResponseDTO atualizarEmail(Long id, String email) {
@@ -146,16 +144,46 @@ public class ClienteService {
 			throw new IllegalArgumentException("E-mail não pode ser vazio.");
 		}
 
-		/*Verifica formato do e-mail.*/
-		String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
-				"(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 		if(!email.matches(regexEmail)) {
 			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
 		
 		cliente.setEmail(email);
-		Cliente clienteAtualizado = repository.saveAndFlush(cliente);
+		Cliente clienteAtualizado = repository.saveAndFlush(cliente); // atualiza no banco de dados
 		return new ClienteResponseDTO(clienteAtualizado);
+	}
+	
+	public ClienteResponseDTO atualizarNomeEmailParcial(Long id, Map<String, Object> updates) {
+		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
+		
+		if(updates.containsKey("id") || updates.containsKey("cpf")) {
+			throw new IllegalArgumentException("Id e CPF, não será mudados aqui.");
+		}
+		
+		if(updates.containsKey("nome")) {
+			Object nome = updates.get("nome");
+			
+			if(nome == null || nome.toString().isBlank()) {
+				throw new IllegalArgumentException("Nome não pode ser vazio");
+			}
+			cliente.setNome(nome.toString());
+		}
+		
+		if(updates.containsKey("email")) {
+			Object email = updates.get("email");
+			if(email == null || email.toString().isBlank()) {
+				throw new IllegalArgumentException("E-mail não pode ser vazio.");
+			}
+			
+			
+			if(!email.toString().matches(regexEmail)) {
+				throw new IllegalArgumentException("O formato do e-mail não é válido.");
+			}
+			cliente.setEmail(email.toString());
+			
+		}
+		repository.saveAndFlush(cliente);
+		return new ClienteResponseDTO(cliente);
 	}
 	
 }

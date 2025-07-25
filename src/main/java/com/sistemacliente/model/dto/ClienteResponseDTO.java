@@ -18,6 +18,7 @@ public class ClienteResponseDTO {
 	private String nome;
 	private String email;
 	private String cpf;
+	
 	public Long getId() {
 		return id;
 	}
@@ -48,8 +49,8 @@ public class ClienteResponseDTO {
 
 	public void setCpf(String cpf) {
 		this.cpf = cpf;
-	}
-
-	
-	
+	}	
 }
+
+
+
