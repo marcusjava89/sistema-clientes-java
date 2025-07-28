@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.exception.AlteracaoDeCpfException;
+import com.sistemacliente.exception.ArgumentoInvalidoException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.model.Cliente;
@@ -184,6 +185,17 @@ public class ClienteService {
 		}
 		repository.saveAndFlush(cliente);
 		return new ClienteResponseDTO(cliente);
+	}
+	
+	public Page<ClienteResponseDTO> buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
+		
+		if(pagina <0 || itens <1) {
+			throw new IllegalArgumentException("Número da página ou de itens por páginas menor que 1.");
+		}
+		
+		PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor.trim()).ascending());
+		Page<Cliente> page = repository.findByEmailContainingIgnoreCase(email, pageable);
+		return page.map(ClienteResponseDTO::new);
 	}
 	
 }

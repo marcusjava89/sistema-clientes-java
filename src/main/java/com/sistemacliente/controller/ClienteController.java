@@ -104,8 +104,8 @@ public class ClienteController {
 	
 	@GetMapping(value = "/buscaemail")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscaPorEmail
-	(@RequestParam(defaultValue = "marcusjava89@gmail.com") String email,
-	@RequestParam(defaultValue = "0") int pagina,@RequestParam(defaultValue = "3") int itens){
+	(@RequestParam String email, @RequestParam(defaultValue = "0") int pagina, 
+	@RequestParam(defaultValue = "3") int itens){
 		Page<ClienteResponseDTO> page = service.buscarPorEmail(email, pagina, itens);
 		return ResponseEntity.ok(page);
 	}
@@ -122,6 +122,16 @@ public class ClienteController {
 		ClienteResponseDTO response = service.atualizarNomeEmailParcial(id, updates);
 		return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping(value = "clientes/buscarporemail")
+	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorEmailOrdenada(
+	@RequestParam String email, @RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens,
+	@RequestParam(defaultValue = "nome") String ordenadoPor){
+		
+		Page<ClienteResponseDTO> page = service.buscaEmailPaginadaOrdenada(email, pagina, itens, ordenadoPor.trim());
+		return ResponseEntity.ok(page);
+	}
+	
 	
 }
 
