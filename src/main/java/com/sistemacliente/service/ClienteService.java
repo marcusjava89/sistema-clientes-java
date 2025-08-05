@@ -34,7 +34,7 @@ public class ClienteService {
 	String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
             "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
-	/* lista de todos os clientes */
+	/*testando*/
 	public List<ClienteResponseDTO> listagemCliente() {
 		List<Cliente> lista = repository.findAll();
 		return lista.stream().map(ClienteResponseDTO::new).toList();

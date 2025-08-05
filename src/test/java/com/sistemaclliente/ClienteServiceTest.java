@@ -1,0 +1,84 @@
+package com.sistemaclliente;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sistemacliente.model.Cliente;
+import com.sistemacliente.model.dto.ClienteResponseDTO;
+import com.sistemacliente.repository.ClienteRepository;
+import com.sistemacliente.service.ClienteService;
+
+@ExtendWith(MockitoExtension.class)
+public class ClienteServiceTest {
+
+	@Mock
+	private ClienteRepository repository;
+	
+	@Mock
+	private ObjectMapper mapper;
+	
+	@InjectMocks
+	private ClienteService service;
+	
+	@Test
+	public void testarListagemCliente_retornarListaDTO() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Cliente cliente2 = new Cliente();
+		cliente2.setId(2L);
+		cliente2.setNome("Antônio");
+		cliente2.setEmail("antonio@email.com");
+		cliente2.setCpf("87654321");
+		
+		List<Cliente> lista = List.of(cliente1, cliente2);
+		
+		when(repository.findAll()).thenReturn(lista);
+		
+		List<ClienteResponseDTO> listaResponse = service.listagemCliente();
+		
+		assertThat(listaResponse).isNotNull();
+		assertThat(listaResponse.size()).isEqualTo(2);
+		assertThat(listaResponse.get(0).getNome()).isEqualTo("Marcus");
+		assertThat(listaResponse.get(1).getNome()).isEqualTo("Antônio");
+		assertThat(listaResponse.get(0).getCpf()).isEqualTo("12345678");
+		assertThat(listaResponse.get(1).getCpf()).isEqualTo("87654321");
+		
+		verify(repository).findAll();		
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
