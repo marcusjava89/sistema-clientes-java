@@ -39,7 +39,6 @@ public class ClienteService {
 		return lista.stream().map(ClienteResponseDTO::new).toList();
 	}
 
-	/*testando*/
 	public ClienteResponseDTO salvarCliente(ClienteRequestDTO dto) {
 		
 		/*Garante CPF único.*/
