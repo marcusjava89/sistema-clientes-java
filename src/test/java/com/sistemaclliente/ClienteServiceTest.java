@@ -1,6 +1,7 @@
 package com.sistemaclliente;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.model.Cliente;
+import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.repository.ClienteRepository;
 import com.sistemacliente.service.ClienteService;
@@ -58,6 +60,27 @@ public class ClienteServiceTest {
 		assertThat(listaResponse.get(1).getCpf()).isEqualTo("87654321");
 		
 		verify(repository).findAll();		
+	}
+	
+	@Test
+	public void testaSalvarCliente_retonarDTO() {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setCpf("12345678");
+		dto.setEmail("marcus@email.com");
+		dto.setNome("Marcus");
+		
+		Cliente salvo = new Cliente(dto);
+		salvo.setId(1L); //id não é gerado automaticamente.
+		
+		when(repository.save(any(Cliente.class))).thenReturn(salvo);
+		
+		ClienteResponseDTO response = service.salvarCliente(dto);
+		
+		assertThat(response).isNotNull();
+		assertThat(response.getId()).isEqualTo(1L);
+		assertThat(response.getCpf()).isEqualTo("12345678");
+		assertThat(response.getNome()).isEqualTo("Marcus");
+		
 	}
 	
 }

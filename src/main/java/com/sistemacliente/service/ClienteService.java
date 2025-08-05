@@ -34,14 +34,15 @@ public class ClienteService {
 	String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
             "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
-	/*testando*/
 	public List<ClienteResponseDTO> listagemCliente() {
 		List<Cliente> lista = repository.findAll();
 		return lista.stream().map(ClienteResponseDTO::new).toList();
 	}
 
+	/*testando*/
 	public ClienteResponseDTO salvarCliente(ClienteRequestDTO dto) {
 		
+		/*Garante CPF único.*/
 		if (repository.findByCpf(dto.getCpf()).isPresent()) {
 			throw new CpfJaCadastradoException(dto.getCpf());
 		}
