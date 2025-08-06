@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.model.Cliente;
@@ -173,7 +174,6 @@ public class ClienteServiceTest {
 		cliente1.setEmail("marcus@email.com");
 		cliente1.setCpf("12345678");
 		
-		
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Carlos");
 		dto.setEmail("carlos@email.com");
@@ -203,6 +203,27 @@ public class ClienteServiceTest {
 
 		assertThrows(ClienteNotFoundException.class, () -> service.atualizarCliente(1L, dto));
 		verify(repository).findById(1L);
+	}
+	
+	@Test
+	public void testarAtualizarCliente_alteraCPF() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Carlos");
+		dto.setEmail("carlos@email.com");
+		dto.setCpf("32165487");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		assertThrows(AlteracaoDeCpfException.class, () -> service.atualizarCliente(1L, dto));
+		
+		verify(repository).findById(1L);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
 	}
 }
 
