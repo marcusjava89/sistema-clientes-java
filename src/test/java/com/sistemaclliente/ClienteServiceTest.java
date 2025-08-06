@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -224,6 +225,36 @@ public class ClienteServiceTest {
 		
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
+	}
+	
+	@Test
+	public void testarEncontrarPorCpf_encontrarCliente() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		when(repository.findByCpf("12345678")).thenReturn(Optional.of(cliente1));
+		ClienteResponseDTO response = service.encontrarPorCpf("12345678");
+			
+		assertThat(response).isNotNull();
+		assertThat(response.getId()).isEqualTo(1L);
+		assertThat(response.getNome()).isEqualTo("Marcus");
+		assertThat(response.getEmail()).isEqualTo("marcus@email.com");
+		assertThat(response.getCpf()).isEqualTo("12345678");
+	
+		verify(repository).findByCpf("12345678");
+	}
+	
+	@Test
+	public void testarEncontrarPorCpf_naoEncontrarCliente() {
+		when(repository.findByCpf("12345678")).thenReturn(Optional.empty());
+
+		assertThrows(ClienteNotFoundException.class, () -> service.encontrarPorCpf("12345678"));
+
+		verify(repository).findByCpf("12345678");
+
 	}
 }
 
