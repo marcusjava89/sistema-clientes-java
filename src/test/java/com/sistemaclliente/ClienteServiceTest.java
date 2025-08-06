@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.exception.ClienteNotFoundException;
+import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.model.Cliente;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
@@ -69,7 +70,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testaSalvarCliente_retonarDTO() {
+	public void testarSalvarCliente_retonarDTO() {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf("12345678");
 		dto.setEmail("marcus@email.com");
@@ -88,6 +89,29 @@ public class ClienteServiceTest {
 		assertThat(response.getNome()).isEqualTo("Marcus");
 		
 	}
+	
+	@Test
+	public void testaSalvarCliente_CPFJaExistente() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Carlos");
+		cliente1.setEmail("carlos@email.com");
+		cliente1.setCpf("12345678");
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setCpf("12345678");
+		dto.setEmail("marcus@email.com");
+		dto.setNome("Marcus");
+		
+		Cliente salvo = new Cliente(dto);
+		salvo.setId(2L); //id não é gerado automaticamente.
+		
+		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.of(cliente1)); /*Retorna existente.*/
+		assertThrows(CpfJaCadastradoException.class, () -> service.salvarCliente(dto));
+		
+		verify(repository).findByCpf(dto.getCpf());
+	}
+	
 
 	@Test
 	public void testarBuscarClientePorId_encontrarCliente() {
@@ -141,6 +165,45 @@ public class ClienteServiceTest {
 		verify(repository).findById(1L);
 	}
 	
+	@Test
+	public void testarAltualizarCliente_encontrarRetornarDTO() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Carlos");
+		dto.setEmail("carlos@email.com");
+		dto.setCpf(cliente1.getCpf());
+	
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		when(repository.saveAndFlush(any(Cliente.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		
+		ClienteResponseDTO response = service.atualizarCliente(1L, dto);
+		
+		assertThat(response).isNotNull();
+		assertThat(response.getId()).isEqualTo(1L);
+		assertThat(response.getNome()).isEqualTo("Carlos");
+		assertThat(response.getEmail()).isEqualTo("carlos@email.com");
+		
+		verify(repository).findById(1L);
+		verify(repository).saveAndFlush(any(Cliente.class));
+	}
+	
+	@Test
+	public void testarAltualizarCliente_naoEncontrarCliente() {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Carlos");
+		dto.setEmail("carlos@email.com");
+		
+		when(repository.findById(1L)).thenReturn(Optional.empty());
+
+		assertThrows(ClienteNotFoundException.class, () -> service.atualizarCliente(1L, dto));
+		verify(repository).findById(1L);
+	}
 }
 
 
