@@ -1,6 +1,7 @@
 package com.sistemaclliente;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -115,6 +116,29 @@ public class ClienteServiceTest {
 		assertThrows(ClienteNotFoundException.class, ()-> service.buscarClientePorId(3L));
 		
 		verify(repository).findById(3L);
+	}
+	
+	@Test
+	public void testarDeletarClientePor_encontrarClienteDepoisDeletar() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		assertDoesNotThrow(() -> service.deletarClientePorId(1L));
+		
+		verify(repository).findById(1L);
+		verify(repository).delete(cliente1);
+	}
+	
+	@Test
+	public void testarDeletarClientePor_naoEncontrarCliente() {
+		when(repository.findById(1L)).thenReturn(Optional.empty());
+		assertThrows(ClienteNotFoundException.class, () -> service.deletarClientePorId(1L));
+		verify(repository).findById(1L);
 	}
 	
 }
