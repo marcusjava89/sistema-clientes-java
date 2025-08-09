@@ -83,7 +83,7 @@ public class ClienteService {
 		Page<Cliente> page = repository.findAll(pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-
+	/*testando*/
 	public Page<ClienteResponseDTO> listaPaginadaPorOrdenacao(int pagina, int itens, String ordenadoPor) {
 		PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor).ascending());
 		Page<Cliente> page = repository.findAll(pageable);

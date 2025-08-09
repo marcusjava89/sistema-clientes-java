@@ -18,6 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.exception.AlteracaoDeCpfException;
@@ -31,7 +35,7 @@ import com.sistemacliente.service.ClienteService;
 
 @ExtendWith(MockitoExtension.class)
 public class ClienteServiceTest {
-
+	/*Os CPF's tem oito dígitos mesmo que o esperado seja 11. Aqui não interfere em nossos testes. */
 	@Mock
 	private ClienteRepository repository;
 	
@@ -89,7 +93,6 @@ public class ClienteServiceTest {
 		assertThat(response.getId()).isEqualTo(1L);
 		assertThat(response.getCpf()).isEqualTo("12345678");
 		assertThat(response.getNome()).isEqualTo("Marcus");
-		
 	}
 	
 	@Test
@@ -114,7 +117,6 @@ public class ClienteServiceTest {
 		verify(repository).findByCpf(dto.getCpf());
 	}
 	
-
 	@Test
 	public void testarBuscarClientePorId_encontrarCliente() {
 		Cliente cliente1 = new Cliente();
@@ -250,11 +252,75 @@ public class ClienteServiceTest {
 	@Test
 	public void testarEncontrarPorCpf_naoEncontrarCliente() {
 		when(repository.findByCpf("12345678")).thenReturn(Optional.empty());
-
 		assertThrows(ClienteNotFoundException.class, () -> service.encontrarPorCpf("12345678"));
-
 		verify(repository).findByCpf("12345678");
+	}
+	
+	@Test
+	public void testarListaPaginada_retornarListaPaginadaDTO() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Cliente cliente2 = new Cliente();
+		cliente2.setId(2L);
+		cliente2.setNome("Antônio");
+		cliente2.setEmail("antonio@email.com");
+		cliente2.setCpf("87654321");
+		
+		List<Cliente> lista = List.of(cliente1, cliente2);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		
+		PageRequest pageable = PageRequest.of(0, 2);
+		when(repository.findAll(any(PageRequest.class))).thenReturn(pageMock);
+		
+		Page<ClienteResponseDTO> page = service.listaPaginada(0, 2);
+		
+		assertThat(page).isNotNull();
+		assertThat(page.getContent()).hasSize(2);		
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf).containsExactly("12345678", "87654321");
 
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
+		assertThat(page.getContent().get(1).getNome()).isEqualTo("Antônio");
+		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
+		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
+		
+		verify(repository).findAll(pageable);
+	}
+	
+	@Test
+	public void testarListaPaginadaPorOrdenacao_retornarLista() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Cliente cliente2 = new Cliente();
+		cliente2.setId(2L);
+		cliente2.setNome("Antônio");
+		cliente2.setEmail("antonio@email.com");
+		cliente2.setCpf("87654321");
+		
+		List<Cliente> lista = List.of(cliente1, cliente2);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
+		when(repository.findAll(any(PageRequest.class))).thenReturn(pageMock);
+		
+		Page<ClienteResponseDTO> page = service.listaPaginadaPorOrdenacao(0, 2, "nome");
+		
+		assertThat(page).isNotNull();
+		assertThat(page.getContent()).hasSize(2);
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf).containsExactly("12345678", "87654321");
+
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
+		assertThat(page.getContent().get(1).getNome()).isEqualTo("Antônio");
+		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
+		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
+		
+		verify(repository).findAll(any(PageRequest.class));
 	}
 }
 
