@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -322,6 +321,40 @@ public class ClienteServiceTest {
 		
 		verify(repository).findAll(any(PageRequest.class));
 	}
+	
+	@Test
+	public void testarBuscarPorNome_retornarListaPaginadaPoNome() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Cliente cliente2 = new Cliente();
+		cliente2.setId(2L);
+		cliente2.setNome("Marcus Antônio");
+		cliente2.setEmail("antonio@email.com");
+		cliente2.setCpf("87654321");
+		
+		List<Cliente> lista = List.of(cliente1, cliente2);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		PageRequest pageable = PageRequest.of(0, 2);
+		
+		when(repository.findByNomeContainingIgnoreCase("Marcus", pageable)).thenReturn(pageMock);
+		Page<ClienteResponseDTO> page = service.buscarPorNome("Marcus", 0, 2);
+		
+		assertThat(page).isNotNull();
+		assertThat(page.getContent()).hasSize(2);
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf).containsExactly("12345678", "87654321");
+
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
+		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus Antônio");
+		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
+		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
+		
+		verify(repository).findByNomeContainingIgnoreCase("Marcus", pageable);
+	}
+	
 }
 
 
