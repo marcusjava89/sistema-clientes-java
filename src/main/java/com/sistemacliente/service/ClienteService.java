@@ -89,13 +89,13 @@ public class ClienteService {
 		Page<Cliente> page = repository.findAll(pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-	/*testando*/
+	
 	public Page<ClienteResponseDTO> buscarPorNome(String nome, int pagina, int itens) {
 		PageRequest pageable = PageRequest.of(pagina, itens);
 		Page<Cliente> page = repository.findByNomeContainingIgnoreCase(nome, pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-
+	/*testando*/
 	public ClienteResponseDTO atualizarParcial(Long id, Map<String, Object> updates) throws JsonMappingException {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 

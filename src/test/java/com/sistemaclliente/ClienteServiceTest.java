@@ -7,9 +7,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
@@ -71,7 +75,8 @@ public class ClienteServiceTest {
 		assertThat(listaResponse.get(0).getCpf()).isEqualTo("12345678");
 		assertThat(listaResponse.get(1).getCpf()).isEqualTo("87654321");
 		
-		verify(repository).findAll();		
+		verify(repository).findAll();	
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -84,6 +89,7 @@ public class ClienteServiceTest {
 		Cliente salvo = new Cliente(dto);
 		salvo.setId(1L); //id não é gerado automaticamente.
 		
+		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.empty());
 		when(repository.save(any(Cliente.class))).thenReturn(salvo);
 		
 		ClienteResponseDTO response = service.salvarCliente(dto);
@@ -92,6 +98,11 @@ public class ClienteServiceTest {
 		assertThat(response.getId()).isEqualTo(1L);
 		assertThat(response.getCpf()).isEqualTo("12345678");
 		assertThat(response.getNome()).isEqualTo("Marcus");
+		
+		verify(repository).save(any(Cliente.class));
+		verify(repository).findByCpf(dto.getCpf());
+		verifyNoMoreInteractions(repository);
+		
 	}
 	
 	@Test
@@ -111,9 +122,11 @@ public class ClienteServiceTest {
 		salvo.setId(2L); //id não é gerado automaticamente.
 		
 		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.of(cliente1)); /*Retorna existente.*/
-		assertThrows(CpfJaCadastradoException.class, () -> service.salvarCliente(dto));
-		
+		CpfJaCadastradoException ex = assertThrows(CpfJaCadastradoException.class, () -> service.salvarCliente(dto));
+		assertThat(ex.getMessage()).isEqualTo("O CPF 12345678 já está cadastrado");
 		verify(repository).findByCpf(dto.getCpf());
+		verify(repository, never()).save(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -134,15 +147,17 @@ public class ClienteServiceTest {
 		assertThat(response.getNome()).isEqualTo("Marcus");
 		
 		verify(repository).findById(1L);
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
 	public void testarBuscarClientePorId_naoEncontrarCliente() {
 		when(repository.findById(3L)).thenReturn(Optional.empty());
 		
-		assertThrows(ClienteNotFoundException.class, ()-> service.buscarClientePorId(3L));
-		
+		ClienteNotFoundException ex = assertThrows(ClienteNotFoundException.class, ()-> service.buscarClientePorId(3L));
+		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 3 não encontrado.");
 		verify(repository).findById(3L);
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -159,13 +174,17 @@ public class ClienteServiceTest {
 		
 		verify(repository).findById(1L);
 		verify(repository).delete(cliente1);
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
 	public void testarDeletarClientePor_naoEncontrarCliente() {
 		when(repository.findById(1L)).thenReturn(Optional.empty());
-		assertThrows(ClienteNotFoundException.class, () -> service.deletarClientePorId(1L));
+		ClienteNotFoundException ex = assertThrows(ClienteNotFoundException.class, () -> service.deletarClientePorId(1L));
+		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 1 não encontrado.");
 		verify(repository).findById(1L);
+		verify(repository, never()).delete(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -193,6 +212,7 @@ public class ClienteServiceTest {
 		
 		verify(repository).findById(1L);
 		verify(repository).saveAndFlush(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -203,8 +223,12 @@ public class ClienteServiceTest {
 		
 		when(repository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ClienteNotFoundException.class, () -> service.atualizarCliente(1L, dto));
+		ClienteNotFoundException ex = 
+				assertThrows(ClienteNotFoundException.class, () -> service.atualizarCliente(1L, dto));
+		
+		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 1 não encontrado.");
 		verify(repository).findById(1L);
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -222,10 +246,12 @@ public class ClienteServiceTest {
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
-		assertThrows(AlteracaoDeCpfException.class, () -> service.atualizarCliente(1L, dto));
+		AlteracaoDeCpfException ex = assertThrows(AlteracaoDeCpfException.class, () -> service.atualizarCliente(1L, dto));
 		
+		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -246,13 +272,17 @@ public class ClienteServiceTest {
 		assertThat(response.getCpf()).isEqualTo("12345678");
 	
 		verify(repository).findByCpf("12345678");
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
 	public void testarEncontrarPorCpf_naoEncontrarCliente() {
 		when(repository.findByCpf("12345678")).thenReturn(Optional.empty());
-		assertThrows(ClienteNotFoundException.class, () -> service.encontrarPorCpf("12345678"));
+		ClienteNotFoundException ex = 
+				assertThrows(ClienteNotFoundException.class, () -> service.encontrarPorCpf("12345678"));
+		assertThat(ex.getMessage()).isEqualTo("Cliente com o CPF = "+"12345678"+" não encontrado.");
 		verify(repository).findByCpf("12345678");
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -287,6 +317,7 @@ public class ClienteServiceTest {
 		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
 		
 		verify(repository).findAll(pageable);
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -320,6 +351,7 @@ public class ClienteServiceTest {
 		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
 		
 		verify(repository).findAll(any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
@@ -355,6 +387,72 @@ public class ClienteServiceTest {
 		verify(repository).findByNomeContainingIgnoreCase("Marcus", pageable);
 	}
 	
+	@Test
+	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException{
+		when(repository.findById(99L)).thenReturn(Optional.empty());
+		Map<String, Object> updates = Map.of("nome", "Marcus");
+		ClienteNotFoundException ex = 
+				assertThrows(ClienteNotFoundException.class,() -> service.atualizarParcial(99L,updates));
+		
+		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 99 não encontrado.");
+		verify(repository).findById(99L);
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
+	public void testarAtualizarParcial_retornarDTO() throws JsonMappingException {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Map<String, Object> updates = Map.of("nome", "Antônio", "email", "antonio@email.com");
+		Cliente atualizado = new Cliente();
+		atualizado.setNome("Antônio");
+		atualizado.setEmail("antonio@email.com");
+		atualizado.setId(1L);
+		atualizado.setCpf("12345678");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		when(mapper.updateValue(cliente1, updates)).thenReturn(atualizado);
+		when(repository.saveAndFlush(atualizado)).thenReturn(atualizado);
+		
+		ClienteResponseDTO response = service.atualizarParcial(1L, updates);
+		
+		assertThat(response).isNotNull();
+		assertThat(response.getNome()).isEqualTo("Antônio");
+		assertThat(response.getEmail()).isEqualTo("antonio@email.com");
+		assertThat(response.getId()).isEqualTo(1L);
+		
+		verify(repository).findById(1L);
+		verify(repository).saveAndFlush(atualizado);
+		verify(mapper).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		verify(mapper).updateValue(cliente1, updates);
+		verifyNoMoreInteractions(repository);
+		verifyNoMoreInteractions(mapper);
+	}
+	
+	@Test 
+	public void testarAtualizarParcialComId_retornarExececao() throws JsonMappingException {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Map<String, Object> updates = Map.of("id", 2L, "email", "antonio@email.com");
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		IllegalArgumentException e = 
+				assertThrows(IllegalArgumentException.class, () -> service.atualizarParcial(1L, updates));
+		assertThat(e.getMessage()).isEqualTo("O campo id não pode ser alterado.");
+		verify(repository).findById(1L);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verify(mapper, never()).updateValue(cliente1, updates);
+		verifyNoMoreInteractions(repository);
+		verifyNoMoreInteractions(mapper);
+	}
 }
 
 
