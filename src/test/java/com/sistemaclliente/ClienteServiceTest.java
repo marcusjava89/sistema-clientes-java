@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -388,7 +390,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException{
+	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException, JsonMappingException{
 		when(repository.findById(99L)).thenReturn(Optional.empty());
 		Map<String, Object> updates = Map.of("nome", "Marcus");
 		ClienteNotFoundException ex = 
@@ -396,7 +398,11 @@ public class ClienteServiceTest {
 		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 99 não encontrado.");
 		verify(repository).findById(99L);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
 		verifyNoMoreInteractions(repository);
+		verifyNoMoreInteractions(mapper);
 	}
 	
 	@Test
@@ -444,15 +450,42 @@ public class ClienteServiceTest {
 		Map<String, Object> updates = Map.of("id", 2L, "email", "antonio@email.com");
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
-		IllegalArgumentException e = 
-				assertThrows(IllegalArgumentException.class, () -> service.atualizarParcial(1L, updates));
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
+				() -> service.atualizarParcial(1L, updates));
 		assertThat(e.getMessage()).isEqualTo("O campo id não pode ser alterado.");
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
-		verify(mapper, never()).updateValue(cliente1, updates);
+		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
 		verifyNoMoreInteractions(repository);
 		verifyNoMoreInteractions(mapper);
 	}
+	
+	@Test
+	public void testarAtualizarParcialAlterarCpf_retornarExcecao() throws JsonMappingException {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Map<String, Object> updates = Map.of("cpf", "32165487");
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
+				() -> service.atualizarParcial(1L, updates));
+		
+		assertThat(e.getMessage()).isEqualTo("O campo CPF não pode ser alterado.");
+		
+		verify(repository).findById(1L);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
+		verifyNoMoreInteractions(mapper);
+		verifyNoMoreInteractions(repository);
+		
+	}
+	
 }
 
 
