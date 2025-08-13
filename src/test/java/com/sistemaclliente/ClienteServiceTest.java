@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -484,6 +485,54 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(mapper);
 		verifyNoMoreInteractions(repository);
 		
+	}
+	
+	@Test
+	public void testarAtualizarParcialNomeNulo_retornarexcecao() throws JsonMappingException {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", null);
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
+				() -> service.atualizarParcial(1L, updates));
+		
+		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio.");
+		verify(repository).findById(1L);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
+		verifyNoMoreInteractions(mapper);
+		verifyNoMoreInteractions(repository);
+	}
+
+	@Test
+	public void testarAtualizarParcialNomeEmBranco_retornarexcecao() throws JsonMappingException {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", " ");
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
+				() -> service.atualizarParcial(1L, updates));
+		
+		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio.");
+		verify(repository).findById(1L);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
+		verifyNoMoreInteractions(mapper);
+		verifyNoMoreInteractions(repository);
 	}
 	
 }
