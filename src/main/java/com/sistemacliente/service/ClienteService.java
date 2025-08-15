@@ -176,7 +176,6 @@ public class ClienteService {
 				throw new IllegalArgumentException("E-mail não pode ser vazio.");
 			}
 			
-			
 			if(!email.toString().matches(regexEmail)) {
 				throw new IllegalArgumentException("O formato do e-mail não é válido.");
 			}
@@ -190,7 +189,12 @@ public class ClienteService {
 	public Page<ClienteResponseDTO> buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
 		
 		if(pagina <0 || itens <1) {
-			throw new IllegalArgumentException("Número da página ou de itens por páginas menor que 1.");
+			throw new 
+			IllegalArgumentException("Número da página não pode ser negativo e de itens por páginas menor que 1.");
+		}
+		
+		if(email == null || email.trim().isBlank()) {
+			throw new IllegalArgumentException("E-mail não pode ser vazio.");
 		}
 		
 		PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor.trim()).ascending());

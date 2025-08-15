@@ -607,6 +607,73 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(mapper);
 		verifyNoMoreInteractions(repository);
 	}
+
+	@Test
+	public void testarBuscaEmailPaginadaOrdenada_retornarListaPaginada() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Cliente cliente2 = new Cliente();
+		cliente2.setId(2L);
+		cliente2.setNome("Marcus Antônio");
+		cliente2.setEmail("marcus@email.com.br");
+		cliente2.setCpf("87654321");
+		
+		List<Cliente> lista = List.of(cliente1, cliente2);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
+		
+		when(repository.findByEmailContainingIgnoreCase("marcus", pageable)).thenReturn(pageMock);
+		
+		Page<ClienteResponseDTO> page = 
+				service.buscaEmailPaginadaOrdenada("marcus", 0, 2, "nome");
+		
+		assertThat(page).isNotNull();
+		assertThat(page.getContent().size()).isEqualTo(2);
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
+		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus Antônio");
+		
+		verify(repository).findByEmailContainingIgnoreCase("marcus", pageable);
+		verifyNoMoreInteractions(repository);
+		
+ 	}
+	
+	@Test
+	public void testarBuscaEmailPaginadaOrdenadaPaginaMenorQue0_retornarExcecao() {	
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+				() -> service.buscaEmailPaginadaOrdenada("marcus", -1, 0, "nome"));
+		
+		assertThat(ex.getMessage())
+		.isEqualTo("Número da página não pode ser negativo e de itens por páginas menor que 1.");	
+	}
+	
+	@Test
+	public void testarBuscaEmailPaginadaOrdenadaIensMenorQue1_retornarExcecao() {	
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+				() -> service.buscaEmailPaginadaOrdenada("marcus", 0, 0, "nome"));
+		
+		assertThat(ex.getMessage())
+		.isEqualTo("Número da página não pode ser negativo e de itens por páginas menor que 1.");
+	}
+	
+	@Test
+	public void testarBuscaEmailPaginadaOrdenadaEmailNulo_retornarExcecao() {	
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+				() -> service.buscaEmailPaginadaOrdenada(null, 0, 1, "nome"));
+		
+		assertThat(ex.getMessage()).isEqualTo("E-mail não pode ser vazio.");
+	}
+	
+	@Test
+	public void testarBuscaEmailPaginadaOrdenadaEmailVazio_retornarExcecao() {	
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+				() -> service.buscaEmailPaginadaOrdenada(" ", 0, 1, "nome"));
+		
+		assertThat(ex.getMessage()).isEqualTo("E-mail não pode ser vazio.");
+	}
 	
 }
 
