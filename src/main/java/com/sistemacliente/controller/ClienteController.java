@@ -32,6 +32,7 @@ public class ClienteController {
 	@Autowired
 	private ClienteService service;
 	
+	/*testando*/
 	@GetMapping(value = "/listarclientes")
 	public ResponseEntity<List<ClienteResponseDTO>> listarClientes(){
 		List<ClienteResponseDTO> listaDeClientes = service.listagemCliente();
@@ -53,7 +54,7 @@ public class ClienteController {
 	@DeleteMapping(value = "/deletarporid/{id}")
 	public ResponseEntity<Void> deletarClientePorId(@PathVariable Long id){
 		service.deletarClientePorId(id);
-		return ResponseEntity.noContent().build(); // noContent(), retorno positivo indicando que não há conteúdo.
+		return ResponseEntity.noContent().build(); // noContent(), retorno positivo não há conteúdo.
 	}
 	
 	@PutMapping(value = "/clientes/{id}")

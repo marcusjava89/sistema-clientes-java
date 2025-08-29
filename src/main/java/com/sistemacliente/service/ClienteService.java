@@ -52,17 +52,20 @@ public class ClienteService {
 	}
 
 	public ClienteResponseDTO buscarClientePorId(Long id) {
-		Cliente clienteEncontrado = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
+		Cliente clienteEncontrado = repository.findById(id)
+				.orElseThrow(() -> new ClienteNotFoundException(id));
 		return new ClienteResponseDTO(clienteEncontrado);
 	}
 
 	public void deletarClientePorId(Long id) {
-		Cliente clienteEncontrado = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
+		Cliente clienteEncontrado = repository.findById(id)
+				.orElseThrow(() -> new ClienteNotFoundException(id));
 		repository.delete(clienteEncontrado);
 	}
 
 	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO dto) {
-		Cliente clienteEncontrado = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
+		Cliente clienteEncontrado = repository
+				.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 
 		if (!clienteEncontrado.getCpf().equals(dto.getCpf())) {
 			throw new AlteracaoDeCpfException();
@@ -96,7 +99,8 @@ public class ClienteService {
 		return page.map(ClienteResponseDTO::new);
 	}
 	/*testando*/
-	public ClienteResponseDTO atualizarParcial(Long id, Map<String, Object> updates) throws JsonMappingException {
+	public ClienteResponseDTO atualizarParcial(Long id, Map<String, Object> updates) 
+	throws JsonMappingException {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 
 		if (updates.containsKey("id")) {
@@ -186,11 +190,12 @@ public class ClienteService {
 		return new ClienteResponseDTO(cliente);
 	}
 	
-	public Page<ClienteResponseDTO> buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
+	public Page<ClienteResponseDTO> 
+	buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
 		
 		if(pagina <0 || itens <1) {
-			throw new 
-			IllegalArgumentException("Número da página não pode ser negativo e de itens por páginas menor que 1.");
+			throw new IllegalArgumentException("Número da página não pode ser negativo e de "
+					+ "itens por páginas menor que 1.");
 		}
 		
 		if(email == null || email.trim().isBlank()) {
