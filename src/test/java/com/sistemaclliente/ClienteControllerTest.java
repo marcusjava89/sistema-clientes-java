@@ -3,8 +3,8 @@ package com.sistemaclliente;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -57,10 +56,22 @@ public class ClienteControllerTest {
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		when(service.listagemCliente()).thenReturn(lista);
 		
+		mvc.perform(get("/listarclientes")).andExpect(status().isOk())
+		.andExpect(jsonPath("$[0].id").value(1)).andExpect(jsonPath("$[1].id").value(2))
+		.andExpect(jsonPath("$[0].nome").value("Marcus")).andExpect(jsonPath("$[1].nome").value("Antonio"));
+		
+		verify(service).listagemCliente();
+		verifyNoMoreInteractions(service);
+	}
+	
+
+	@Test
+	public void testarlistarClientes_listaVazia_retornar200() throws Exception {
+		List<ClienteResponseDTO> lista = List.of();
+		when(service.listagemCliente()).thenReturn(lista);
+		
 		mvc.perform(get("/listarclientes").contentType(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(1))
-		.andExpect(jsonPath("$[1].id").value(2)).andExpect(jsonPath("$[0].nome").value("Marcus"))
-		.andExpect(jsonPath("$[1].nome").value("Antonio"));
+		.andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty()).andExpect(jsonPath("$").isArray());
 		
 		verify(service).listagemCliente();
 		verifyNoMoreInteractions(service);
