@@ -3,10 +3,11 @@ package com.sistemaclliente;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
 
 import java.util.List;
 
@@ -16,11 +17,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.controller.ClienteController;
+import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.service.ClienteService;
@@ -58,7 +59,8 @@ public class ClienteControllerTest {
 		
 		mvc.perform(get("/listarclientes")).andExpect(status().isOk())
 		.andExpect(jsonPath("$[0].id").value(1)).andExpect(jsonPath("$[1].id").value(2))
-		.andExpect(jsonPath("$[0].nome").value("Marcus")).andExpect(jsonPath("$[1].nome").value("Antonio"));
+		.andExpect(jsonPath("$[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$[1].nome").value("Antonio")).andExpect(jsonPath("$.length()").value(2));
 		
 		verify(service).listagemCliente();
 		verifyNoMoreInteractions(service);
@@ -70,8 +72,29 @@ public class ClienteControllerTest {
 		List<ClienteResponseDTO> lista = List.of();
 		when(service.listagemCliente()).thenReturn(lista);
 		
-		mvc.perform(get("/listarclientes").contentType(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty()).andExpect(jsonPath("$").isArray());
+		mvc.perform(get("/listarclientes")).andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty())
+		.andExpect(jsonPath("$").isArray()).andExpect(content().json("[]"));
+		
+		verify(service).listagemCliente();
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void testarlistarClientes_retornar500() throws Exception {
+		when(service.listagemCliente()).thenThrow(new RuntimeException());
+		
+		mvc.perform(get("/listarclientes")).andExpect(status().isInternalServerError())
+		.andExpect(content().string("Erro interno no servidor."));
+		
+		verify(service).listagemCliente();
+		verifyNoMoreInteractions(service);
+	}
+	@Test
+	public void testarlistarClientes_clienteNaoEncontrado_retornar404() throws Exception {
+		when(service.listagemCliente()).thenThrow(new ClienteNotFoundException());
+		
+		mvc.perform(get("/listarclientes")).andExpect(status().isNotFound())
+		.andExpect(content().string("Cliente não encontrado."));
 		
 		verify(service).listagemCliente();
 		verifyNoMoreInteractions(service);
