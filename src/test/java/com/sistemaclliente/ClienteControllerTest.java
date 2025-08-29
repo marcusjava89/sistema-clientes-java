@@ -4,6 +4,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -89,15 +90,10 @@ public class ClienteControllerTest {
 		verify(service).listagemCliente();
 		verifyNoMoreInteractions(service);
 	}
+	
 	@Test
-	public void testarlistarClientes_clienteNaoEncontrado_retornar404() throws Exception {
-		when(service.listagemCliente()).thenThrow(new ClienteNotFoundException());
-		
-		mvc.perform(get("/listarclientes")).andExpect(status().isNotFound())
-		.andExpect(content().string("Cliente não encontrado."));
-		
-		verify(service).listagemCliente();
-		verifyNoMoreInteractions(service);
+	public void testarlistarClientes_verboHttpIncorreto_retornar405() throws Exception {
+		mvc.perform(post("/listarclientes")).andExpect(status().isMethodNotAllowed());
 	}
 	
 	@Configuration
