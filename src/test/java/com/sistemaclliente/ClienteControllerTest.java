@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.controller.ClienteController;
+import com.sistemacliente.exception.ArgumentoInvalidoException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
@@ -139,9 +140,36 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void salvarCliente_nomeVazio_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_nomeNulo_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome(null);
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.nome").value("Nome não pode ser vazio."));
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
+	
 }
 
 

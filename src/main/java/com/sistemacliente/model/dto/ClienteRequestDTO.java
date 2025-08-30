@@ -11,8 +11,8 @@ public class ClienteRequestDTO {
 
 	}
 	
-	@Size(min = 3, max = 60, message = "Nome deve ter entre 3 e 60 caracteres")
 	@NotBlank(message = "Nome não pode ser vazio.")
+	@Size(min = 3, max = 60, message = "Nome deve ter entre 3 e 60 caracteres")
 	private String nome;
 	
 	@Email(message = "Formato inválido do e-mail.")
