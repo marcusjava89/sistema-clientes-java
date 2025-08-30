@@ -1,14 +1,14 @@
 package com.sistemaclliente;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-
 
 import java.util.List;
 
@@ -18,12 +18,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.controller.ClienteController;
-import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
+import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.service.ClienteService;
 
@@ -42,7 +43,7 @@ public class ClienteControllerTest {
 	
 	
 	@Test
-	public void testarlistarClientes_retornar200() throws Exception {
+	public void listar_listaCheia_retornar200() throws Exception {
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -69,7 +70,7 @@ public class ClienteControllerTest {
 	
 
 	@Test
-	public void testarlistarClientes_listaVazia_retornar200() throws Exception {
+	public void listarClientes_listaVazia_retornar200() throws Exception {
 		List<ClienteResponseDTO> lista = List.of();
 		when(service.listagemCliente()).thenReturn(lista);
 		
@@ -81,7 +82,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void testarlistarClientes_retornar500() throws Exception {
+	public void listarClientes_retornar500() throws Exception {
 		when(service.listagemCliente()).thenThrow(new RuntimeException());
 		
 		mvc.perform(get("/listarclientes")).andExpect(status().isInternalServerError())
@@ -92,8 +93,33 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void testarlistarClientes_verboHttpIncorreto_retornar405() throws Exception {
+	public void listarClientes_verboHttpIncorreto_retornar405() throws Exception {
 		mvc.perform(post("/listarclientes")).andExpect(status().isMethodNotAllowed());
+	}
+	
+	@Test
+	public void salvarCliente_sucesso_retornar200() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		when(service.salvarCliente(any(ClienteRequestDTO.class))).thenReturn(cliente1);
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isCreated())
+		.andExpect(jsonPath("$.id").value(1)).andExpect(jsonPath("$.nome").value("Marcus"))
+		.andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
+		
+		verify(service).salvarCliente(any(ClienteRequestDTO.class));
+		verifyNoMoreInteractions(service);
 	}
 	
 	@Configuration

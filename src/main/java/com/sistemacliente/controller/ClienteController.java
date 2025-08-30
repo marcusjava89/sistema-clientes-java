@@ -32,13 +32,13 @@ public class ClienteController {
 	@Autowired
 	private ClienteService service;
 	
-	/*testando*/
 	@GetMapping(value = "/listarclientes")
 	public ResponseEntity<List<ClienteResponseDTO>> listarClientes(){
 		List<ClienteResponseDTO> listaDeClientes = service.listagemCliente();
 		return ResponseEntity.ok(listaDeClientes);
 	}
 	
+	/*testando*/
 	@PostMapping(value = "/salvarcliente")
 	public ResponseEntity<ClienteResponseDTO> salvarCliente(@Valid @RequestBody ClienteRequestDTO dto){
 		ClienteResponseDTO clienteNovo = service.salvarCliente(dto);
