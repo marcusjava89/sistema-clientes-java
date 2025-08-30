@@ -93,8 +93,25 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void listarClientes_verboHttpIncorreto_retornar405() throws Exception {
-		mvc.perform(post("/listarclientes")).andExpect(status().isMethodNotAllowed());
+	public void salvarClientes_verboHttpIncorreto_retornar405() throws Exception {
+		mvc.perform(get("/salvarcliente")).andExpect(status().isMethodNotAllowed());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_verboHttpIncorreto_retorna405() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		mvc.perform(get("/salvarcliente").contentType(MediaType.APPLICATION_JSON));
 	}
 	
 	@Test
