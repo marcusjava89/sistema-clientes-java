@@ -178,6 +178,19 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	public void salvarCliente_nomeMaior60Digitos_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890AB");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
 	public void salvarCliente_emailVazio_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
@@ -230,7 +243,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_cpfMenoDe11Digitos_retornar400() throws Exception {
+	public void salvarCliente_cpfMenosDe11Digitos_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("101089757");
@@ -238,6 +251,19 @@ public class ClienteControllerTest {
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_cpfMaisDe11Digitos_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("25013569874965");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
 		verifyNoMoreInteractions(service);
 	}
