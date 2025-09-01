@@ -38,13 +38,13 @@ public class ClienteController {
 		return ResponseEntity.ok(listaDeClientes);
 	}
 	
-	/*testando*/
 	@PostMapping(value = "/salvarcliente")
 	public ResponseEntity<ClienteResponseDTO> salvarCliente(@Valid @RequestBody ClienteRequestDTO dto){
 		ClienteResponseDTO clienteNovo = service.salvarCliente(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(clienteNovo);
 	}
 	
+	/*testando*/
 	@GetMapping(value = "/encontrarcliente/{id}")
 	public ResponseEntity<ClienteResponseDTO> encontrarClientePorId(@PathVariable Long id){
 		ClienteResponseDTO encontrado = service.buscarClientePorId(id);
