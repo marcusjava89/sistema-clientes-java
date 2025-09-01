@@ -322,6 +322,23 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void salvarCliente_erroDeServidor_retrno500() throws Exception{
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		when(service.salvarCliente(any(ClienteRequestDTO.class))).thenThrow(new RuntimeException());
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto)))
+		.andExpect(status().isInternalServerError())
+		.andExpect(content().string("Erro interno no servidor."));
+		
+		verify(service).salvarCliente(any(ClienteRequestDTO.class));
+		verifyNoMoreInteractions(service);
+	}
 	
 	
 	@Configuration
