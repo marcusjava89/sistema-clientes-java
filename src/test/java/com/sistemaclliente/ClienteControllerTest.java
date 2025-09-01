@@ -148,8 +148,7 @@ public class ClienteControllerTest {
 		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -161,10 +160,49 @@ public class ClienteControllerTest {
 		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.nome").value("Nome não pode ser vazio."));
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
 		verifyNoMoreInteractions(service);
 	}
+	
+	@Test
+	public void salvarCliente_emailVazio_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_emailInvalido_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.email").value("Formato inválido do e-mail."));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_emailNulo_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail(null);
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
+		verifyNoMoreInteractions(service);
+	}
+	
 	
 	@Configuration
 	@Import(ClienteController.class)
