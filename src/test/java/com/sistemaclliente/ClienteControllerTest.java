@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.controller.ClienteController;
 import com.sistemacliente.exception.ArgumentoInvalidoException;
+import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
@@ -198,10 +199,92 @@ public class ClienteControllerTest {
 		dto.setEmail(null);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
 		verifyNoMoreInteractions(service);
 	}
+	
+	@Test
+	public void salvarCliente_cpfInvalido_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("101089757er");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_cpfMenoDe11Digitos_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("101089757");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_cpfVazio_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_cpfNulo_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf(null);
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.cpf").value("CPF não pode ser vazio."));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void salvarCliente_cpfExistente_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		
+		ClienteRequestDTO dto1 = new ClienteRequestDTO();
+		dto1.setNome("Carlos");
+		dto1.setCpf("23501206586");
+		dto1.setEmail("carlos@gmail.com");
+		
+		when(service.salvarCliente(any(ClienteRequestDTO.class)))
+		.thenThrow(new CpfJaCadastradoException("23501206586"));
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto1))).andExpect(status().isConflict())
+		.andExpect(content().string("O CPF 23501206586 já está cadastrado"));
+		
+		verify(service).salvarCliente(any(ClienteRequestDTO.class));
+		verifyNoMoreInteractions(service);
+	}
+	
 	
 	
 	@Configuration
