@@ -1,14 +1,18 @@
 package com.sistemaclliente;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -74,7 +78,7 @@ public class ClienteControllerTest {
 	
 
 	@Test
-	public void listarClientes_listaVazia_retornar200() throws Exception {
+	public void listarClientes_listaVazia_retorno200() throws Exception {
 		List<ClienteResponseDTO> lista = List.of();
 		when(service.listagemCliente()).thenReturn(lista);
 		
@@ -86,7 +90,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void listarClientes_retornar500() throws Exception {
+	public void listarClientes_retornao500() throws Exception {
 		when(service.listagemCliente()).thenThrow(new RuntimeException());
 		
 		mvc.perform(get("/listarclientes")).andExpect(status().isInternalServerError())
@@ -97,29 +101,14 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarClientes_verboHttpIncorreto_retornar405() throws Exception {
-		mvc.perform(get("/salvarcliente")).andExpect(status().isMethodNotAllowed());
+	public void salvarClientes_verboHttpIncorreto_retorno405() throws Exception {
+		mvc.perform(get("/salvarcliente")).andExpect(status().isMethodNotAllowed())
+		.andExpect(header().string("Allow", "POST"));
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
-	public void salvarCliente_verboHttpIncorreto_retorna405() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
-		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
-		mvc.perform(get("/salvarcliente").contentType(MediaType.APPLICATION_JSON));
-	}
-	
-	@Test
-	public void salvarCliente_sucesso_retornar200() throws Exception {
+	public void salvarCliente_sucesso_retorno200() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("23501206586");
@@ -144,7 +133,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_nomeVazio_retornar400() throws Exception {
+	public void salvarCliente_nomeVazio_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("");
 		dto.setCpf("23501206586");
@@ -156,7 +145,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_nomeNulo_retornar400() throws Exception {
+	public void salvarCliente_nomeNulo_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome(null);
 		dto.setCpf("23501206586");
@@ -168,7 +157,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_nomeMenor3Digitos_retornar400() throws Exception {
+	public void salvarCliente_nomeMenor3Digitos_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("ma");
 		dto.setCpf("23501206586");
@@ -181,46 +170,46 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_nomeMaior60Digitos_retornar400() throws Exception {
+	public void salvarCliente_nomeMaior60Digitos_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890AB");
 		dto.setCpf("23501206586");
 		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
-	public void salvarCliente_emailVazio_retornar400() throws Exception {
+	public void salvarCliente_emailVazio_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("23501206586");
 		dto.setEmail("");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
-	public void salvarCliente_emailInvalido_retornar400() throws Exception {
+	public void salvarCliente_emailInvalido_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("23501206586");
 		dto.setEmail("com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("Formato inválido do e-mail."));
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
-	public void salvarCliente_emailNulo_retornar400() throws Exception {
+	public void salvarCliente_emailNulo_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("23501206586");
@@ -233,7 +222,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_cpfInvalido_retornar400() throws Exception {
+	public void salvarCliente_cpfInvalido_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("101089757er");
@@ -246,7 +235,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_cpfMenosDe11Digitos_retornar400() throws Exception {
+	public void salvarCliente_cpfMenosDe11Digitos_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("101089757");
@@ -364,17 +353,18 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void encontrarClientePorId_notFound_retorno404() throws Exception {
-		when(service.buscarClientePorId(1L)).thenThrow(new ClienteNotFoundException());
+		when(service.buscarClientePorId(anyLong())).thenThrow(new ClienteNotFoundException());
 		mvc.perform(get("/encontrarcliente/1")).andExpect(status().isNotFound())
 		.andExpect(content().string("Cliente não encontrado."));
 
-		verify(service).buscarClientePorId(1L);
+		verify(service).buscarClientePorId(anyLong());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void encontrarClientePorId_verboIncorreto_retorno405() throws Exception{
-		mvc.perform(delete("/encontrarcliente/1")).andExpect(status().isMethodNotAllowed());
+		mvc.perform(delete("/encontrarcliente/1")).andExpect(status().isMethodNotAllowed())
+		.andExpect(header().string("Allow", "GET"));
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -388,11 +378,48 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+
+	@Test
+	public void deletarClientePorId_sucesso_retorno204() throws Exception {
+		mvc.perform(delete("/deletarporid/1")).andExpect(status().isNoContent());
+		
+		verify(service).deletarClientePorId(anyLong());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void deletarClientePorId_clienteNaoEncontrado_retorno404() throws Exception{
+		doThrow(new ClienteNotFoundException()).when(service).deletarClientePorId(anyLong());
+		mvc.perform(delete("/deletarporid/1")).andExpect(status().isNotFound())
+		.andExpect(content().string("Cliente não encontrado."));
+		
+		verify(service).deletarClientePorId(anyLong());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void deletarClientePorId_verboIncorreto_retorno405() throws Exception{
+		mvc.perform(get("/deletarporid/1")).andExpect(status().isMethodNotAllowed())
+		.andExpect(header().string("Allow", containsString("DELETE")));
+
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void deletarClientePorId_erroServidor_retorno500() throws Exception{
+		doThrow(new RuntimeException()).when(service).deletarClientePorId(anyLong());
+		mvc.perform(delete("/deletarporid/1")).andExpect(status().isInternalServerError());
+		
+		verify(service).deletarClientePorId(anyLong());
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
 	
 }
+
 
 
 

@@ -44,13 +44,12 @@ public class ClienteController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(clienteNovo);
 	}
 	
-	/*testando*/
 	@GetMapping(value = "/encontrarcliente/{id}")
 	public ResponseEntity<ClienteResponseDTO> encontrarClientePorId(@PathVariable Long id){
 		ClienteResponseDTO encontrado = service.buscarClientePorId(id);
 		return ResponseEntity.ok(encontrado);
 	}
-	
+	/*testando*/
 	@DeleteMapping(value = "/deletarporid/{id}")
 	public ResponseEntity<Void> deletarClientePorId(@PathVariable Long id){
 		service.deletarClientePorId(id);

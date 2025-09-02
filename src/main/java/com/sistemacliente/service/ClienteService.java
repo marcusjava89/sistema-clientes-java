@@ -53,19 +53,19 @@ public class ClienteService {
 
 	public ClienteResponseDTO buscarClientePorId(Long id) {
 		Cliente clienteEncontrado = repository.findById(id)
-				.orElseThrow(() -> new ClienteNotFoundException(id));
+		.orElseThrow(() -> new ClienteNotFoundException(id));
 		return new ClienteResponseDTO(clienteEncontrado);
 	}
 
 	public void deletarClientePorId(Long id) {
 		Cliente clienteEncontrado = repository.findById(id)
-				.orElseThrow(() -> new ClienteNotFoundException(id));
+		.orElseThrow(() -> new ClienteNotFoundException(id));
 		repository.delete(clienteEncontrado);
 	}
 
 	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO dto) {
 		Cliente clienteEncontrado = repository
-				.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
+		.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 
 		if (!clienteEncontrado.getCpf().equals(dto.getCpf())) {
 			throw new AlteracaoDeCpfException();
