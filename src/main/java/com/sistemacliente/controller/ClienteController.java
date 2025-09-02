@@ -49,13 +49,13 @@ public class ClienteController {
 		ClienteResponseDTO encontrado = service.buscarClientePorId(id);
 		return ResponseEntity.ok(encontrado);
 	}
-	/*testando*/
+	
 	@DeleteMapping(value = "/deletarporid/{id}")
 	public ResponseEntity<Void> deletarClientePorId(@PathVariable Long id){
 		service.deletarClientePorId(id);
 		return ResponseEntity.noContent().build(); // noContent(), retorno positivo não há conteúdo.
 	}
-	
+	/*testando*/
 	@PutMapping(value = "/clientes/{id}")
 	public ResponseEntity<ClienteResponseDTO> 
 	atualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteRequestDTO dto){

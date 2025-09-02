@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,10 +21,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +46,7 @@ public class ClienteControllerTest {
 	@Autowired
 	private ObjectMapper mapper;
 	
-	@MockBean
+	@MockitoBean
 	private ClienteService service;
 	
 	
@@ -411,6 +411,50 @@ public class ClienteControllerTest {
 		mvc.perform(delete("/deletarporid/1")).andExpect(status().isInternalServerError());
 		
 		verify(service).deletarClientePorId(anyLong());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarCliente_sucesso_retorno200() throws Exception{
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class))).thenReturn(cliente1);
+		
+		mvc.perform(put("/clientes/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isOk())
+		.andExpect(jsonPath("$.nome").value("Marcus"))
+		.andExpect(jsonPath("$.id").value(1L))
+		.andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
+		
+		verify(service).atualizarCliente(anyLong(), any(ClienteRequestDTO.class));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarCliente_clienteNaoEncontrado_retorno404() throws Exception{
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
+		.thenThrow(new ClienteNotFoundException());
+		
+		mvc.perform(put("/clientes/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isNotFound())
+		.andExpect(content().string("Cliente não encontrado."));
+
+		verify(service).atualizarCliente(anyLong(), any(ClienteRequestDTO.class));
 		verifyNoMoreInteractions(service);
 	}
 	
