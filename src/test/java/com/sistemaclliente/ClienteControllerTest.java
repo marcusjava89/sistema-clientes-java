@@ -1,9 +1,11 @@
 package com.sistemaclliente;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -23,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.controller.ClienteController;
+import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
@@ -356,6 +359,32 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
 		
 		verify(service).buscarClientePorId(1L);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void encontrarClientePorId_notFound_retorno404() throws Exception {
+		when(service.buscarClientePorId(1L)).thenThrow(new ClienteNotFoundException());
+		mvc.perform(get("/encontrarcliente/1")).andExpect(status().isNotFound())
+		.andExpect(content().string("Cliente não encontrado."));
+
+		verify(service).buscarClientePorId(1L);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void encontrarClientePorId_verboIncorreto_retorno405() throws Exception{
+		mvc.perform(delete("/encontrarcliente/1")).andExpect(status().isMethodNotAllowed());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void encontrarClientePorId_erroDeServidor_retorno500() throws Exception{
+		when(service.buscarClientePorId(anyLong())).thenThrow(new RuntimeException());
+		mvc.perform(get("/encontrarcliente/1")).andExpect(status().isInternalServerError())
+		.andExpect(content().string("Erro interno no servidor."));
+		
+		verify(service).buscarClientePorId(anyLong());
 		verifyNoMoreInteractions(service);
 	}
 	
