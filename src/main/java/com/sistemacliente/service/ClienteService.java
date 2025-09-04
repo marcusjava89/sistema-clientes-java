@@ -82,18 +82,35 @@ public class ClienteService {
 	}
 
 	public Page<ClienteResponseDTO> listaPaginada(int pagina, int itens) {
+		
+		if(pagina < 0 || itens <1) {
+			throw new 
+			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
+		}
+		
 		PageRequest pageable = PageRequest.of(pagina, itens); // critério da página
 		Page<Cliente> page = repository.findAll(pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
 	
 	public Page<ClienteResponseDTO> listaPaginadaPorOrdenacao(int pagina, int itens, String ordenadoPor) {
+		
+		if(pagina < 0 || itens <1) {
+			throw new 
+			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
+		}
+		
 		PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor).ascending());
 		Page<Cliente> page = repository.findAll(pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
 	
 	public Page<ClienteResponseDTO> buscarPorNome(String nome, int pagina, int itens) {
+		if(pagina < 0 || itens <1) {
+			throw new 
+			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
+		}
+		
 		PageRequest pageable = PageRequest.of(pagina, itens);
 		Page<Cliente> page = repository.findByNomeContainingIgnoreCase(nome, pageable);
 		return page.map(ClienteResponseDTO::new);
