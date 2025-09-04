@@ -116,7 +116,7 @@ public class ClienteController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@PatchMapping(value = "/clientes/{id}")
+	@PatchMapping(value = "/nomeemailparcial/{id}")
 	public ResponseEntity<ClienteResponseDTO> atualizarNomeEmailParcial(@PathVariable Long id, 
 	@RequestBody Map<String, Object> updates){
 		ClienteResponseDTO response = service.atualizarNomeEmailParcial(id, updates);

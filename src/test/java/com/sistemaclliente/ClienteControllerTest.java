@@ -3,7 +3,9 @@ package com.sistemaclliente;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -29,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.controller.ClienteController;
+import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
@@ -102,8 +105,16 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void salvarClientes_verboHttpIncorreto_retorno405() throws Exception {
-		mvc.perform(get("/salvarcliente")).andExpect(status().isMethodNotAllowed())
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(get("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isMethodNotAllowed())
 		.andExpect(header().string("Allow", "POST"));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -141,6 +152,8 @@ public class ClienteControllerTest {
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -153,6 +166,8 @@ public class ClienteControllerTest {
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -166,6 +181,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -179,6 +196,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -192,6 +211,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -205,6 +226,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("Formato inválido do e-mail."));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -218,6 +241,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -231,6 +256,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -242,8 +269,10 @@ public class ClienteControllerTest {
 		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -257,6 +286,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -269,6 +300,8 @@ public class ClienteControllerTest {
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -282,6 +315,8 @@ public class ClienteControllerTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("CPF não pode ser vazio."));
+		
+		verify(service, never()).salvarCliente(dto);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -354,6 +389,7 @@ public class ClienteControllerTest {
 	@Test
 	public void encontrarClientePorId_notFound_retorno404() throws Exception {
 		when(service.buscarClientePorId(anyLong())).thenThrow(new ClienteNotFoundException());
+		
 		mvc.perform(get("/encontrarcliente/1")).andExpect(status().isNotFound())
 		.andExpect(content().string("Cliente não encontrado."));
 
@@ -365,12 +401,15 @@ public class ClienteControllerTest {
 	public void encontrarClientePorId_verboIncorreto_retorno405() throws Exception{
 		mvc.perform(delete("/encontrarcliente/1")).andExpect(status().isMethodNotAllowed())
 		.andExpect(header().string("Allow", "GET"));
+		
+		verify(service, never()).buscarClientePorId(anyLong());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void encontrarClientePorId_erroDeServidor_retorno500() throws Exception{
 		when(service.buscarClientePorId(anyLong())).thenThrow(new RuntimeException());
+		
 		mvc.perform(get("/encontrarcliente/1")).andExpect(status().isInternalServerError())
 		.andExpect(content().string("Erro interno no servidor."));
 		
@@ -390,6 +429,7 @@ public class ClienteControllerTest {
 	@Test
 	public void deletarClientePorId_clienteNaoEncontrado_retorno404() throws Exception{
 		doThrow(new ClienteNotFoundException()).when(service).deletarClientePorId(anyLong());
+		
 		mvc.perform(delete("/deletarporid/1")).andExpect(status().isNotFound())
 		.andExpect(content().string("Cliente não encontrado."));
 		
@@ -402,12 +442,14 @@ public class ClienteControllerTest {
 		mvc.perform(get("/deletarporid/1")).andExpect(status().isMethodNotAllowed())
 		.andExpect(header().string("Allow", containsString("DELETE")));
 
+		verify(service, never()).deletarClientePorId(anyLong());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void deletarClientePorId_erroServidor_retorno500() throws Exception{
 		doThrow(new RuntimeException()).when(service).deletarClientePorId(anyLong());
+		
 		mvc.perform(delete("/deletarporid/1")).andExpect(status().isInternalServerError());
 		
 		verify(service).deletarClientePorId(anyLong());
@@ -457,6 +499,57 @@ public class ClienteControllerTest {
 		verify(service).atualizarCliente(anyLong(), any(ClienteRequestDTO.class));
 		verifyNoMoreInteractions(service);
 	}
+	
+	@Test
+	public void atualizarCliente_verboIncorreto_retorno405() throws Exception{
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/clientes/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isMethodNotAllowed())
+		.andExpect(header().string("Allow", "PUT"));
+		
+		verify(service, never()).atualizarCliente(anyLong(), any(ClienteRequestDTO.class));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarCliente_trocaDeCpf_retorno400() throws Exception{
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("26359874014");
+		dto.setEmail("marcus@gmail.com");
+		
+		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
+		.thenThrow(new AlteracaoDeCpfException());
+		
+		mvc.perform(put("/clientes/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isConflict())
+		.andExpect(content().string("Alteração de CPF não permitida."));
+		
+		verify(service).atualizarCliente(anyLong(), any(ClienteRequestDTO.class));
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarCliente_erroDeServidor_retorno500() throws Exception{
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
+		.thenThrow(new RuntimeException());
+		
+		mvc.perform(put("/clientes/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isInternalServerError());
+		
+		verify(service).atualizarCliente(anyLong(), any(ClienteRequestDTO.class));
+		verifyNoMoreInteractions(service);
+	}
+	
 	
 	@Configuration
 	@Import(ClienteController.class)

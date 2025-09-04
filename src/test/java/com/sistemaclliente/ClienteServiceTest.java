@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -642,37 +643,49 @@ public class ClienteServiceTest {
  	}
 	
 	@Test
-	public void testarBuscaEmailPaginadaOrdenadaPaginaMenorQue0_retornarExcecao() {	
+	public void testarBuscaEmailPaginadaOrdenada_PaginaMenorQue0_retornarExcecao() {	
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
 				() -> service.buscaEmailPaginadaOrdenada("marcus", -1, 0, "nome"));
 		
 		assertThat(ex.getMessage())
-		.isEqualTo("Número da página não pode ser negativo e de itens por páginas menor que 1.");	
+		.isEqualTo("Número da página não pode ser negativo e de itens por páginas menor que 1.");
+		
+		verify(repository, never()).findByEmailContainingIgnoreCase(anyString(), any());
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
-	public void testarBuscaEmailPaginadaOrdenadaIensMenorQue1_retornarExcecao() {	
+	public void testarBuscaEmailPaginadaOrdenada_ItensMenorQue1_retornarExcecao() {	
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
 				() -> service.buscaEmailPaginadaOrdenada("marcus", 0, 0, "nome"));
 		
 		assertThat(ex.getMessage())
 		.isEqualTo("Número da página não pode ser negativo e de itens por páginas menor que 1.");
+		
+		verify(repository, never()).findByEmailContainingIgnoreCase(anyString(), any());
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
-	public void testarBuscaEmailPaginadaOrdenadaEmailNulo_retornarExcecao() {	
+	public void testarBuscaEmailPaginadaOrdenada_EmailNulo_retornarExcecao() {	
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
 				() -> service.buscaEmailPaginadaOrdenada(null, 0, 1, "nome"));
 		
 		assertThat(ex.getMessage()).isEqualTo("E-mail não pode ser vazio.");
+		
+		verify(repository, never()).findByEmailContainingIgnoreCase(anyString(), any());
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
-	public void testarBuscaEmailPaginadaOrdenadaEmailVazio_retornarExcecao() {	
+	public void testarBuscaEmailPaginadaOrdenada_EmailVazio_retornarExcecao() {	
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
 				() -> service.buscaEmailPaginadaOrdenada(" ", 0, 1, "nome"));
 		
 		assertThat(ex.getMessage()).isEqualTo("E-mail não pode ser vazio.");
+		
+		verify(repository, never()).findByEmailContainingIgnoreCase(anyString(), any());
+		verifyNoMoreInteractions(repository);
 	}
 	
 }
