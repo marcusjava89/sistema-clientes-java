@@ -516,7 +516,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void atualizarCliente_trocaDeCpf_retorno400() throws Exception{
+	public void atualizarCliente_trocaDeCpf_retorno409() throws Exception{
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("26359874014");
@@ -550,11 +550,61 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void encontrarClientePorCpf_sucesso_retorno200() throws Exception{
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		when(service.encontrarPorCpf("23501206586")).thenReturn(cliente1);
+		
+		mvc.perform(get("/clientecpf/23501206586")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.id").value(1L)).andExpect(jsonPath("$.nome").value("Marcus"))
+		.andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
+		
+		verify(service).encontrarPorCpf("23501206586");
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void encontrarClientePorCpf_clienteNotFound_retorno404() throws Exception{
+		when(service.encontrarPorCpf("23501206586"))
+		.thenThrow(new ClienteNotFoundException("23501206586"));
+		
+		mvc.perform(get("/clientecpf/23501206586")).andExpect(status().isNotFound())
+		.andExpect(content().string("Cliente com o CPF = 23501206586 não encontrado."));
+		
+		verify(service).encontrarPorCpf("23501206586");
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void encontrarClientePor_verboIncorreto_retorno405() throws Exception{
+		mvc.perform(delete("/clientecpf/23501206586")).andExpect(status().isMethodNotAllowed())
+		.andExpect(header().string("Allow", "GET"));
+		
+		verify(service, never()).encontrarPorCpf("23501206586");
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void encontrarClientePorCpf_erroDeServidor_retorno500() throws Exception{
+		when(service.encontrarPorCpf("23501206586"))
+		.thenThrow(new RuntimeException());
+	
+		mvc.perform(get("/clientecpf/23501206586")).andExpect(status().isInternalServerError())
+		.andExpect(content().string("Erro interno no servidor."));
+		
+		verify(service).encontrarPorCpf("23501206586");
+		verifyNoMoreInteractions(service);
+	}
 	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
-	
 }
 
 

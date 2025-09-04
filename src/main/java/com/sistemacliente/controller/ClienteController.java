@@ -55,14 +55,14 @@ public class ClienteController {
 		service.deletarClientePorId(id);
 		return ResponseEntity.noContent().build(); // noContent(), retorno positivo não há conteúdo.
 	}
-	/*testando*/
+
 	@PutMapping(value = "/clientes/{id}")
 	public ResponseEntity<ClienteResponseDTO> 
 	atualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteRequestDTO dto){
 		ClienteResponseDTO response = service.atualizarCliente(id, dto);
 		return ResponseEntity.ok(response);
 	}
-	
+	/*testando*/
 	@GetMapping(value = "/clientecpf/{cpf}")
 	public ResponseEntity<ClienteResponseDTO> encontrarClientePorCpf(@PathVariable String cpf){
 		ClienteResponseDTO response = service.encontrarPorCpf(cpf);
