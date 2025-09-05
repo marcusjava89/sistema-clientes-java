@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -343,7 +345,7 @@ public class ClienteControllerTest {
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto1))).andExpect(status().isConflict())
-		.andExpect(content().string("O CPF 23501206586 já está cadastrado"));
+		.andExpect(content().string("O CPF 23501206586 já está cadastrado."));
 		
 		verify(service).salvarCliente(any(ClienteRequestDTO.class));
 		verifyNoMoreInteractions(service);
@@ -600,6 +602,28 @@ public class ClienteControllerTest {
 		
 		verify(service).encontrarPorCpf("23501206586");
 		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void listaPaginada_sucesso_retorno200() throws Exception{
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
+		cliente2.setId(2L);
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("marcus@gmail.com");
+		
+		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.listaPaginada(0, 2)).thenReturn(page);
+		
+		mvc.perform(get("/paginada?pagina=0&itens=2")).andExpect(status().isOk());
 	}
 	
 	@Configuration

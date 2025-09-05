@@ -62,14 +62,14 @@ public class ClienteController {
 		ClienteResponseDTO response = service.atualizarCliente(id, dto);
 		return ResponseEntity.ok(response);
 	}
-	/*testando*/
+	
 	@GetMapping(value = "/clientecpf/{cpf}")
 	public ResponseEntity<ClienteResponseDTO> encontrarClientePorCpf(@PathVariable String cpf){
 		ClienteResponseDTO response = service.encontrarPorCpf(cpf);
 		return ResponseEntity.ok(response); 
 	}
-	
-	@GetMapping(value = "paginada")
+	/*testando*/
+	@GetMapping(value = "/paginada")
 	public ResponseEntity<Page<ClienteResponseDTO>> 
 	listaPaginada(@RequestParam(defaultValue = "0") int pagina,
 	@RequestParam(defaultValue = "3") int itens){
@@ -77,7 +77,7 @@ public class ClienteController {
 		return ResponseEntity.ok(page);
 	}
 	
-	@GetMapping(value = "paginadaordem")
+	@GetMapping(value = "/paginadaordem")
 	public ResponseEntity<Page<ClienteResponseDTO>> listaPaginadaOrdenada
 	(@RequestParam(defaultValue = "0") int pagina,
 	@RequestParam(defaultValue = "3") int itens,
@@ -95,7 +95,7 @@ public class ClienteController {
 		return ResponseEntity.ok(page);
 	}
 	
-	@PatchMapping(value = "parcial/{id}")
+	@PatchMapping(value = "/parcial/{id}")
 	public ResponseEntity<ClienteResponseDTO> atualizarParcial(@PathVariable Long id,
 	@RequestBody Map<String, Object> updates) throws JsonMappingException{
 		ClienteResponseDTO response = service.atualizarParcial(id, updates);
@@ -123,7 +123,7 @@ public class ClienteController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@GetMapping(value = "clientes/buscarporemail")
+	@GetMapping(value = "/clientes/buscarporemail")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorEmailOrdenada(
 	@RequestParam String email, @RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens,
 	@RequestParam(defaultValue = "nome") String ordenadoPor){
