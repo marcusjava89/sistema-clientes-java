@@ -684,6 +684,18 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void listaPaginada_itensMenorQue1_retorno400() throws Exception{
+		when(service.listaPaginada(0, 0)).thenThrow
+		(new IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1."));
+		
+		mvc.perform(get("/paginada?pagina=0&itens=0")).andExpect(status().isBadRequest())
+		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
+		
+		verify(service).listaPaginada(0, 0);
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
