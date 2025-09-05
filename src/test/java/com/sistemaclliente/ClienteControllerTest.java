@@ -54,7 +54,6 @@ public class ClienteControllerTest {
 	@MockitoBean
 	private ClienteService service;
 	
-	
 	@Test
 	public void listar_listaCheia_retornar200() throws Exception {
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
@@ -67,7 +66,7 @@ public class ClienteControllerTest {
 		cliente2.setId(2L);
 		cliente2.setNome("Antonio");
 		cliente2.setCpf("20219064674");
-		cliente2.setEmail("marcus@gmail.com");
+		cliente2.setEmail("antonio@gmail.com");
 		
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		when(service.listagemCliente()).thenReturn(lista);
@@ -605,7 +604,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void listaPaginada_sucesso_retorno200() throws Exception{
+	public void listaPaginada_sucessoComParâmetros_retorno200() throws Exception{
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -616,14 +615,73 @@ public class ClienteControllerTest {
 		cliente2.setId(2L);
 		cliente2.setNome("Antonio");
 		cliente2.setCpf("20219064674");
-		cliente2.setEmail("marcus@gmail.com");
+		cliente2.setEmail("antonio@gmail.com");
 		
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
 		when(service.listaPaginada(0, 2)).thenReturn(page);
 		
-		mvc.perform(get("/paginada?pagina=0&itens=2")).andExpect(status().isOk());
+		mvc.perform(get("/paginada?pagina=0&itens=2")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content[0].id").value(1L))
+		.andExpect(jsonPath("$.content[1].id").value(2L))
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[1].nome").value("Antonio"))
+		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content[1].cpf").value("20219064674"))
+		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[1].email").value("antonio@gmail.com"))
+		.andExpect(jsonPath("$.content.length()").value(2));
+
+		
+		verify(service).listaPaginada(0, 2);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void listaPaginada_sucessoSemParâmetros_retorno200() throws Exception{
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
+		cliente2.setId(2L);
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
+		
+		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.listaPaginada(0, 3)).thenReturn(page);
+
+		mvc.perform(get("/paginada")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content[0].id").value(1L))
+		.andExpect(jsonPath("$.content[1].id").value(2L))
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[1].nome").value("Antonio"))
+		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content[1].cpf").value("20219064674"))
+		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[1].email").value("antonio@gmail.com"))
+		.andExpect(jsonPath("$.content.length()").value(2));
+		
+		verify(service).listaPaginada(0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void listaPaginada_paginaNegativa_retorno400() throws Exception{
+		when(service.listaPaginada(-1, 2)).thenThrow
+		(new IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1."));
+		
+		mvc.perform(get("/paginada?pagina=-1&itens=2")).andExpect(status().isBadRequest())
+		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
+		
+		verify(service).listaPaginada(-1, 2);
+		verifyNoMoreInteractions(service);
 	}
 	
 	@Configuration
