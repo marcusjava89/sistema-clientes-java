@@ -696,6 +696,15 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void listaPaginada_verboIncorreto_retorno405() throws Exception {
+		mvc.perform(post("/paginada")).andExpect(status().isMethodNotAllowed())
+		.andExpect(header().string("Allow","GET"));
+		
+		verify(service, never()).listaPaginada(0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}

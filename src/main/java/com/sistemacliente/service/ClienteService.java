@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.exception.AlteracaoDeCpfException;
-import com.sistemacliente.exception.ArgumentoInvalidoException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.model.Cliente;
