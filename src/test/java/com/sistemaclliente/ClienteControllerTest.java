@@ -705,6 +705,17 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void listaPaginada_erroDeServidor_retorno500() throws Exception {
+		when(service.listaPaginada(0, 3)).thenThrow(new RuntimeException());
+		
+		mvc.perform(get("/paginada")).andExpect(status().isInternalServerError())
+		.andExpect(content().string("Erro interno no servidor."));
+		
+		verify(service).listaPaginada(0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
