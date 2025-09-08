@@ -777,8 +777,21 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.content.length()").value(2));
 		
 		verify(service).listaPaginadaPorOrdenacao(1, 2, "id");
+		verifyNoMoreInteractions(service);	
+	}
+	
+	@Test
+	public void listaPaginadaOrdenada_psginaNegativa_retorno400() throws Exception{
+		when(service.listaPaginadaPorOrdenacao(-1, 2, "id"))
+		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
+		
+		mvc.perform(get("/paginadaordem?pagina=-1&itens=2&ordenadoPor=id"))
+		.andExpect(status().isBadRequest()).andExpect(content().string("Página não pode ser negativa."));
+		
+		verify(service).listaPaginadaPorOrdenacao(-1, 2, "id");
 		verifyNoMoreInteractions(service);
 	}
+	
 	
 	@Configuration
 	@Import(ClienteController.class)
