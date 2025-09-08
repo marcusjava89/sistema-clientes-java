@@ -781,7 +781,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void listaPaginadaOrdenada_psginaNegativa_retorno400() throws Exception{
+	public void listaPaginadaOrdenada_paginaNegativa_retorno400() throws Exception{
 		when(service.listaPaginadaPorOrdenacao(-1, 2, "id"))
 		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
 		
@@ -789,6 +789,18 @@ public class ClienteControllerTest {
 		.andExpect(status().isBadRequest()).andExpect(content().string("Página não pode ser negativa."));
 		
 		verify(service).listaPaginadaPorOrdenacao(-1, 2, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void listaPaginadaOrdenada_itensMenorQue1_retorno400() throws Exception{
+		when(service.listaPaginadaPorOrdenacao(1, 0, "id"))
+		.thenThrow(new IllegalArgumentException("Itens não pode ser menor que 1."));
+		
+		mvc.perform(get("/paginadaordem?pagina=1&itens=0&ordenadoPor=id"))
+		.andExpect(status().isBadRequest()).andExpect(content().string("Itens não pode ser menor que 1."));
+		
+		verify(service).listaPaginadaPorOrdenacao(1, 0, "id");
 		verifyNoMoreInteractions(service);
 	}
 	
