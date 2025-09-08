@@ -110,7 +110,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testaSalvarCliente_CPFJaExistente() {
+	public void testaSalvarCliente_CpfJaExistente() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Carlos");
@@ -359,7 +359,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarBuscarPorNome_retornarListaPaginadaPoNome() {
+	public void testarBuscarPorNome_retornarListaPaginadaPorNome() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
