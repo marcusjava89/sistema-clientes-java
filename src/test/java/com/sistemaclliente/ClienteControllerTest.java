@@ -828,7 +828,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void buscarPorNomePagina_sucessoSemParametro_retorno200() throws Exception {
+	public void buscarPorNomePagina_sucessoComParametro_retorno200() throws Exception {
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -856,8 +856,39 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.content.length()").value(2));
 		
 		verify(service).buscarPorNome("mar", 0, 2);
-		verifyNoMoreInteractions(service);
+		verifyNoMoreInteractions(service);	
+	}
+	
+	@Test
+	public void buscarPorNomePagina_sucessoSemParametro_retorno200() throws Exception {
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
+		cliente2.setId(2L);
+		cliente2.setNome("Marcelo");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("marcelo@gmail.com");
 		
+		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.buscarPorNome("", 0, 3)).thenReturn(page);
+		
+		mvc.perform(get("/buscapornome")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[1].nome").value("Marcelo"))
+		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content[1].cpf").value("20219064674"))
+		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[1].email").value("marcelo@gmail.com"))
+		.andExpect(jsonPath("$.content.length()").value(2));
+		
+		verify(service).buscarPorNome("", 0, 3);
+		verifyNoMoreInteractions(service);	
 	}
 	
 	@Configuration
