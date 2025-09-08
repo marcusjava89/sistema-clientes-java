@@ -68,7 +68,7 @@ public class ClienteController {
 		ClienteResponseDTO response = service.encontrarPorCpf(cpf);
 		return ResponseEntity.ok(response); 
 	}
-	/*testando*/
+	
 	@GetMapping(value = "/paginada")
 	public ResponseEntity<Page<ClienteResponseDTO>> 
 	listaPaginada(@RequestParam(defaultValue = "0") int pagina,
@@ -76,14 +76,13 @@ public class ClienteController {
 		Page<ClienteResponseDTO> page = service.listaPaginada(pagina, itens);
 		return ResponseEntity.ok(page);
 	}
-	
+	/*testando*/
 	@GetMapping(value = "/paginadaordem")
 	public ResponseEntity<Page<ClienteResponseDTO>> listaPaginadaOrdenada
 	(@RequestParam(defaultValue = "0") int pagina,
 	@RequestParam(defaultValue = "3") int itens,
 	@RequestParam(defaultValue = "nome") String ordenadoPor){
-		Page<ClienteResponseDTO> lista = service
-				.listaPaginadaPorOrdenacao(pagina, itens, ordenadoPor);
+		Page<ClienteResponseDTO> lista = service.listaPaginadaPorOrdenacao(pagina, itens, ordenadoPor);
 		return ResponseEntity.ok(lista);
 	}
 	
