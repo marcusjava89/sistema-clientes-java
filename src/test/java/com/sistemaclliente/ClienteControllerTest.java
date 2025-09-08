@@ -804,6 +804,15 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void listaPaginadaOrdenada_verboIncorreto_retorno405() throws Exception{
+		
+		mvc.perform(post("/paginadaordem?pagina=1&itens=2&ordenadoPor=id"))
+		.andExpect(status().isMethodNotAllowed());
+		
+		verify(service, never()).listaPaginadaPorOrdenacao(1, 2, "id");
+		verifyNoMoreInteractions(service);
+	}
 	
 	@Configuration
 	@Import(ClienteController.class)
