@@ -948,6 +948,20 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void buscarPorNomePagina_erroDeServidor_retorno500() throws Exception{	
+		when(service.buscarPorNome("mar", 0, 2)).thenThrow(new RuntimeException());
+		
+		mvc.perform(get("/buscapornome?nome=mar&pagina=0&itens=2"))
+		.andExpect(status().isInternalServerError())
+		.andExpect(content().string("Erro interno no servidor."));
+		
+		verify(service).buscarPorNome("mar", 0, 2);
+		verifyNoMoreInteractions(service);
+	}
+	
+	
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
