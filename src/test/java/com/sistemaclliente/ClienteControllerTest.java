@@ -876,7 +876,7 @@ public class ClienteControllerTest {
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
-		when(service.buscarPorNome("", 0, 3)).thenReturn(page);
+		when(service.buscarPorNome(null, 0, 3)).thenReturn(page);
 		
 		mvc.perform(get("/buscapornome")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
@@ -887,7 +887,7 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.content[1].email").value("marcelo@gmail.com"))
 		.andExpect(jsonPath("$.content.length()").value(2));
 		
-		verify(service).buscarPorNome("", 0, 3);
+		verify(service).buscarPorNome(null, 0, 3);
 		verifyNoMoreInteractions(service);	
 	}
 	
@@ -898,6 +898,9 @@ public class ClienteControllerTest {
 		
 		mvc.perform(get("/buscapornome?nome=mar&pagina=-1&itens=2")).andExpect(status().isBadRequest())
 		.andExpect(content().string("Página não pode ser negativa."));
+		
+		verify(service).buscarPorNome("mar", -1, 2);
+		verifyNoMoreInteractions(service);	
 	}
 	
 	@Test
@@ -907,6 +910,33 @@ public class ClienteControllerTest {
 		
 		mvc.perform(get("/buscapornome?nome=mar&pagina=0&itens=0")).andExpect(status().isBadRequest())
 		.andExpect(content().string("Itens não pode ser menor que 1."));
+		
+		verify(service).buscarPorNome("mar", 0, 0);
+		verifyNoMoreInteractions(service);	
+	}
+	
+	@Test
+	public void buscarPorNomePagina_nomeNulo_retorno400() throws Exception{	
+		when(service.buscarPorNome(null, 0, 2))
+		.thenThrow(new IllegalArgumentException("Nome não pode ser nulo."));
+		
+		mvc.perform(get("/buscapornome?pagina=0&itens=2")).andExpect(status().isBadRequest())
+		.andExpect(content().string("Nome não pode ser nulo."));
+		
+		verify(service).buscarPorNome(null, 0, 2);
+		verifyNoMoreInteractions(service);	
+	}
+	
+	@Test
+	public void buscarPorNomePagina_nomeVazio_retorno400() throws Exception{	
+		when(service.buscarPorNome("", 0, 2))
+		.thenThrow(new IllegalArgumentException("Nome não pode ser vazio."));
+		
+		mvc.perform(get("/buscapornome?nome=&pagina=0&itens=2")).andExpect(status().isBadRequest())
+		.andExpect(content().string("Nome não pode ser vazio."));
+		
+		verify(service).buscarPorNome("", 0, 2);
+		verifyNoMoreInteractions(service);	
 	}
 	
 	@Configuration

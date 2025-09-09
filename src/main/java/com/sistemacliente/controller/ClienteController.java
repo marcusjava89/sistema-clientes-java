@@ -88,7 +88,7 @@ public class ClienteController {
 	/*testando*/
 	@GetMapping(value = "/buscapornome")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorNomePagina(
-	@RequestParam(defaultValue = "") String nome,
+	@RequestParam(required = false) String nome,
 	@RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens){
 		Page<ClienteResponseDTO> page = service.buscarPorNome(nome, pagina, itens);
 		return ResponseEntity.ok(page);
@@ -110,7 +110,8 @@ public class ClienteController {
 	}
 	
 	@PatchMapping(value = "/clientes/{id}/email")
-	public ResponseEntity<ClienteResponseDTO> atualizarEmail(@PathVariable Long id,@RequestParam String email){
+	public ResponseEntity<ClienteResponseDTO> 
+	atualizarEmail(@PathVariable Long id,@RequestParam String email){
 		ClienteResponseDTO response= service.atualizarEmail(id, email);
 		return ResponseEntity.ok(response);
 	}
@@ -124,10 +125,11 @@ public class ClienteController {
 	
 	@GetMapping(value = "/clientes/buscarporemail")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorEmailOrdenada(
-	@RequestParam String email, @RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens,
-	@RequestParam(defaultValue = "nome") String ordenadoPor){
+	@RequestParam String email, @RequestParam(defaultValue = "0") int pagina, 
+	@RequestParam(defaultValue = "3") int itens, @RequestParam(defaultValue = "nome") String ordenadoPor){
 		
-		Page<ClienteResponseDTO> page = service.buscaEmailPaginadaOrdenada(email, pagina, itens, ordenadoPor.trim());
+		Page<ClienteResponseDTO> page = 
+		service.buscaEmailPaginadaOrdenada(email, pagina, itens, ordenadoPor.trim());
 		return ResponseEntity.ok(page);
 	}
 	
