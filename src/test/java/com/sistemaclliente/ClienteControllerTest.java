@@ -892,12 +892,21 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void buscarPorNomePagina_PaginaNegativa_retorno400() throws Exception{
-		
+	public void buscarPorNomePagina_paginaNegativa_retorno400() throws Exception{	
 		when(service.buscarPorNome("mar", -1, 2))
 		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
+		
 		mvc.perform(get("/buscapornome?nome=mar&pagina=-1&itens=2")).andExpect(status().isBadRequest())
 		.andExpect(content().string("Página não pode ser negativa."));
+	}
+	
+	@Test
+	public void buscarPorNomePagina_itensMenorQue1_retorno400() throws Exception{	
+		when(service.buscarPorNome("mar", 0, 0))
+		.thenThrow(new IllegalArgumentException("Itens não pode ser menor que 1."));
+		
+		mvc.perform(get("/buscapornome?nome=mar&pagina=0&itens=0")).andExpect(status().isBadRequest())
+		.andExpect(content().string("Itens não pode ser menor que 1."));
 	}
 	
 	@Configuration
