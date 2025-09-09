@@ -939,6 +939,15 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
+	@Test
+	public void buscarPorNomePagina_verboIncorreto_retorno405() throws Exception{	
+		mvc.perform(post("/buscapornome?nome=mar&pagina=0&itens=2"))
+		.andExpect(status().isMethodNotAllowed()).andExpect(header().string("Allow", "GET"));
+		
+		verify(service, never()).buscarPorNome("mar", 0, 2);
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
