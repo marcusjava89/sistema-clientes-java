@@ -891,6 +891,15 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
+	@Test
+	public void buscarPorNomePagina_PaginaNegativa_retorno400() throws Exception{
+		
+		when(service.buscarPorNome("mar", -1, 2))
+		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
+		mvc.perform(get("/buscapornome?nome=mar&pagina=-1&itens=2")).andExpect(status().isBadRequest())
+		.andExpect(content().string("Página não pode ser negativa."));
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}

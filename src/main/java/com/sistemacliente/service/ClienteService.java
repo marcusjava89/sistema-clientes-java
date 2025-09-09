@@ -111,8 +111,8 @@ public class ClienteService {
 			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
 		}
 		
-		if(nome == null || nome.trim().isBlank()) {
-			throw new IllegalArgumentException("Nome não pode ser vazio.");
+		if(nome == null ) {
+			throw new IllegalArgumentException("Nome não pode ser Nulo.");
 		}
 		
 		PageRequest pageable = PageRequest.of(pagina, itens);
