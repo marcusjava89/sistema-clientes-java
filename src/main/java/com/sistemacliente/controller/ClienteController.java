@@ -85,7 +85,7 @@ public class ClienteController {
 		Page<ClienteResponseDTO> lista = service.listaPaginadaPorOrdenacao(pagina, itens, ordenadoPor);
 		return ResponseEntity.ok(lista);
 	}
-	/*testando*/
+	
 	@GetMapping(value = "/buscapornome")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorNomePagina(
 	@RequestParam(required = false) String nome,
@@ -93,7 +93,7 @@ public class ClienteController {
 		Page<ClienteResponseDTO> page = service.buscarPorNome(nome, pagina, itens);
 		return ResponseEntity.ok(page);
 	}
-	
+	/*testando*/
 	@PatchMapping(value = "/parcial/{id}")
 	public ResponseEntity<ClienteResponseDTO> atualizarParcial(@PathVariable Long id,
 	@RequestBody Map<String, Object> updates) throws JsonMappingException{

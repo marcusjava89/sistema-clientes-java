@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -18,7 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -960,7 +963,29 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	
+	@Test
+	public void atualizarParcial_sucesso_retorno200() throws Exception {
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", "Marcus");
+		updates.put("email", "marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome(updates.get("nome").toString());
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail(updates.get("email").toString());
+		
+		when(service.atualizarParcial(1L, updates)).thenReturn(cliente1);
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isOk())
+		.andExpect(jsonPath("$.id").value(1)).andExpect(jsonPath("$.nome").value("Marcus"))
+		.andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
+		
+		verify(service).atualizarParcial(1L, updates);
+		verifyNoMoreInteractions(service);
+ 	}
 	
 	@Configuration
 	@Import(ClienteController.class)
