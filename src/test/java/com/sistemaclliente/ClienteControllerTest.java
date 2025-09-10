@@ -3,6 +3,8 @@ package com.sistemaclliente;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -677,8 +679,8 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void listaPaginada_paginaNegativa_retorno400() throws Exception{
-		when(service.listaPaginada(-1, 2)).thenThrow
-		(new IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1."));
+		when(service.listaPaginada(-1, 2)).thenThrow(new IllegalArgumentException
+		("A página não pode ser negativa e itens não pode ser menor que 1."));
 		
 		mvc.perform(get("/paginada?pagina=-1&itens=2")).andExpect(status().isBadRequest())
 		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
@@ -689,8 +691,8 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void listaPaginada_itensMenorQue1_retorno400() throws Exception{
-		when(service.listaPaginada(0, 0)).thenThrow
-		(new IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1."));
+		when(service.listaPaginada(0, 0)).thenThrow(new IllegalArgumentException
+		("A página não pode ser negativa e itens não pode ser menor que 1."));
 		
 		mvc.perform(get("/paginada?pagina=0&itens=0")).andExpect(status().isBadRequest())
 		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
@@ -801,7 +803,8 @@ public class ClienteControllerTest {
 		.thenThrow(new IllegalArgumentException("Itens não pode ser menor que 1."));
 		
 		mvc.perform(get("/paginadaordem?pagina=1&itens=0&ordenadoPor=id"))
-		.andExpect(status().isBadRequest()).andExpect(content().string("Itens não pode ser menor que 1."));
+		.andExpect(status().isBadRequest())
+		.andExpect(content().string("Itens não pode ser menor que 1."));
 		
 		verify(service).listaPaginadaPorOrdenacao(1, 0, "id");
 		verifyNoMoreInteractions(service);
@@ -987,11 +990,39 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
  	}
 	
+	@Test
+	public void atualizarParcial_presencaDoId_retorno400() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("id", 2L);
+		updates.put("nome", "Marcus");
+		updates.put("email", "marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId((Long) updates.get("id"));
+		cliente1.setNome(updates.get("nome").toString());
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail(updates.get("email").toString());
+		
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O campo id não pode ser alterado."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O campo id não pode ser alterado."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+	}
+	
+	
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
 	
 }
+
+
 
 
 
