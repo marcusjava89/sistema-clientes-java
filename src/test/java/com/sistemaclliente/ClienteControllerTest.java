@@ -1038,6 +1038,30 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void atualizarParcial_nomeNulo_retorno400() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", "");
+		updates.put("cpf", "23501206586");
+		updates.put("email", "marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome(updates.get("nome").toString());
+		cliente1.setCpf(updates.get("cpf").toString());
+		cliente1.setEmail(updates.get("email").toString());
+
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O nome não pode ser vazio."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O nome não pode ser vazio."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
