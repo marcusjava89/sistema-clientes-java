@@ -998,7 +998,7 @@ public class ClienteControllerTest {
 		updates.put("email", "marcus@gmail.com");
 		
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId((Long) updates.get("id"));
+		cliente1.setId(Long.parseLong(updates.get("id").toString()));
 		cliente1.setNome(updates.get("nome").toString());
 		cliente1.setCpf("23501206586");
 		cliente1.setEmail(updates.get("email").toString());
@@ -1014,7 +1014,29 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	
+	@Test
+	public void atualizarParcial_presencaDoCpf_retorno400() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", "Marcus");
+		updates.put("cpf", "23501206586");
+		updates.put("email", "marcus@gmail.com");
+		
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome(updates.get("nome").toString());
+		cliente1.setCpf(updates.get("cpf").toString());
+		cliente1.setEmail(updates.get("email").toString());
+
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O campo cpf não pode ser alterado."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O campo cpf não pode ser alterado."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+	}
 	
 	@Configuration
 	@Import(ClienteController.class)
