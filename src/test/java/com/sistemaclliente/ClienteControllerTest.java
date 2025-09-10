@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,6 +41,7 @@ import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
+import com.sistemacliente.model.Cliente;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.service.ClienteService;
@@ -112,9 +112,6 @@ public class ClienteControllerTest {
 	@Test
 	public void salvarClientes_verboHttpIncorreto_retorno405() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(get("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isMethodNotAllowed())
@@ -153,13 +150,11 @@ public class ClienteControllerTest {
 	public void salvarCliente_nomeVazio_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -167,13 +162,11 @@ public class ClienteControllerTest {
 	public void salvarCliente_nomeNulo_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome(null);
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -181,14 +174,12 @@ public class ClienteControllerTest {
 	public void salvarCliente_nomeMenor3Digitos_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("ma");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -196,144 +187,122 @@ public class ClienteControllerTest {
 	public void salvarCliente_nomeMaior60Digitos_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890AB");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_emailVazio_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
 		dto.setEmail("");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_emailInvalido_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
 		dto.setEmail("com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("Formato inválido do e-mail."));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_emailNulo_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
 		dto.setEmail(null);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_cpfInvalido_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
 		dto.setCpf("101089757er");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_cpfMenosDe11Digitos_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
 		dto.setCpf("101089757");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_cpfMaisDe11Digitos_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
 		dto.setCpf("25013569874965");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_cpfVazio_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
 		dto.setCpf("");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_cpfNulo_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
 		dto.setCpf(null);
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.cpf").value("CPF não pode ser vazio."));
 		
-		verify(service, never()).salvarCliente(dto);
+		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
 	@Test
 	public void salvarCliente_cpfExistente_retornar409() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
 		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
 		cliente1.setCpf("23501206586");
@@ -509,9 +478,6 @@ public class ClienteControllerTest {
 	@Test
 	public void atualizarCliente_verboIncorreto_retorno405() throws Exception{
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
 		
 		mvc.perform(post("/clientes/1").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isMethodNotAllowed())
@@ -994,14 +960,6 @@ public class ClienteControllerTest {
 	public void atualizarParcial_presencaDoId_retorno400() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("id", 2L);
-		updates.put("nome", "Marcus");
-		updates.put("email", "marcus@gmail.com");
-		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(Long.parseLong(updates.get("id").toString()));
-		cliente1.setNome(updates.get("nome").toString());
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail(updates.get("email").toString());
 		
 		when(service.atualizarParcial(eq(1L) ,anyMap()))
 		.thenThrow(new IllegalArgumentException("O campo id não pode ser alterado."));
@@ -1017,16 +975,8 @@ public class ClienteControllerTest {
 	@Test
 	public void atualizarParcial_presencaDoCpf_retorno400() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
-		updates.put("nome", "Marcus");
 		updates.put("cpf", "23501206586");
-		updates.put("email", "marcus@gmail.com");
 		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome(updates.get("nome").toString());
-		cliente1.setCpf(updates.get("cpf").toString());
-		cliente1.setEmail(updates.get("email").toString());
-
 		when(service.atualizarParcial(eq(1L) ,anyMap()))
 		.thenThrow(new IllegalArgumentException("O campo cpf não pode ser alterado."));
 		
@@ -1039,18 +989,10 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void atualizarParcial_nomeNulo_retorno400() throws Exception{
+	public void atualizarParcial_nomeVazio_retorno400() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("nome", "");
-		updates.put("cpf", "23501206586");
-		updates.put("email", "marcus@gmail.com");
 		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome(updates.get("nome").toString());
-		cliente1.setCpf(updates.get("cpf").toString());
-		cliente1.setEmail(updates.get("email").toString());
-
 		when(service.atualizarParcial(eq(1L) ,anyMap()))
 		.thenThrow(new IllegalArgumentException("O nome não pode ser vazio."));
 		
