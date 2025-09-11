@@ -1003,6 +1003,22 @@ public class ClienteControllerTest {
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
 	}
+
+	@Test
+	public void atualizarParcial_nomeNulo_retorno400() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", null);
+		
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O nome não pode ser nulo."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O nome não pode ser nulo."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+	}
 	
 	@Configuration
 	@Import(ClienteController.class)
