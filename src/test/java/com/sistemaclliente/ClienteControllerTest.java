@@ -46,6 +46,9 @@ import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.service.ClienteService;
 
+/*Podemos fazer testes em conjunto para deixar a classe mais enxuta como o caso de testar verbo http in-
+ *correto. Porém quando esses testes foram escritos não rodaram fazendo que tenha ser feito caso a caso.*/
+
 @WebMvcTest(controllers = ClienteController.class)
 @Import(ValidationExceptionHandler.class)
 public class ClienteControllerTest {
@@ -1015,6 +1018,38 @@ public class ClienteControllerTest {
 		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
 		.andExpect(content().string("O nome não pode ser nulo."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarParcial_emailNulo_retorno400() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("email", null);
+		
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O email não pode ser nulo."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O email não pode ser nulo."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarParcial_emailVazio_retorno400() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("email", "");
+		
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O email não pode ser vazio."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O email não pode ser vazio."));
 		
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
