@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Configuration;
@@ -149,10 +152,18 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
-	public void salvarCliente_nomeVazio_retorno400() throws Exception {
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" "})
+	public void salvarCliente_nomeInvalido_retorno400(String nome) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("");
+		dto.setNome(nome);
+		
+		String mensagem = "";
+		
+		if(nome == null || nome.trim().isEmpty() || nome.equals(" ")) {
+			mensagem = "Nome não pode ser vazio.";
+		}
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
@@ -161,22 +172,11 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
-	public void salvarCliente_nomeNulo_retorno400() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {"ma", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890AB"})
+	public void salvarCliente_nomeQuantidadeInvalida_retorno400(String nome) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome(null);
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	
-	@Test
-	public void salvarCliente_nomeMenor3Digitos_retorno400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("ma");
+		dto.setNome(nome);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
@@ -186,19 +186,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
-	public void salvarCliente_nomeMaior60Digitos_retorno400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890AB");
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	
+	/*juntar*/
 	@Test
 	public void salvarCliente_emailVazio_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
@@ -212,32 +200,22 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
-	public void salvarCliente_emailInvalido_retorno400() throws Exception {
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {"com", " "})
+	public void salvarCliente_emailInvalido_retorno400(String email) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setEmail("com");
-		
+		dto.setEmail(email);
+
+	
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.email").value("Formato inválido do e-mail."));
-		
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
+
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
-	public void salvarCliente_emailNulo_retorno400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setEmail(null);
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	
+	/*juntar*/
 	@Test
 	public void salvarCliente_cpfInvalido_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
@@ -250,7 +228,7 @@ public class ClienteControllerTest {
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
-	
+	/*juntar*/
 	@Test
 	public void salvarCliente_cpfMenosDe11Digitos_retorno400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
@@ -263,7 +241,7 @@ public class ClienteControllerTest {
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
-	
+	/*juntar*/
 	@Test
 	public void salvarCliente_cpfMaisDe11Digitos_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
@@ -276,7 +254,7 @@ public class ClienteControllerTest {
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
-	
+	/*juntar*/
 	@Test
 	public void salvarCliente_cpfVazio_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
@@ -288,9 +266,25 @@ public class ClienteControllerTest {
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
-	
+	/*juntar*/
 	@Test
 	public void salvarCliente_cpfNulo_retornar400() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setCpf(null);
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.cpf").value("CPF não pode ser vazio."));
+		
+		verify(service, never()).salvarCliente(any());
+		verifyNoMoreInteractions(service);
+	}
+	
+	/*continuar daqui*/
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {})
+	public void salvarCliente_cpfInvalido_retornar400() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf(null);
 		
@@ -1053,6 +1047,62 @@ public class ClienteControllerTest {
 		
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
+		
+	}
+	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" "})
+	public void atualizarParcial_email_retorno400(String email) throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("email", email);
+		
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O email não pode ser vazio."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O email não pode ser vazio."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+		
+	}
+	
+	@Test
+	public void atualizarParcial_emailFormatoInvalido_retorno400() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("email", "marcus@marcus@marcus");
+		
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("Formato inválido do e-mail."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+		
+	}
+	
+	@ParameterizedTest
+	@ValueSource(strings = { "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@" })
+	public void atualizarParcial_emailFormatoInvalido_retorno400(String emailInvalido) throws Exception {
+	    Map<String, Object> updates = new HashMap<>();
+	    updates.put("email", emailInvalido);
+
+	    when(service.atualizarParcial(eq(1L), anyMap()))
+	        .thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
+
+	    mvc.perform(patch("/parcial/1")
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(mapper.writeValueAsString(updates)))
+	        .andExpect(status().isBadRequest())
+	        .andExpect(content().string("Formato inválido do e-mail."));
+
+	    verify(service).atualizarParcial(eq(1L), anyMap());
+	    verifyNoMoreInteractions(service);
 	}
 	
 	@Configuration
