@@ -51,6 +51,3 @@ public class ClienteResponseDTO {
 		this.cpf = cpf;
 	}	
 }
-
-
-

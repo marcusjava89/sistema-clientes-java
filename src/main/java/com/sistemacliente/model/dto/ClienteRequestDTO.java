@@ -11,15 +11,15 @@ public class ClienteRequestDTO {
 
 	}
 	
-	@NotBlank(message = "Nome não pode ser vazio.")
+	@NotBlank(message = "Nome deve ter entre 3 e 60 caracteres")
 	@Size(min = 3, max = 60, message = "Nome deve ter entre 3 e 60 caracteres")
 	private String nome;
 	
-	@NotBlank(message = "E-mail não pode ser vazio.")
+	@NotBlank(message = "Formato inválido do e-mail.")
 	@Email(message = "Formato inválido do e-mail.")
 	private String email;
 	
-	@NotBlank(message = "CPF não pode ser vazio.")
+	@NotBlank(message = "Digite os 11 dígitos do CPF sem ponto e hífen.")
 	@Pattern(regexp = "\\d{11}", message = "Digite os 11 dígitos do CPF sem ponto e hífen.")
 	private String cpf;
 

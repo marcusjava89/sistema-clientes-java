@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,17 +160,11 @@ public class ClienteControllerTest {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome(nome);
 		
-		String mensagem = "";
-		
-		if(nome == null || nome.equals("")) {
-			mensagem = "Nome não pode ser vazio.";
-		}else {
-			mensagem = "Nome deve ter entre 3 e 60 caracteres";
-		}
+		String mensagem = "Nome deve ter entre 3 e 60 caracteres";
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.nome").value(mensagem));
+		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
 		
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
@@ -181,10 +176,12 @@ public class ClienteControllerTest {
 	public void salvarCliente_emailInvalido_retorno400(String email) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setEmail(email);
+		
+		String mensagem = "Formato inválido do e-mail.";
 
-	
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.email").value(mensagem));;
 
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
@@ -197,13 +194,7 @@ public class ClienteControllerTest {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf(cpf);
 		
-		String mensagem = "";
-		
-		if(cpf == null || cpf.equals("") || cpf.equals(" ")) {
-			mensagem = "CPF não pode ser vazio.";
-		} else {
-			mensagem = "Digite os 11 dígitos do CPF sem ponto e hífen.";
-		}
+		String mensagem = "Digite os 11 dígitos do CPF sem ponto e hífen.";
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
@@ -306,7 +297,6 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-
 	@Test
 	public void deletarClientePorId_sucesso_retorno204() throws Exception {
 		mvc.perform(delete("/deletarporid/1")).andExpect(status().isNoContent());
@@ -557,27 +547,16 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
-	public void listaPaginada_paginaNegativa_retorno400() throws Exception{
-		when(service.listaPaginada(-1, 2)).thenThrow(new IllegalArgumentException
+	@ParameterizedTest
+	@CsvSource({"-1 , 2","0 , 0"})
+	public void listaPaginada_parametrosInvalidos_retorno400(int pagina, int itens) throws Exception {
+		when(service.listaPaginada(pagina, itens)).thenThrow(new IllegalArgumentException
 		("A página não pode ser negativa e itens não pode ser menor que 1."));
 		
-		mvc.perform(get("/paginada?pagina=-1&itens=2")).andExpect(status().isBadRequest())
+		mvc.perform(get("/paginada?pagina="+pagina+"&itens="+itens)).andExpect(status().isBadRequest())
 		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
 		
-		verify(service).listaPaginada(-1, 2);
-		verifyNoMoreInteractions(service);
-	}
-	
-	@Test
-	public void listaPaginada_itensMenorQue1_retorno400() throws Exception{
-		when(service.listaPaginada(0, 0)).thenThrow(new IllegalArgumentException
-		("A página não pode ser negativa e itens não pode ser menor que 1."));
-		
-		mvc.perform(get("/paginada?pagina=0&itens=0")).andExpect(status().isBadRequest())
-		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
-		
-		verify(service).listaPaginada(0, 0);
+		verify(service).listaPaginada(pagina, itens);
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -665,6 +644,21 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
+	@ParameterizedTest
+	@CsvSource({"-1 , 2","0 , 0"})
+	public void listaPaginadaOrdenada_parametrosInvalidos_retorno400(int pagina, int itens) 
+	throws Exception {
+		when(service.listaPaginadaPorOrdenacao(pagina, itens, "id"))
+		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
+		
+		mvc.perform(get("/paginadaordem?pagina="+pagina+"&itens="+itens+"&ordenadoPor=id"))
+		.andExpect(status().isBadRequest()).andExpect(content().string("Página não pode ser negativa."));
+		
+		verify(service).listaPaginadaPorOrdenacao(pagina, itens, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
+	/*juntar*/
 	@Test
 	public void listaPaginadaOrdenada_paginaNegativa_retorno400() throws Exception{
 		when(service.listaPaginadaPorOrdenacao(-1, 2, "id"))
@@ -676,7 +670,7 @@ public class ClienteControllerTest {
 		verify(service).listaPaginadaPorOrdenacao(-1, 2, "id");
 		verifyNoMoreInteractions(service);
 	}
-	
+	/*juntar*/
 	@Test
 	public void listaPaginadaOrdenada_itensMenorQue1_retorno400() throws Exception{
 		when(service.listaPaginadaPorOrdenacao(1, 0, "id"))
@@ -1027,7 +1021,6 @@ public class ClienteControllerTest {
 	static class TestConfig {}
 	
 }
-
 
 
 

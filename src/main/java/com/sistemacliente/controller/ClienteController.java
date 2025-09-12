@@ -135,19 +135,3 @@ public class ClienteController {
 	
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
