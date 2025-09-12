@@ -215,82 +215,24 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	/*juntar*/
-	@Test
-	public void salvarCliente_cpfInvalido_retorno400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setCpf("101089757er");
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	/*juntar*/
-	@Test
-	public void salvarCliente_cpfMenosDe11Digitos_retorno400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setCpf("101089757");
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	/*juntar*/
-	@Test
-	public void salvarCliente_cpfMaisDe11Digitos_retornar400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setCpf("25013569874965");
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.cpf").value("Digite os 11 dígitos do CPF sem ponto e hífen."));
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	/*juntar*/
-	@Test
-	public void salvarCliente_cpfVazio_retornar400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setCpf("");
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	/*juntar*/
-	@Test
-	public void salvarCliente_cpfNulo_retornar400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setCpf(null);
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.cpf").value("CPF não pode ser vazio."));
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	
-	/*continuar daqui*/
 	@ParameterizedTest
 	@NullAndEmptySource
-	@ValueSource(strings = {})
-	public void salvarCliente_cpfInvalido_retornar400() throws Exception {
+	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
+	public void salvarCliente_cpfInvalido_retornar400(String cpf) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setCpf(null);
+		dto.setCpf(cpf);
+		
+		String mensagem = "";
+		
+		if(cpf == null || cpf.equals("") || cpf.equals(" ")) {
+			mensagem = "CPF não pode ser vazio.";
+		} else {
+			mensagem = "Digite os 11 dígitos do CPF sem ponto e hífen.";
+		}
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.cpf").value("CPF não pode ser vazio."));
+		.andExpect(jsonPath("$.cpf").value(mensagem));
 		
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
