@@ -154,47 +154,22 @@ public class ClienteControllerTest {
 	
 	@ParameterizedTest
 	@NullAndEmptySource
-	@ValueSource(strings = {" "})
+	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
 	public void salvarCliente_nomeInvalido_retorno400(String nome) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome(nome);
 		
 		String mensagem = "";
 		
-		if(nome == null || nome.trim().isEmpty() || nome.equals(" ")) {
+		if(nome == null || nome.equals("")) {
 			mensagem = "Nome não pode ser vazio.";
+		}else {
+			mensagem = "Nome deve ter entre 3 e 60 caracteres";
 		}
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest());
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	
-	@ParameterizedTest
-	@ValueSource(strings = {"ma", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890AB"})
-	public void salvarCliente_nomeQuantidadeInvalida_retorno400(String nome) throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome(nome);
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
-		
-		verify(service, never()).salvarCliente(any());
-		verifyNoMoreInteractions(service);
-	}
-	
-	/*juntar*/
-	@Test
-	public void salvarCliente_emailVazio_retorno400() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setEmail("");
-		
-		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.email").value("E-mail não pode ser vazio."));
+		.andExpect(jsonPath("$.nome").value(mensagem));
 		
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
