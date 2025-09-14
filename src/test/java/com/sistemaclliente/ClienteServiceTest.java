@@ -126,8 +126,9 @@ public class ClienteServiceTest {
 		salvo.setId(2L); //id não é gerado automaticamente.
 		
 		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.of(cliente1)); /*Retorna existente.*/
-		CpfJaCadastradoException ex = assertThrows(CpfJaCadastradoException.class, () -> service.salvarCliente(dto));
-		assertThat(ex.getMessage()).isEqualTo("O CPF 12345678 já está cadastrado");
+		CpfJaCadastradoException ex = 
+		assertThrows(CpfJaCadastradoException.class, () -> service.salvarCliente(dto));
+		assertThat(ex.getMessage()).isEqualTo("O CPF 12345678 já está cadastrado.");
 		verify(repository).findByCpf(dto.getCpf());
 		verify(repository, never()).save(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
@@ -474,10 +475,10 @@ public class ClienteServiceTest {
 		Map<String, Object> updates = Map.of("cpf", "32165487");
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
+		AlteracaoDeCpfException e = assertThrows(AlteracaoDeCpfException.class, 
 				() -> service.atualizarParcial(1L, updates));
 		
-		assertThat(e.getMessage()).isEqualTo("O campo CPF não pode ser alterado.");
+		assertThat(e.getMessage()).isEqualTo("Alteração de CPF não permitida.");
 		
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
@@ -503,7 +504,7 @@ public class ClienteServiceTest {
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
 				() -> service.atualizarParcial(1L, updates));
 		
-		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio.");
+		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio ou nulo.");
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -527,7 +528,7 @@ public class ClienteServiceTest {
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
 				() -> service.atualizarParcial(1L, updates));
 		
-		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio.");
+		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio ou nulo.");
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -627,17 +628,18 @@ public class ClienteServiceTest {
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
 		
-		when(repository.findByEmailContainingIgnoreCase("marcus", pageable)).thenReturn(pageMock);
+		when(repository.findByEmailContainingIgnoreCase("mar", pageable))
+		.thenReturn(pageMock);
 		
 		Page<ClienteResponseDTO> page = 
-				service.buscaEmailPaginadaOrdenada("marcus", 0, 2, "nome");
+				service.buscaEmailPaginadaOrdenada("mar", 0, 2, "nome");
 		
 		assertThat(page).isNotNull();
 		assertThat(page.getContent().size()).isEqualTo(2);
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus Antônio");
 		
-		verify(repository).findByEmailContainingIgnoreCase("marcus", pageable);
+		verify(repository).findByEmailContainingIgnoreCase("mar", pageable);
 		verifyNoMoreInteractions(repository);
 		
  	}

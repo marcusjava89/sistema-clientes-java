@@ -132,13 +132,13 @@ public class ClienteService {
 		}
 
 		if (updates.containsKey("cpf")) {
-			throw new IllegalArgumentException("O campo CPF não pode ser alterado.");
+			throw new AlteracaoDeCpfException();
 		}
 
 		if (updates.containsKey("nome")) {
 			Object nome = updates.get("nome");
 			if (nome == null || nome.toString().isBlank()) {
-				throw new IllegalArgumentException("Nome não pode ser vazio.");
+				throw new IllegalArgumentException("Nome não pode ser vazio ou nulo.");
 			}
 		}
 		
@@ -239,10 +239,6 @@ public class ClienteService {
 		
 		if(email == null || email.trim().isBlank()) {
 			throw new IllegalArgumentException("E-mail não pode ser vazio.");
-		}
-		
-		if(!email.matches(regexEmail)) {
-			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
 		
 		if(ordenadoPor == null || ordenadoPor.trim().isBlank()) {

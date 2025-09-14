@@ -845,11 +845,11 @@ public class ClienteControllerTest {
 		updates.put("cpf", "23501206586");
 		
 		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new IllegalArgumentException("O campo cpf não pode ser alterado."));
+		.thenThrow(new AlteracaoDeCpfException());
 		
 		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("O campo cpf não pode ser alterado."));
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isConflict())
+		.andExpect(content().string("Alteração de CPF não permitida."));
 		
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
