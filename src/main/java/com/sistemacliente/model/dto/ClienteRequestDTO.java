@@ -6,13 +6,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class ClienteRequestDTO {
-
-	public ClienteRequestDTO() {
-
-	}
 	
-	@NotBlank(message = "Nome deve ter entre 3 e 60 caracteres")
-	@Size(min = 3, max = 60, message = "Nome deve ter entre 3 e 60 caracteres")
+	@NotBlank(message = "Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio.")
+	@Size(min = 3, max = 60, message = "Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio.")
 	private String nome;
 	
 	@NotBlank(message = "Formato inválido do e-mail.")

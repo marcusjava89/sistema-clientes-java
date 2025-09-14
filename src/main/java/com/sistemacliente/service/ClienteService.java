@@ -106,17 +106,20 @@ public class ClienteService {
 	}
 	
 	public Page<ClienteResponseDTO> buscarPorNome(String nome, int pagina, int itens) {
+		PageRequest pageable = PageRequest.of(pagina, itens);
+		Page<Cliente> page;
+		
 		if(pagina < 0 || itens <1) {
 			throw new 
 			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
 		}
 		
-		if(nome == null ) {
-			throw new IllegalArgumentException("Nome não pode ser Nulo.");
+		if(nome == null || nome.isBlank()) {
+			page = repository.findAll(pageable);
+		}else {
+			page = repository.findByNomeContainingIgnoreCase(nome, pageable);
 		}
 		
-		PageRequest pageable = PageRequest.of(pagina, itens);
-		Page<Cliente> page = repository.findByNomeContainingIgnoreCase(nome, pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
 

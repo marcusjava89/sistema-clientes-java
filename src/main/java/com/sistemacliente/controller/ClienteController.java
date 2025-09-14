@@ -88,8 +88,8 @@ public class ClienteController {
 	
 	@GetMapping(value = "/buscapornome")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorNomePagina(
-	@RequestParam(required = false) String nome,
-	@RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens){
+	@RequestParam(required = false) String nome, @RequestParam(defaultValue = "0") int pagina, 
+	@RequestParam(defaultValue = "3") int itens){
 		Page<ClienteResponseDTO> page = service.buscarPorNome(nome, pagina, itens);
 		return ResponseEntity.ok(page);
 	}

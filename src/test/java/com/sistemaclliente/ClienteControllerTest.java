@@ -27,6 +27,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,7 +165,8 @@ public class ClienteControllerTest {
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.nome").value("Nome deve ter entre 3 e 60 caracteres"));
+		.andExpect(jsonPath("$.nome")
+		.value("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
 		
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
@@ -508,7 +510,6 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.content[1].email").value("antonio@gmail.com"))
 		.andExpect(jsonPath("$.content.length()").value(2));
 
-		
 		verify(service).listaPaginada(0, 2);
 		verifyNoMoreInteractions(service);
 	}
@@ -648,39 +649,14 @@ public class ClienteControllerTest {
 	@CsvSource({"-1 , 2","0 , 0"})
 	public void listaPaginadaOrdenada_parametrosInvalidos_retorno400(int pagina, int itens) 
 	throws Exception {
-		when(service.listaPaginadaPorOrdenacao(pagina, itens, "id"))
-		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
+		when(service.listaPaginadaPorOrdenacao(pagina, itens, "id")).thenThrow(new 
+		IllegalArgumentException("Página não pode ser negativa e itens não pode ser menor que 1."));
 		
 		mvc.perform(get("/paginadaordem?pagina="+pagina+"&itens="+itens+"&ordenadoPor=id"))
-		.andExpect(status().isBadRequest()).andExpect(content().string("Página não pode ser negativa."));
+		.andExpect(status().isBadRequest())
+		.andExpect(content().string("Página não pode ser negativa e itens não pode ser menor que 1."));
 		
 		verify(service).listaPaginadaPorOrdenacao(pagina, itens, "id");
-		verifyNoMoreInteractions(service);
-	}
-	
-	/*juntar*/
-	@Test
-	public void listaPaginadaOrdenada_paginaNegativa_retorno400() throws Exception{
-		when(service.listaPaginadaPorOrdenacao(-1, 2, "id"))
-		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
-		
-		mvc.perform(get("/paginadaordem?pagina=-1&itens=2&ordenadoPor=id"))
-		.andExpect(status().isBadRequest()).andExpect(content().string("Página não pode ser negativa."));
-		
-		verify(service).listaPaginadaPorOrdenacao(-1, 2, "id");
-		verifyNoMoreInteractions(service);
-	}
-	/*juntar*/
-	@Test
-	public void listaPaginadaOrdenada_itensMenorQue1_retorno400() throws Exception{
-		when(service.listaPaginadaPorOrdenacao(1, 0, "id"))
-		.thenThrow(new IllegalArgumentException("Itens não pode ser menor que 1."));
-		
-		mvc.perform(get("/paginadaordem?pagina=1&itens=0&ordenadoPor=id"))
-		.andExpect(status().isBadRequest())
-		.andExpect(content().string("Itens não pode ser menor que 1."));
-		
-		verify(service).listaPaginadaPorOrdenacao(1, 0, "id");
 		verifyNoMoreInteractions(service);
 	}
 	
@@ -738,9 +714,10 @@ public class ClienteControllerTest {
 		verify(service).buscarPorNome("mar", 0, 2);
 		verifyNoMoreInteractions(service);	
 	}
-	
+
 	@Test
 	public void buscarPorNomePagina_sucessoSemParametro_retorno200() throws Exception {
+		/*Sem parâmetro em página e itens.*/
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -771,51 +748,33 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
-	@Test
-	public void buscarPorNomePagina_paginaNegativa_retorno400() throws Exception{	
-		when(service.buscarPorNome("mar", -1, 2))
-		.thenThrow(new IllegalArgumentException("Página não pode ser negativa."));
+	@ParameterizedTest
+	@CsvSource({"mar, -1, 2", "marc, 0, 0", })
+	public void buscarPorNomePagina_paginaItensInvalidos_retorno400(String nome, int pagina, int itens) 
+	throws Exception {
+		when(service.buscarPorNome(nome, pagina, itens))
+		.thenThrow(new IllegalArgumentException("Página não pode ser negativa e itens maior que 0."));
 		
-		mvc.perform(get("/buscapornome?nome=mar&pagina=-1&itens=2")).andExpect(status().isBadRequest())
-		.andExpect(content().string("Página não pode ser negativa."));
+		mvc.perform(get("/buscapornome?nome="+nome+"&pagina="+pagina+"&itens="+itens))
+		.andExpect(status().isBadRequest())
+		.andExpect(content().string("Página não pode ser negativa e itens maior que 0."));
 		
-		verify(service).buscarPorNome("mar", -1, 2);
+		verify(service).buscarPorNome(nome, pagina, itens);
 		verifyNoMoreInteractions(service);	
 	}
-	
-	@Test
-	public void buscarPorNomePagina_itensMenorQue1_retorno400() throws Exception{	
-		when(service.buscarPorNome("mar", 0, 0))
-		.thenThrow(new IllegalArgumentException("Itens não pode ser menor que 1."));
+
+	@ParameterizedTest
+	@EmptySource
+	@ValueSource(strings = " ")
+	public void buscarPorNomePagina_nomeInvalido_retorno400(String nome) throws Exception{
+		when(service.buscarPorNome(nome, 0, 2)).thenThrow(new 
+		IllegalArgumentException("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
 		
-		mvc.perform(get("/buscapornome?nome=mar&pagina=0&itens=0")).andExpect(status().isBadRequest())
-		.andExpect(content().string("Itens não pode ser menor que 1."));
+		mvc.perform(get("/buscapornome?nome="+nome+"&pagina=0&itens=2"))
+		.andExpect(status().isBadRequest()).andExpect(content()
+		.string("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
 		
-		verify(service).buscarPorNome("mar", 0, 0);
-		verifyNoMoreInteractions(service);	
-	}
-	
-	@Test
-	public void buscarPorNomePagina_nomeNulo_retorno400() throws Exception{	
-		when(service.buscarPorNome(null, 0, 2))
-		.thenThrow(new IllegalArgumentException("Nome não pode ser nulo."));
-		
-		mvc.perform(get("/buscapornome?pagina=0&itens=2")).andExpect(status().isBadRequest())
-		.andExpect(content().string("Nome não pode ser nulo."));
-		
-		verify(service).buscarPorNome(null, 0, 2);
-		verifyNoMoreInteractions(service);	
-	}
-	
-	@Test
-	public void buscarPorNomePagina_nomeVazio_retorno400() throws Exception{	
-		when(service.buscarPorNome("", 0, 2))
-		.thenThrow(new IllegalArgumentException("Nome não pode ser vazio."));
-		
-		mvc.perform(get("/buscapornome?nome=&pagina=0&itens=2")).andExpect(status().isBadRequest())
-		.andExpect(content().string("Nome não pode ser vazio."));
-		
-		verify(service).buscarPorNome("", 0, 2);
+		verify(service).buscarPorNome(nome, 0, 2);
 		verifyNoMoreInteractions(service);	
 	}
 	
