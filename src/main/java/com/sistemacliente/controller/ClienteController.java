@@ -93,7 +93,7 @@ public class ClienteController {
 		Page<ClienteResponseDTO> page = service.buscarPorNome(nome, pagina, itens);
 		return ResponseEntity.ok(page);
 	}
-	/*testando*/
+	
 	@PatchMapping(value = "/parcial/{id}")
 	public ResponseEntity<ClienteResponseDTO> atualizarParcial(@PathVariable Long id,
 	@RequestBody Map<String, Object> updates) throws JsonMappingException{
@@ -101,9 +101,10 @@ public class ClienteController {
 		return ResponseEntity.ok(response);
 	}
 	
+	/*testando*/
 	@GetMapping(value = "/buscaemail")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscaPorEmail
-	(@RequestParam String email, @RequestParam(defaultValue = "0") int pagina, 
+	(@RequestParam(required = false) String email, @RequestParam(defaultValue = "0") int pagina, 
 	@RequestParam(defaultValue = "3") int itens){
 		Page<ClienteResponseDTO> page = service.buscarPorEmail(email, pagina, itens);
 		return ResponseEntity.ok(page);

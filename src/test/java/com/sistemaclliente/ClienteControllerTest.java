@@ -52,7 +52,8 @@ import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.service.ClienteService;
 
 /*Podemos fazer testes em conjunto para deixar a classe mais enxuta como o caso de testar verbo http in-
- *correto. Porém quando esses testes foram escritos não rodaram fazendo que tenha ser feito caso a caso.*/
+ *correto. Porém quando esses testes foram escritos não rodaram fazendo que tenha ser feito caso a caso.
+ *Sempre que possível teste em grupo foram feitos.*/
 
 @WebMvcTest(controllers = ClienteController.class)
 @Import(ValidationExceptionHandler.class)
@@ -154,14 +155,13 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	/*Testa nomes vazio, nulo, menos de 3 e mais de 60 caracteres, espaço em branco.*/
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
 	public void salvarCliente_nomeInvalido_retorno400(String nome) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome(nome);
-		
-		String mensagem = "Nome deve ter entre 3 e 60 caracteres";
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
@@ -172,9 +172,10 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	/*Testa e-mails vazio, nulo e no formato inválido.*/
 	@ParameterizedTest
 	@NullAndEmptySource
-	@ValueSource(strings = {"com", " "})
+	@ValueSource(strings = {"com", " ", "marcus@marcus@"})
 	public void salvarCliente_emailInvalido_retorno400(String email) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setEmail(email);
@@ -189,6 +190,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	/*Testa CPF's vazio, nulo e inválidos.*/
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
@@ -662,7 +664,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void listaPaginadaOrdenada_verboIncorreto_retorno405() throws Exception{
-		
 		mvc.perform(post("/paginadaordem?pagina=1&itens=2&ordenadoPor=id"))
 		.andExpect(status().isMethodNotAllowed())
 		.andExpect(header().string("Allow", "GET"));
@@ -717,7 +718,7 @@ public class ClienteControllerTest {
 
 	@Test
 	public void buscarPorNomePagina_sucessoSemParametro_retorno200() throws Exception {
-		/*Sem parâmetro em página e itens.*/
+		/*Sem parâmetro em nome, página e itens.*/
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -874,76 +875,85 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	/*juntar*/
-	@Test
-	public void atualizarParcial_nomeVazio_retorno400() throws Exception{
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("nome", "");
-		
-		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new IllegalArgumentException("O nome não pode ser vazio."));
-		
-		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("O nome não pode ser vazio."));
-		
-		verify(service).atualizarParcial(eq(1L), anyMap());
-		verifyNoMoreInteractions(service);
-	}
-	
-	/*juntar*/
-	@Test
-	public void atualizarParcial_nomeNulo_retorno400() throws Exception{
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("nome", null);
-		
-		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new IllegalArgumentException("O nome não pode ser nulo."));
-		
-		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("O nome não pode ser nulo."));
-		
-		verify(service).atualizarParcial(eq(1L), anyMap());
-		verifyNoMoreInteractions(service);
-	}
-	
 	@ParameterizedTest
 	@NullAndEmptySource
-	@ValueSource(strings = {" "})
-	public void atualizarParcial_emailInvalido_retorno400(String email) throws Exception{
+	@ValueSource(strings = {" ", "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
+	public void atualizarParcial_emailNuloVazioInvalido_retorno400(String email) throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("email", email);
 		
 		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new IllegalArgumentException("O email não pode ser vazio."));
+		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
 		
 		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("O email não pode ser vazio."));
+		.andExpect(content().string("Formato inválido do e-mail."));
 		
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
 		
 	}
 	
-	@ParameterizedTest
-	@ValueSource(strings = { "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@" })
-	public void atualizarParcial_emailFormatoInvalido_retorno400(String emailInvalido) throws Exception {
-	    Map<String, Object> updates = new HashMap<>();
-	    updates.put("email", emailInvalido);
-
-	    when(service.atualizarParcial(eq(1L), anyMap()))
-	        .thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
-
-	    mvc.perform(patch("/parcial/1")
-	            .contentType(MediaType.APPLICATION_JSON)
-	            .content(mapper.writeValueAsString(updates)))
-	        .andExpect(status().isBadRequest())
-	        .andExpect(content().string("Formato inválido do e-mail."));
-
-	    verify(service).atualizarParcial(eq(1L), anyMap());
-	    verifyNoMoreInteractions(service);
+	@Test
+	public void buscaPorEmail_sucessoPaginaCheia_comParametro_retorno200() throws Exception{
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		List<ClienteResponseDTO> lista = List.of(cliente1);
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.buscarPorEmail("marcus@gmail.com", 0, 1)).thenReturn(page);
+		
+		mvc.perform(get("/buscaemail?email=marcus@gmail.com&pagina=0&itens=1"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].id").value(1L))
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content.length()").value(1));
+		
+		verify(service).buscarPorEmail("marcus@gmail.com", 0, 1);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void buscaPorEmail_sucessoPaginaCheia_semParametroNoPage_retorno200() throws Exception{
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		List<ClienteResponseDTO> lista = List.of(cliente1);
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.buscarPorEmail("marcus@gmail.com", 0, 3)).thenReturn(page);
+		
+		mvc.perform(get("/buscaemail?email=marcus@gmail.com"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].id").value(1L))
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content.length()").value(1));
+		
+		verify(service).buscarPorEmail("marcus@gmail.com", 0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void buscaPorEmail_sucessoPaginaVazia_retorno200() throws Exception{
+		List<ClienteResponseDTO> lista = List.of();
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.buscarPorEmail(null, 0, 3)).thenReturn(page);
+		
+		mvc.perform(get("/buscaemail")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.length()").value(0));
+		
+		verify(service).buscarPorEmail(null, 0, 3);
+		verifyNoMoreInteractions(service);	
 	}
 	
 	@Configuration

@@ -160,6 +160,7 @@ public class ClienteService {
 
 	}
 	
+	/*Páginas podem ser retornadas vazias.*/
 	public Page<ClienteResponseDTO> buscarPorEmail(String email, int pagina, int itens){
 		if(pagina < 0 || itens <1) {
 			throw new 
@@ -173,7 +174,6 @@ public class ClienteService {
 		if(!email.matches(regexEmail)) {
 			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
-		
 		
 		PageRequest pageable = PageRequest.of(pagina, itens);
 		Page<Cliente> page = repository.findByEmail(email, pageable);
@@ -228,7 +228,6 @@ public class ClienteService {
 		return new ClienteResponseDTO(cliente);
 	}
 	
-	/*Refatorando*/
 	public Page<ClienteResponseDTO> 
 	buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
 		
