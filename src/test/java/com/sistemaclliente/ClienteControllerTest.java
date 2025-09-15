@@ -839,8 +839,9 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	
 	@Test
-	public void atualizarParcial_presencaDoCpf_retorno400() throws Exception{
+	public void atualizarParcial_presencaDoCpf_retorno409() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("cpf", "23501206586");
 		
@@ -855,6 +856,25 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = " ")
+	public void atualizarParcial_nomeNuloVazio_retorno400(String nome) throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", nome);
+		
+		when(service.atualizarParcial(eq(1L) ,anyMap()))
+		.thenThrow(new IllegalArgumentException("O nome não pode ser vazio ou nulo."));
+		
+		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O nome não pode ser vazio ou nulo."));
+		
+		verify(service).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+	}
+	
+	/*juntar*/
 	@Test
 	public void atualizarParcial_nomeVazio_retorno400() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
@@ -870,7 +890,8 @@ public class ClienteControllerTest {
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
 	}
-
+	
+	/*juntar*/
 	@Test
 	public void atualizarParcial_nomeNulo_retorno400() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
@@ -887,43 +908,10 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
-	public void atualizarParcial_emailNulo_retorno400() throws Exception{
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("email", null);
-		
-		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new IllegalArgumentException("O email não pode ser nulo."));
-		
-		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("O email não pode ser nulo."));
-		
-		verify(service).atualizarParcial(eq(1L), anyMap());
-		verifyNoMoreInteractions(service);
-	}
-	
-	@Test
-	public void atualizarParcial_emailVazio_retorno400() throws Exception{
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("email", "");
-		
-		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new IllegalArgumentException("O email não pode ser vazio."));
-		
-		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("O email não pode ser vazio."));
-		
-		verify(service).atualizarParcial(eq(1L), anyMap());
-		verifyNoMoreInteractions(service);
-		
-	}
-	
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" "})
-	public void atualizarParcial_email_retorno400(String email) throws Exception{
+	public void atualizarParcial_emailInvalido_retorno400(String email) throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("email", email);
 		
@@ -933,23 +921,6 @@ public class ClienteControllerTest {
 		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
 		.andExpect(content().string("O email não pode ser vazio."));
-		
-		verify(service).atualizarParcial(eq(1L), anyMap());
-		verifyNoMoreInteractions(service);
-		
-	}
-	
-	@Test
-	public void atualizarParcial_emailFormatoInvalido_retorno400() throws Exception{
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("email", "marcus@marcus@marcus");
-		
-		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
-		
-		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("Formato inválido do e-mail."));
 		
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
