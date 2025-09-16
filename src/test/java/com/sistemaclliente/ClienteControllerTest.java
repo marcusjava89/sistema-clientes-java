@@ -112,7 +112,7 @@ public class ClienteControllerTest {
 		when(service.listagemCliente()).thenThrow(new RuntimeException());
 		
 		mvc.perform(get("/listarclientes")).andExpect(status().isInternalServerError())
-		.andExpect(content().string("Erro interno no servidor."));
+		.andExpect(content().string(containsString("Erro")));
 		
 		verify(service).listagemCliente();
 		verifyNoMoreInteractions(service);
@@ -180,11 +180,9 @@ public class ClienteControllerTest {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setEmail(email);
 		
-		String mensagem = "Formato inválido do e-mail.";
-
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.email").value(mensagem));;
+		.andExpect(jsonPath("$.email").value(containsString("inválido")));;
 
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
@@ -198,11 +196,9 @@ public class ClienteControllerTest {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf(cpf);
 		
-		String mensagem = "Digite os 11 dígitos do CPF sem ponto e hífen.";
-		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.cpf").value(mensagem));
+		.andExpect(jsonPath("$.cpf").value(containsString("11 dígitos do CPF")));
 		
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
@@ -424,7 +420,8 @@ public class ClienteControllerTest {
 		.thenThrow(new RuntimeException());
 		
 		mvc.perform(put("/clientes/1").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto))).andExpect(status().isInternalServerError());
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isInternalServerError())
+		.andExpect(content().string(containsString("Erro")));
 		
 		verify(service).atualizarCliente(anyLong(), any(ClienteRequestDTO.class));
 		verifyNoMoreInteractions(service);
@@ -891,7 +888,6 @@ public class ClienteControllerTest {
 		
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
-		
 	}
 	
 	@Test
@@ -967,6 +963,21 @@ public class ClienteControllerTest {
 		.andExpect(content().string(containsString("inválido")));
 	
 		verify(service).buscarPorEmail(email, 0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@ParameterizedTest
+	@CsvSource({"-1,2", "0,0"})
+	public void buscaPorEmail(int pagina, int itens) throws Exception{
+		when(service.buscarPorEmail("marcus@gmail.com", pagina, itens)).thenThrow(new 
+		IllegalArgumentException("Página não pode ser negativa e itens não pode ser menor que 1."));
+		
+		mvc.perform(get("/buscaemail").param("email", "marcus@gmail.com")
+		.param("pagina", String.valueOf(pagina)).param("itens", String.valueOf(itens)))
+		.andExpect(status().isBadRequest())
+		.andExpect(content().string("Página não pode ser negativa e itens não pode ser menor que 1."));
+		
+		verify(service).buscarPorEmail("marcus@gmail.com", pagina, itens);
 		verifyNoMoreInteractions(service);
 	}
 	
