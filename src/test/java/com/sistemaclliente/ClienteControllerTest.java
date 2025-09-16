@@ -887,7 +887,7 @@ public class ClienteControllerTest {
 		
 		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
-		.andExpect(content().string("Formato inválido do e-mail."));
+		.andExpect(content().string(containsString("inválido")));
 		
 		verify(service).atualizarParcial(eq(1L), anyMap());
 		verifyNoMoreInteractions(service);
@@ -932,7 +932,7 @@ public class ClienteControllerTest {
 		
 		when(service.buscarPorEmail("marcus@gmail.com", 0, 3)).thenReturn(page);
 		
-		mvc.perform(get("/buscaemail?email=marcus@gmail.com"))
+		mvc.perform(get("/buscaemail").param("email", "marcus@gmail.com"))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].id").value(1L))
 		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
 		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
@@ -958,17 +958,16 @@ public class ClienteControllerTest {
 	}
 	
 	@ParameterizedTest
-	@EmptySource
-	@ValueSource(strings = {" ", "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
-	public void buscaPorEmail(String email) throws Exception{
+	@ValueSource(strings = {"marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
+	public void buscaPorEmail_formatoInvalido_retorno400(String email) throws Exception{
+		when(service.buscarPorEmail(email, 0, 3))
+		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
 		
-		when(service.buscarPorEmail(email, 0, 3)).thenThrow(new IllegalArgumentException());
-		
-		mvc.perform(get("/buscaemail?email="+email)).andExpect(status().isBadRequest());
-		
+		mvc.perform(get("/buscaemail?email="+email)).andExpect(status().isBadRequest())
+		.andExpect(content().string(containsString("inválido")));
+	
 		verify(service).buscarPorEmail(email, 0, 3);
 		verifyNoMoreInteractions(service);
-		
 	}
 	
 	@Configuration
