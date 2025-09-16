@@ -895,7 +895,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void buscaPorEmail_sucessoPaginaCheia_comParametro_retorno200() throws Exception{
+	public void buscaPorEmail_sucessoPaginaCheia_comParametros_retorno200() throws Exception{
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -919,7 +919,8 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void buscaPorEmail_sucessoPaginaCheia_semParametroNoPage_retorno200() throws Exception{
+	public void buscaPorEmail_sucessoPaginaCheia_semParametros_retorno200() throws Exception{
+		/*Sem parämetro de página e itens.*/
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -954,6 +955,20 @@ public class ClienteControllerTest {
 		
 		verify(service).buscarPorEmail(null, 0, 3);
 		verifyNoMoreInteractions(service);	
+	}
+	
+	@ParameterizedTest
+	@EmptySource
+	@ValueSource(strings = {" ", "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
+	public void buscaPorEmail(String email) throws Exception{
+		
+		when(service.buscarPorEmail(email, 0, 3)).thenThrow(new IllegalArgumentException());
+		
+		mvc.perform(get("/buscaemail?email="+email)).andExpect(status().isBadRequest());
+		
+		verify(service).buscarPorEmail(email, 0, 3);
+		verifyNoMoreInteractions(service);
+		
 	}
 	
 	@Configuration
