@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -891,6 +892,18 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	public void atualizarParcial_verboIncorreto_retorno405() throws Exception{
+		Map<String, Object> updates = new HashMap<>();
+		mvc.perform(get("/parcial/1").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isMethodNotAllowed())
+		.andExpect(header().string("Allow", "PATCH"));
+		
+		verify(service, never()).atualizarParcial(eq(1L), anyMap());
+		verifyNoMoreInteractions(service);
+		
+	}
+	
+	@Test
 	public void buscaPorEmail_sucessoPaginaCheia_comParametros_retorno200() throws Exception{
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
@@ -944,12 +957,12 @@ public class ClienteControllerTest {
 		List<ClienteResponseDTO> lista = List.of();
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
-		when(service.buscarPorEmail(null, 0, 3)).thenReturn(page);
+		when(service.buscarPorEmail("marcus@gmail.com", 0, 3)).thenReturn(page);
 		
-		mvc.perform(get("/buscaemail")).andExpect(status().isOk())
+		mvc.perform(get("/buscaemail?email=marcus@gmail.com")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(0));
 		
-		verify(service).buscarPorEmail(null, 0, 3);
+		verify(service).buscarPorEmail("marcus@gmail.com", 0, 3);
 		verifyNoMoreInteractions(service);	
 	}
 	
