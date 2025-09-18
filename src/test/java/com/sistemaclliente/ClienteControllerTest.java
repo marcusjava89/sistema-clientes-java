@@ -1001,6 +1001,18 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void buscaPorEmail_erroDeServidor_retorno500() throws Exception {
+		when(service.buscarPorEmail("marcus@gmail.com", 0, 3)).thenThrow(new RuntimeException());
+		
+		mvc.perform(get("/buscaemail").param("email", "marcus@gmail.com"))
+		.andExpect(status().isInternalServerError())
+		.andExpect(content().string(containsString("Erro")));
+		
+		verify(service).buscarPorEmail("marcus@gmail.com", 0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
