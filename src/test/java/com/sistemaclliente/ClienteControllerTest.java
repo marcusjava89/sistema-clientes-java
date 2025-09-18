@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -899,8 +898,7 @@ public class ClienteControllerTest {
 		.andExpect(header().string("Allow", "PATCH"));
 		
 		verify(service, never()).atualizarParcial(eq(1L), anyMap());
-		verifyNoMoreInteractions(service);
-		
+		verifyNoMoreInteractions(service);	
 	}
 	
 	@Test
@@ -981,7 +979,7 @@ public class ClienteControllerTest {
 	
 	@ParameterizedTest
 	@CsvSource({"-1,2", "0,0"})
-	public void buscaPorEmail(int pagina, int itens) throws Exception{
+	public void buscaPorEmail_paginaItensInvalidos_retorno400(int pagina, int itens) throws Exception{
 		when(service.buscarPorEmail("marcus@gmail.com", pagina, itens)).thenThrow(new 
 		IllegalArgumentException("Página não pode ser negativa e itens não pode ser menor que 1."));
 		
@@ -991,6 +989,15 @@ public class ClienteControllerTest {
 		.andExpect(content().string("Página não pode ser negativa e itens não pode ser menor que 1."));
 		
 		verify(service).buscarPorEmail("marcus@gmail.com", pagina, itens);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void buscaPorEmail_verboIncorreto_rettorno405() throws Exception{
+		mvc.perform(delete("/buscaemail").param("email", "marcus@gmail.com"))
+		.andExpect(status().isMethodNotAllowed()).andExpect(header().string("Allow", "GET"));
+		
+		verify(service, never()).buscarPorEmail("marcus@gmail.com", 0, 3);
 		verifyNoMoreInteractions(service);
 	}
 	
