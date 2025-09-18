@@ -192,38 +192,6 @@ public class ClienteService {
 		return new ClienteResponseDTO(clienteAtualizado);
 	}
 	
-	public ClienteResponseDTO atualizarNomeEmailParcial(Long id, Map<String, Object> updates) {
-		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
-		
-		if(updates.containsKey("id") || updates.containsKey("cpf")) {
-			throw new IllegalArgumentException("Id e CPF, não será mudados aqui.");
-		}
-		
-		if(updates.containsKey("nome")) {
-			Object nome = updates.get("nome");
-			
-			if(nome == null || nome.toString().isBlank()) {
-				throw new IllegalArgumentException("Nome não pode ser vazio.");
-			}
-			cliente.setNome(nome.toString());
-		}
-		
-		if(updates.containsKey("email")) {
-			Object email = updates.get("email");
-			if(email == null || email.toString().isBlank()) {
-				throw new IllegalArgumentException("E-mail não pode ser vazio.");
-			}
-			
-			if(!email.toString().matches(regexEmail)) {
-				throw new IllegalArgumentException("O formato do e-mail não é válido.");
-			}
-			cliente.setEmail(email.toString());
-			
-		}
-		repository.saveAndFlush(cliente);
-		return new ClienteResponseDTO(cliente);
-	}
-	
 	public Page<ClienteResponseDTO> 
 	buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
 		

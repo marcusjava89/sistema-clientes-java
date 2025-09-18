@@ -159,7 +159,8 @@ public class ClienteServiceTest {
 	public void testarBuscarClientePorId_naoEncontrarCliente() {
 		when(repository.findById(3L)).thenReturn(Optional.empty());
 		
-		ClienteNotFoundException ex = assertThrows(ClienteNotFoundException.class, ()-> service.buscarClientePorId(3L));
+		ClienteNotFoundException ex = 
+		assertThrows(ClienteNotFoundException.class, ()-> service.buscarClientePorId(3L));
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 3 não encontrado.");
 		verify(repository).findById(3L);
 		verifyNoMoreInteractions(repository);
@@ -185,7 +186,8 @@ public class ClienteServiceTest {
 	@Test
 	public void testarDeletarClientePor_naoEncontrarCliente() {
 		when(repository.findById(1L)).thenReturn(Optional.empty());
-		ClienteNotFoundException ex = assertThrows(ClienteNotFoundException.class, () -> service.deletarClientePorId(1L));
+		ClienteNotFoundException ex = 
+		assertThrows(ClienteNotFoundException.class, () -> service.deletarClientePorId(1L));
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 1 não encontrado.");
 		verify(repository).findById(1L);
 		verify(repository, never()).delete(any(Cliente.class));
@@ -206,7 +208,8 @@ public class ClienteServiceTest {
 		dto.setCpf(cliente1.getCpf());
 	
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
-		when(repository.saveAndFlush(any(Cliente.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		when(repository.saveAndFlush(any(Cliente.class)))
+		.thenAnswer(invocation -> invocation.getArgument(0));
 		
 		ClienteResponseDTO response = service.atualizarCliente(1L, dto);
 		
@@ -251,7 +254,8 @@ public class ClienteServiceTest {
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
-		AlteracaoDeCpfException ex = assertThrows(AlteracaoDeCpfException.class, () -> service.atualizarCliente(1L, dto));
+		AlteracaoDeCpfException ex = assertThrows(AlteracaoDeCpfException.class, 
+				() -> service.atualizarCliente(1L, dto));
 		
 		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
 		verify(repository).findById(1L);
@@ -314,7 +318,8 @@ public class ClienteServiceTest {
 		
 		assertThat(page).isNotNull();
 		assertThat(page.getContent()).hasSize(2);		
-		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf).containsExactly("12345678", "87654321");
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf)
+		.containsExactly("12345678", "87654321");
 
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Antônio");
@@ -348,7 +353,8 @@ public class ClienteServiceTest {
 		
 		assertThat(page).isNotNull();
 		assertThat(page.getContent()).hasSize(2);
-		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf).containsExactly("12345678", "87654321");
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf)
+		.containsExactly("12345678", "87654321");
 
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Antônio");
@@ -382,7 +388,8 @@ public class ClienteServiceTest {
 		
 		assertThat(page).isNotNull();
 		assertThat(page.getContent()).hasSize(2);
-		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf).containsExactly("12345678", "87654321");
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf)
+		.containsExactly("12345678", "87654321");
 
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus Antônio");
@@ -393,7 +400,8 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException, JsonMappingException{
+	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException, 
+	JsonMappingException{
 		when(repository.findById(99L)).thenReturn(Optional.empty());
 		Map<String, Object> updates = Map.of("nome", "Marcus");
 		ClienteNotFoundException ex = 

@@ -101,7 +101,6 @@ public class ClienteController {
 		return ResponseEntity.ok(response);
 	}
 	
-	/*testando*/
 	@GetMapping(value = "/buscaemail")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscaPorEmail
 	(@RequestParam(required = false) String email, @RequestParam(defaultValue = "0") int pagina, 
@@ -109,18 +108,11 @@ public class ClienteController {
 		Page<ClienteResponseDTO> page = service.buscarPorEmail(email, pagina, itens);
 		return ResponseEntity.ok(page);
 	}
-	
+	/*testando*/
 	@PatchMapping(value = "/clientes/{id}/email")
 	public ResponseEntity<ClienteResponseDTO> 
 	atualizarEmail(@PathVariable Long id,@RequestParam String email){
 		ClienteResponseDTO response= service.atualizarEmail(id, email);
-		return ResponseEntity.ok(response);
-	}
-	
-	@PatchMapping(value = "/nomeemailparcial/{id}")
-	public ResponseEntity<ClienteResponseDTO> atualizarNomeEmailParcial(@PathVariable Long id, 
-	@RequestBody Map<String, Object> updates){
-		ClienteResponseDTO response = service.atualizarNomeEmailParcial(id, updates);
 		return ResponseEntity.ok(response);
 	}
 	
