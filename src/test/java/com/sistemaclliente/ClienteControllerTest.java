@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.commons.annotation.Testable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Configuration;
@@ -964,6 +965,16 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
+	@Test
+	public void buscaPorEmail_emailNulo_retorno400() throws Exception{
+		when(service.buscarPorEmail(null, 0, 3)).thenThrow(new IllegalArgumentException());
+		
+		mvc.perform(get("/buscaemail")).andExpect(status().isBadRequest());
+		
+		verify(service).buscarPorEmail(null, 0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
 	@ParameterizedTest
 	@ValueSource(strings = {"marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
 	public void buscaPorEmail_formatoInvalido_retorno400(String email) throws Exception{
@@ -1041,6 +1052,16 @@ public class ClienteControllerTest {
 		.andExpect(content().string(containsString("inválido")));
 		
 		verify(service).atualizarEmail(1L, email);	
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarEmail_emailNulo_retorno400() throws Exception{
+		when(service.atualizarEmail(1L, null)).thenThrow(new IllegalArgumentException());
+		
+		mvc.perform(patch("/atualizaremail/1")).andExpect(status().isBadRequest());
+		
+		verify(service, never()).atualizarEmail(1L, null);	
 		verifyNoMoreInteractions(service);
 	}
 	
