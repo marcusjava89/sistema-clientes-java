@@ -109,9 +109,9 @@ public class ClienteController {
 		return ResponseEntity.ok(page);
 	}
 	/*testando*/
-	@PatchMapping(value = "/clientes/{id}/email")
+	@PatchMapping(value = "/atualizaremail/{id}")
 	public ResponseEntity<ClienteResponseDTO> 
-	atualizarEmail(@PathVariable Long id,@RequestParam String email){
+	atualizarEmail(@PathVariable Long id, @RequestParam String email){
 		ClienteResponseDTO response= service.atualizarEmail(id, email);
 		return ResponseEntity.ok(response);
 	}

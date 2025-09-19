@@ -180,7 +180,7 @@ public class ClienteService {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 		
 		if(email == null || email.isBlank()) {
-			throw new IllegalArgumentException("E-mail não pode ser vazio.");
+			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
 
 		if(!email.matches(regexEmail)) {
@@ -201,7 +201,7 @@ public class ClienteService {
 		}
 		
 		if(email == null || email.trim().isBlank()) {
-			throw new IllegalArgumentException("E-mail não pode ser vazio.");
+			throw new IllegalArgumentException("Formato inválido do e-mail.");
 		}
 		
 		if(ordenadoPor == null || ordenadoPor.trim().isBlank()) {

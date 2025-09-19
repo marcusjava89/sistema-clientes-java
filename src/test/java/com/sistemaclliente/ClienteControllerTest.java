@@ -927,7 +927,7 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void buscaPorEmail_sucessoPaginaCheia_semParametros_retorno200() throws Exception{
-		/*Sem parämetro de página e itens.*/
+		/*Sem parâmetro de página e itens.*/
 		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -1010,6 +1010,37 @@ public class ClienteControllerTest {
 		.andExpect(content().string(containsString("Erro")));
 		
 		verify(service).buscarPorEmail("marcus@gmail.com", 0, 3);
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void atualizarEmail_sucesso_retorno200() throws Exception{
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		
+		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenReturn(cliente1);
+		
+		mvc.perform(patch("/atualizaremail/1").param("email", "marcus@gmail.com"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.nome").value("Marcus"));
+		
+		verify(service).atualizarEmail(1L, "marcus@gmail.com");
+		verifyNoMoreInteractions(service);	
+	}
+	
+	@ParameterizedTest
+	@EmptySource
+	@ValueSource(strings = {" ", "mar", "mar@mar@", "mar.com"})
+	public void atualizarEmail_emailInvalido_retorno400(String email) throws Exception{
+		when(service.atualizarEmail(1L, email))
+		.thenThrow(new IllegalArgumentException("Formato do e-mail inválido."));
+		
+		mvc.perform(patch("/atualizaremail/1?email="+email)).andExpect(status().isBadRequest())
+		.andExpect(content().string(containsString("inválido")));
+		
+		verify(service).atualizarEmail(1L, email);	
 		verifyNoMoreInteractions(service);
 	}
 	
