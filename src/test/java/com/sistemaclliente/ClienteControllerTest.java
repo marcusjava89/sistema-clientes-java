@@ -1057,13 +1057,17 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void atualizarEmail_emailNulo_retorno400() throws Exception{
-		when(service.atualizarEmail(1L, null)).thenThrow(new IllegalArgumentException());
+		when(service.atualizarEmail(1L, null))
+		.thenThrow(new IllegalArgumentException("Formato do e-mail inválido."));
 		
-		mvc.perform(patch("/atualizaremail/1")).andExpect(status().isBadRequest());
+		mvc.perform(patch("/atualizaremail/1")).andExpect(status().isBadRequest())
+		.andExpect(content().string(containsString("inválido")));
 		
 		verify(service, never()).atualizarEmail(1L, null);	
 		verifyNoMoreInteractions(service);
 	}
+	
+	
 	
 	@Configuration
 	@Import(ClienteController.class)
