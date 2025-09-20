@@ -166,8 +166,8 @@ public class ClienteService {
 			throw new 
 			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
 		}
-		
-		if(email == null || email.isBlank()) {
+		/*Podemos receber e-mail em branco e retorno a página vazia.*/
+		if(email == null) {
 			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
 		

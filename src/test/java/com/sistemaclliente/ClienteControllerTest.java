@@ -29,6 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.annotation.Testable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -600,7 +601,7 @@ public class ClienteControllerTest {
 		
 		when(service.listaPaginadaPorOrdenacao(0, 3, "nome")).thenReturn(page);
 		
-		mvc.perform(get("/paginadaordem")).andExpect(status().isOk())
+		mvc.perform(get("/paginadaordem").param("ordenadoPor", "nome")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
 		.andExpect(jsonPath("$.content[1].nome").value("Antonio"))
 		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
@@ -763,13 +764,13 @@ public class ClienteControllerTest {
 	}
 
 	@ParameterizedTest
-	@EmptySource
+	@NullAndEmptySource
 	@ValueSource(strings = " ")
 	public void buscarPorNomePagina_nomeInvalido_retorno400(String nome) throws Exception{
 		when(service.buscarPorNome(nome, 0, 2)).thenThrow(new 
 		IllegalArgumentException("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
 		
-		mvc.perform(get("/buscapornome?nome="+nome+"&pagina=0&itens=2"))
+		mvc.perform(get("/buscapornome?pagina=0&itens=2").param("nome", nome))
 		.andExpect(status().isBadRequest()).andExpect(content()
 		.string("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
 		
@@ -876,7 +877,7 @@ public class ClienteControllerTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
-	public void atualizarParcial_emailNuloVazioInvalido_retorno400(String email) throws Exception{
+	public void atualizarParcial_emailInvalido_retorno400(String email) throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("email", email);
 		
@@ -965,23 +966,14 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
-	@Test
-	public void buscaPorEmail_emailNulo_retorno400() throws Exception{
-		when(service.buscarPorEmail(null, 0, 3)).thenThrow(new IllegalArgumentException());
-		
-		mvc.perform(get("/buscaemail")).andExpect(status().isBadRequest());
-		
-		verify(service).buscarPorEmail(null, 0, 3);
-		verifyNoMoreInteractions(service);
-	}
-	
 	@ParameterizedTest
+	@NullSource
 	@ValueSource(strings = {"marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
 	public void buscaPorEmail_formatoInvalido_retorno400(String email) throws Exception{
 		when(service.buscarPorEmail(email, 0, 3))
 		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
 		
-		mvc.perform(get("/buscaemail?email="+email)).andExpect(status().isBadRequest())
+		mvc.perform(get("/buscaemail").param("email", email)).andExpect(status().isBadRequest())
 		.andExpect(content().string(containsString("inválido")));
 	
 		verify(service).buscarPorEmail(email, 0, 3);
@@ -1042,32 +1034,18 @@ public class ClienteControllerTest {
 	}
 	
 	@ParameterizedTest
-	@EmptySource
+	@NullAndEmptySource
 	@ValueSource(strings = {" ", "mar", "mar@mar@", "mar.com"})
 	public void atualizarEmail_emailInvalido_retorno400(String email) throws Exception{
 		when(service.atualizarEmail(1L, email))
 		.thenThrow(new IllegalArgumentException("Formato do e-mail inválido."));
 		
-		mvc.perform(patch("/atualizaremail/1?email="+email)).andExpect(status().isBadRequest())
+		mvc.perform(patch("/atualizaremail/1").param("email", email)).andExpect(status().isBadRequest())
 		.andExpect(content().string(containsString("inválido")));
 		
 		verify(service).atualizarEmail(1L, email);	
 		verifyNoMoreInteractions(service);
 	}
-	
-	@Test
-	public void atualizarEmail_emailNulo_retorno400() throws Exception{
-		when(service.atualizarEmail(1L, null))
-		.thenThrow(new IllegalArgumentException("Formato do e-mail inválido."));
-		
-		mvc.perform(patch("/atualizaremail/1")).andExpect(status().isBadRequest())
-		.andExpect(content().string(containsString("inválido")));
-		
-		verify(service, never()).atualizarEmail(1L, null);	
-		verifyNoMoreInteractions(service);
-	}
-	
-	
 	
 	@Configuration
 	@Import(ClienteController.class)
