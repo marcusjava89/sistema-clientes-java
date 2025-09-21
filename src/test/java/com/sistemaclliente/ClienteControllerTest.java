@@ -157,7 +157,6 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	/*Testa nomes vazio, nulo, menos de 3 e mais de 60 caracteres, espaço em branco.*/
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
@@ -190,7 +189,6 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	/*Testa CPF's vazio, nulo e inválidos.*/
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
@@ -1046,6 +1044,18 @@ public class ClienteControllerTest {
 		verify(service).atualizarEmail(1L, email);	
 		verifyNoMoreInteractions(service);
 	}
+	
+	@Test
+	public void atualizarEmail_naoEncontrado_retorno404() throws Exception{
+		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenThrow(new ClienteNotFoundException());
+		
+		mvc.perform(patch("/atualizaremail/1").param("email", "marcus@gmail.com"))
+		.andExpect(status().isNotFound()).andExpect(content().string(containsString("não encontrado")));
+		
+		verify(service).atualizarEmail(1L, "marcus@gmail.com");	
+		verifyNoMoreInteractions(service);
+	}
+	
 	
 	@Configuration
 	@Import(ClienteController.class)
