@@ -59,4 +59,9 @@ public class ValidationExceptionHandler {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno no servidor.");
 	}
 	
+	@ExceptionHandler(EmailJaCadastradoException.class)
+	public ResponseEntity<String> handlerEmailJaCadastradoException(EmailJaCadastradoException ex){
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+	}
+	
 }

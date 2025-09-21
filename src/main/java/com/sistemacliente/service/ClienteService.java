@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
+import com.sistemacliente.exception.EmailJaCadastradoException;
 import com.sistemacliente.model.Cliente;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
@@ -189,6 +190,10 @@ public class ClienteService {
 
 		if(!email.matches(regexEmail)) {
 			throw new IllegalArgumentException("Formato do e-mail inválido.");
+		}
+		
+		if(repository.findByEmail(email).isPresent()) {
+			throw new EmailJaCadastradoException();
 		}
 		
 		cliente.setEmail(email);

@@ -1075,7 +1075,6 @@ public class ClienteControllerTest {
 		
 		verify(service).atualizarEmail(1L, "marcus@gmail.com");	
 		verifyNoMoreInteractions(service);
-
 	}
 
 	@Configuration
