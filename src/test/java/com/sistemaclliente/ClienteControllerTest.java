@@ -1056,6 +1056,14 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void atualizarEmail_verboIncorreto_retorno405() throws Exception{
+		mvc.perform(delete("/atualizaremail/1").param("email", "marcus@gmail.com"))
+		.andExpect(status().isMethodNotAllowed()).andExpect(header().string("Allow", "PATCH"));
+		
+		verify(service, never()).atualizarEmail(1L, "marcus@gmail.com");	
+		verifyNoMoreInteractions(service);
+	}
 	
 	@Configuration
 	@Import(ClienteController.class)
