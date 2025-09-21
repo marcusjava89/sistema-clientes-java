@@ -47,6 +47,7 @@ import com.sistemacliente.controller.ClienteController;
 import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
+import com.sistemacliente.exception.EmailJaCadastradoException;
 import com.sistemacliente.exception.ValidationExceptionHandler;
 import com.sistemacliente.model.Cliente;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
@@ -1066,6 +1067,17 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	public void atualizarEmail_emailExistente_retorno409() throws Exception{
+		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenThrow(new EmailJaCadastradoException());
+		
+		mvc.perform(patch("/atualizaremail/1").param("email", "marcus@gmail.com"))
+		.andExpect(status().isConflict()).andExpect(content().string(containsString("indisponível")));
+		
+		verify(service).atualizarEmail(1L, "marcus@gmail.com");	
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
 	public void atualizarEmail_erroDeServidor_retorno500() throws Exception{
 		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenThrow(new RuntimeException());
 		
@@ -1076,6 +1088,7 @@ public class ClienteControllerTest {
 		verify(service).atualizarEmail(1L, "marcus@gmail.com");	
 		verifyNoMoreInteractions(service);
 	}
+	
 
 	@Configuration
 	@Import(ClienteController.class)
