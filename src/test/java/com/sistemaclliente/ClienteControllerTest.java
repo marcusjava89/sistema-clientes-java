@@ -1065,6 +1065,19 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void atualizarEmail_erroDeServidor_retorno500() throws Exception{
+		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenThrow(new RuntimeException());
+		
+		mvc.perform(patch("/atualizaremail/1").param("email", "marcus@gmail.com"))
+		.andExpect(status().isInternalServerError())
+		.andExpect(content().string(containsString("Erro")));
+		
+		verify(service).atualizarEmail(1L, "marcus@gmail.com");	
+		verifyNoMoreInteractions(service);
+
+	}
+
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
