@@ -44,6 +44,10 @@ public class ClienteService {
 		if (repository.findByCpf(dto.getCpf()).isPresent()) { /*Garantia de CPF único.*/
 			throw new CpfJaCadastradoException(dto.getCpf());
 		}
+		
+		if (repository.findByEmail(dto.getEmail()).isPresent()) {
+			throw new EmailJaCadastradoException();
+		}
 
 		Cliente cliente = new Cliente(dto);
 		Cliente salvo = repository.save(cliente); 
@@ -68,6 +72,10 @@ public class ClienteService {
 		/*Garante a não mudança de CPF.*/
 		if (!clienteEncontrado.getCpf().equals(dto.getCpf())) {
 			throw new AlteracaoDeCpfException();
+		}
+		
+		if (repository.findByEmail(dto.getEmail()).isPresent()) {
+			throw new EmailJaCadastradoException();
 		}
 
 		clienteEncontrado.setNome(dto.getNome());
@@ -151,6 +159,10 @@ public class ClienteService {
 			
 			if(!email.toString().matches(regexEmail)) {
 				throw new IllegalArgumentException("O formato do email está incorreto.");
+			}
+			
+			if (repository.findByEmail(email.toString()).isPresent()) {
+				throw new EmailJaCadastradoException();
 			}
 		}
 		
