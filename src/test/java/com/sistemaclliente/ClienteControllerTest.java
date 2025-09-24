@@ -1089,6 +1089,50 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void buscarPorEmailOrdenada_sucessoPageCheia_retorno200() throws Exception {
+		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
+		cliente2.setId(2L);
+		cliente2.setNome("Marcus Antônio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("marcus@gmail.com");
+		
+		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id")).thenReturn(page);
+		
+		mvc.perform(get("/clientes/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].id").value(1L))
+		.andExpect(jsonPath("$.content[1].id").value(2L))
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"));
+		
+		verify(service).buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void buscarPorEmailOrdenada_sucessoPageVazia_retorno200() throws Exception {
+		List<ClienteResponseDTO> lista = List.of();
+		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
+		
+		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id")).thenReturn(page);
+		
+		mvc.perform(get("/clientes/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.content.length()").value(0));
+		
+		verify(service).buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
