@@ -1089,7 +1089,6 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
