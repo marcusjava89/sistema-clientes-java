@@ -225,6 +225,10 @@ public class ClienteService {
 			throw new IllegalArgumentException("Formato inválido do e-mail.");
 		}
 		
+		if(!email.matches(regexEmail)) {
+			throw new IllegalArgumentException("Formato do e-mail inválido.");
+		}
+		
 		if(ordenadoPor == null || ordenadoPor.trim().isBlank()) {
 			throw new IllegalArgumentException("Critério de ordenação não pode ser vazio.");
 		}
