@@ -1133,6 +1133,22 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@ParameterizedTest
+	@CsvSource({"-1,2", "0,0"})
+	public void buscarPorEmailOrdenada_paginaItensInvalidos_retorno400
+	(int pagina, int itens) throws Exception{
+		/*Página negativa e itens menor que 1.*/
+		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", pagina, itens, "id"))
+		.thenThrow(new IllegalArgumentException());
+		
+		mvc.perform(get("/clientes/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", String.valueOf(pagina)).param("itens", String.valueOf(itens))
+		.param("ordenadoPor", "id")).andExpect(status().isBadRequest());
+		
+		verify(service).buscaEmailPaginadaOrdenada("marcus@gmail.com", pagina, itens, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
