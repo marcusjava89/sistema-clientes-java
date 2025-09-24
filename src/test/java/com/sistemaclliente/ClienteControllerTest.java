@@ -1133,11 +1133,10 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@ParameterizedTest
+	@ParameterizedTest(name = "Página negativa e itens menor que 1.")
 	@CsvSource({"-1,2", "0,0"})
 	public void buscarPorEmailOrdenada_paginaItensInvalidos_retorno400
 	(int pagina, int itens) throws Exception{
-		/*Página negativa e itens menor que 1.*/
 		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", pagina, itens, "id"))
 		.thenThrow(new IllegalArgumentException());
 		
@@ -1146,6 +1145,21 @@ public class ClienteControllerTest {
 		.param("ordenadoPor", "id")).andExpect(status().isBadRequest());
 		
 		verify(service).buscaEmailPaginadaOrdenada("marcus@gmail.com", pagina, itens, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "marcus@marcus@", "marcus.com"})
+	public void buscarPorEmailOrdenada_emailInvalido_retorno400(String email) throws Exception{
+		when(service.buscaEmailPaginadaOrdenada(email, 0, 2, "id"))
+		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
+		
+		mvc.perform(get("/clientes/buscarporemail").param("email", email)
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isBadRequest()).andExpect(content().string(containsString("inválido")));
+		
+		verify(service).buscaEmailPaginadaOrdenada(email, 0, 2, "id");
 		verifyNoMoreInteractions(service);
 	}
 	
