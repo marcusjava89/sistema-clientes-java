@@ -1108,7 +1108,7 @@ public class ClienteControllerTest {
 		
 		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id")).thenReturn(page);
 		
-		mvc.perform(get("/clientes/buscarporemail").param("email", "marcus@gmail.com")
+		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
 		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].id").value(1L))
 		.andExpect(jsonPath("$.content[1].id").value(2L))
@@ -1125,7 +1125,7 @@ public class ClienteControllerTest {
 		
 		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id")).thenReturn(page);
 		
-		mvc.perform(get("/clientes/buscarporemail").param("email", "marcus@gmail.com")
+		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
 		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.content.length()").value(0));
 		
@@ -1140,7 +1140,7 @@ public class ClienteControllerTest {
 		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", pagina, itens, "id"))
 		.thenThrow(new IllegalArgumentException());
 		
-		mvc.perform(get("/clientes/buscarporemail").param("email", "marcus@gmail.com")
+		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
 		.param("pagina", String.valueOf(pagina)).param("itens", String.valueOf(itens))
 		.param("ordenadoPor", "id")).andExpect(status().isBadRequest());
 		
@@ -1155,11 +1155,21 @@ public class ClienteControllerTest {
 		when(service.buscaEmailPaginadaOrdenada(email, 0, 2, "id"))
 		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
 		
-		mvc.perform(get("/clientes/buscarporemail").param("email", email)
+		mvc.perform(get("/buscarporemail").param("email", email)
 		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
 		.andExpect(status().isBadRequest()).andExpect(content().string(containsString("inválido")));
 		
 		verify(service).buscaEmailPaginadaOrdenada(email, 0, 2, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test
+	public void buscarPorEmailOrdenada_verboIncorreto_retorno405() throws Exception{
+		mvc.perform(delete("/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isMethodNotAllowed()).andExpect(header().string("Allow", "GET"));
+		
+		verify(service, never()).buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id");
 		verifyNoMoreInteractions(service);
 	}
 	

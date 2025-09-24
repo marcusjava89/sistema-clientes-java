@@ -116,7 +116,7 @@ public class ClienteController {
 		return ResponseEntity.ok(response);
 	}
 	/*testando*/
-	@GetMapping(value = "/clientes/buscarporemail")
+	@GetMapping(value = "/buscarporemail")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorEmailOrdenada(
 	@RequestParam(required = false) String email, @RequestParam(defaultValue = "0") int pagina, 
 	@RequestParam(defaultValue = "3") int itens, @RequestParam(required = false) String ordenadoPor){
