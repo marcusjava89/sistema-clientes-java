@@ -1173,6 +1173,19 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	@Test
+	public void buscarPorEmailOrdenada_erroDeServidor_retorno500() throws Exception{
+		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id")).
+		thenThrow(new RuntimeException());
+		
+		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isInternalServerError());
+	
+		verify(service).buscaEmailPaginadaOrdenada("marcus@gmail.com", 0, 2, "id");
+		verifyNoMoreInteractions(service);
+	}
+	
 	@Configuration
 	@Import(ClienteController.class)
 	static class TestConfig {}
