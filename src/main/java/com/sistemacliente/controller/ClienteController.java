@@ -115,7 +115,7 @@ public class ClienteController {
 		ClienteResponseDTO response= service.atualizarEmail(id, email);
 		return ResponseEntity.ok(response);
 	}
-	/*testando*/
+	
 	@GetMapping(value = "/buscarporemail")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorEmailOrdenada(
 	@RequestParam(required = false) String email, @RequestParam(defaultValue = "0") int pagina, 

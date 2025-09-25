@@ -32,8 +32,7 @@ public class ClienteService {
 	private ObjectMapper mapper;
 	
 	/*Garantia que e-mail está no formato correto.*/
-	String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
-            "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+	String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
 	public List<ClienteResponseDTO> listagemCliente() {
 		List<Cliente> lista = repository.findAll();

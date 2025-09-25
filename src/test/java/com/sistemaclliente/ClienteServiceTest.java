@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.exception.AlteracaoDeCpfException;
 import com.sistemacliente.exception.ClienteNotFoundException;
 import com.sistemacliente.exception.CpfJaCadastradoException;
+import com.sistemacliente.exception.EmailJaCadastradoException;
 import com.sistemacliente.model.Cliente;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
@@ -53,7 +55,7 @@ public class ClienteServiceTest {
 	private ClienteService service;
 	
 	@Test
-	public void testarListagemCliente_retornarListaDTO() {
+	public void listagemCliente_retornarListaDTO() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -84,6 +86,21 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
+	public void listagemCliente_retornarListaVazia() {
+		List<Cliente> lista = List.of();	
+		when(repository.findAll()).thenReturn(lista);
+		
+		List<ClienteResponseDTO> response = service.listagemCliente();
+		
+		assertThat(response).isEmpty();
+		assertThat(response.size()).isEqualTo(0);
+		
+		verify(repository).findAll();
+		verifyNoMoreInteractions(repository);
+		
+	}
+	
+	@Test
 	public void testarSalvarCliente_retonarDTO() {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf("12345678");
@@ -103,8 +120,9 @@ public class ClienteServiceTest {
 		assertThat(response.getCpf()).isEqualTo("12345678");
 		assertThat(response.getNome()).isEqualTo("Marcus");
 		
-		verify(repository).save(any(Cliente.class));
 		verify(repository).findByCpf(dto.getCpf());
+		verify(repository).findByEmail(dto.getEmail());
+		verify(repository).save(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 		
 	}
@@ -126,10 +144,39 @@ public class ClienteServiceTest {
 		salvo.setId(2L); //id não é gerado automaticamente.
 		
 		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.of(cliente1)); /*Retorna existente.*/
+		
 		CpfJaCadastradoException ex = 
 		assertThrows(CpfJaCadastradoException.class, () -> service.salvarCliente(dto));
 		assertThat(ex.getMessage()).isEqualTo("O CPF 12345678 já está cadastrado.");
+		
 		verify(repository).findByCpf(dto.getCpf());
+		verify(repository, never()).save(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
+	public void salvarCliente_emailExistente() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Carlos");
+		cliente1.setEmail("carlos@email.com");
+		cliente1.setCpf("12345678789");
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setCpf("12345678254");
+		dto.setEmail("carlos@email.com");
+		dto.setNome("Marcus");
+		
+		when(repository.findByCpf("12345678254")).thenReturn(Optional.empty());
+		when(repository.findByEmail("carlos@email.com")).thenReturn(Optional.of(cliente1));
+		
+		EmailJaCadastradoException ex = assertThrows( EmailJaCadastradoException.class,
+		() -> service.salvarCliente(dto));
+		assertThat(ex.getMessage())
+		.isEqualTo("E-mail indisponível para uso, está sendo utilizado por outro cliente.");
+
+		verify(repository).findByCpf(dto.getCpf());
+		verify(repository).findByEmail("carlos@email.com");
 		verify(repository, never()).save(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 	}
@@ -201,12 +248,12 @@ public class ClienteServiceTest {
 		cliente1.setNome("Marcus");
 		cliente1.setEmail("marcus@email.com");
 		cliente1.setCpf("12345678");
-		
+        
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Carlos");
 		dto.setEmail("carlos@email.com");
 		dto.setCpf(cliente1.getCpf());
-	
+		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		when(repository.saveAndFlush(any(Cliente.class)))
 		.thenAnswer(invocation -> invocation.getArgument(0));
@@ -219,6 +266,7 @@ public class ClienteServiceTest {
 		assertThat(response.getEmail()).isEqualTo("carlos@email.com");
 		
 		verify(repository).findById(1L);
+		verify(repository).findByEmail("carlos@email.com");
 		verify(repository).saveAndFlush(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 	}
@@ -443,6 +491,7 @@ public class ClienteServiceTest {
 		assertThat(response.getId()).isEqualTo(1L);
 		
 		verify(repository).findById(1L);
+		verify(repository).findByEmail(updates.get("email").toString());
 		verify(repository).saveAndFlush(atualizado);
 		verify(mapper).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		verify(mapper).updateValue(cliente1, updates);
@@ -636,18 +685,18 @@ public class ClienteServiceTest {
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
 		
-		when(repository.findByEmailContainingIgnoreCase("mar", pageable))
+		when(repository.findByEmailContainingIgnoreCase("marcus@email.com", pageable))
 		.thenReturn(pageMock);
 		
 		Page<ClienteResponseDTO> page = 
-				service.buscaEmailPaginadaOrdenada("mar", 0, 2, "nome");
+		service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
 		
 		assertThat(page).isNotNull();
 		assertThat(page.getContent().size()).isEqualTo(2);
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus Antônio");
 		
-		verify(repository).findByEmailContainingIgnoreCase("mar", pageable);
+		verify(repository).findByEmailContainingIgnoreCase("marcus@email.com", pageable);
 		verifyNoMoreInteractions(repository);
 		
  	}
@@ -681,7 +730,7 @@ public class ClienteServiceTest {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
 				() -> service.buscaEmailPaginadaOrdenada(null, 0, 1, "nome"));
 		
-		assertThat(ex.getMessage()).isEqualTo("E-mail não pode ser vazio.");
+		assertThat(ex.getMessage()).isEqualTo("Formato inválido do e-mail.");
 		
 		verify(repository, never()).findByEmailContainingIgnoreCase(anyString(), any());
 		verifyNoMoreInteractions(repository);
@@ -692,7 +741,7 @@ public class ClienteServiceTest {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
 				() -> service.buscaEmailPaginadaOrdenada(" ", 0, 1, "nome"));
 		
-		assertThat(ex.getMessage()).isEqualTo("E-mail não pode ser vazio.");
+		assertThat(ex.getMessage()).isEqualTo("Formato inválido do e-mail.");
 		
 		verify(repository, never()).findByEmailContainingIgnoreCase(anyString(), any());
 		verifyNoMoreInteractions(repository);
