@@ -105,7 +105,7 @@ public class ClienteService {
 		Cliente cliente = repository.findByCpf(cpf).orElseThrow(() -> new ClienteNotFoundException(cpf));
 		return new ClienteResponseDTO(cliente);
 	}
-
+	/*testando*/
 	public Page<ClienteResponseDTO> listaPaginada(int pagina, int itens) {
 		if(pagina < 0 || itens <1) {
 			throw new 

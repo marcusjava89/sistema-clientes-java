@@ -305,6 +305,7 @@ public class ClienteServiceTest {
 				assertThrows(ClienteNotFoundException.class, () -> service.atualizarCliente(1L, dto));
 		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 1 não encontrado.");
+		
 		verify(repository).findById(1L);
 		verify(repository, never()).findByEmail("carlos@email.com");
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
@@ -330,8 +331,9 @@ public class ClienteServiceTest {
 				() -> service.atualizarCliente(1L, dto));
 		
 		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
+		
 		verify(repository).findById(1L);
-		verify(repository, never()).findByEmail("marcus@email.com");
+		verify(repository, never()).findByEmail("carlos@email.com");
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 	}
@@ -359,6 +361,7 @@ public class ClienteServiceTest {
 		assertThat(ex.getMessage()).isEqualTo("Formato inválido do e-mail.");
 		
 		verify(repository).findById(1L);
+		verify(repository).findByEmail(email);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 	}
@@ -388,10 +391,15 @@ public class ClienteServiceTest {
 		() -> service.atualizarCliente(1L, dto));
 		
 		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
+		
+		verify(repository).findById(1L);
+		verify(repository, never()).findByEmail("carlos@email.com");
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
-	public void testarEncontrarPorCpf_encontrarCliente() {
+	public void encontrarPorCpf_sucesso_encontrarCliente() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -412,11 +420,13 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarEncontrarPorCpf_naoEncontrarCliente() {
+	public void testarEncontrarPorCpf_fracasso_naoEncontrarCliente() {
 		when(repository.findByCpf("12345678")).thenReturn(Optional.empty());
+		
 		ClienteNotFoundException ex = 
 				assertThrows(ClienteNotFoundException.class, () -> service.encontrarPorCpf("12345678"));
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o CPF = "+"12345678"+" não encontrado.");
+		
 		verify(repository).findByCpf("12345678");
 		verifyNoMoreInteractions(repository);
 	}
