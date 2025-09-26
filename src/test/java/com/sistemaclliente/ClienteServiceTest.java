@@ -21,6 +21,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -97,11 +100,10 @@ public class ClienteServiceTest {
 		
 		verify(repository).findAll();
 		verifyNoMoreInteractions(repository);
-		
 	}
 	
 	@Test
-	public void testarSalvarCliente_retonarDTO() {
+	public void salvarCliente_retonarDTO() {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf("12345678");
 		dto.setEmail("marcus@email.com");
@@ -111,6 +113,7 @@ public class ClienteServiceTest {
 		salvo.setId(1L); //id não é gerado automaticamente.
 		
 		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.empty());
+		when(repository.findByEmail(dto.getEmail())).thenReturn(Optional.empty());
 		when(repository.save(any(Cliente.class))).thenReturn(salvo);
 		
 		ClienteResponseDTO response = service.salvarCliente(dto);
@@ -128,7 +131,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testaSalvarCliente_CpfJaExistente() {
+	public void salvarCliente_CpfJaExistente_retornarExcecao() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Carlos");
@@ -155,7 +158,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void salvarCliente_emailExistente() {
+	public void salvarCliente_emailExistente_retornarExcecao() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Carlos");
@@ -167,7 +170,6 @@ public class ClienteServiceTest {
 		dto.setEmail("carlos@email.com");
 		dto.setNome("Marcus");
 		
-		when(repository.findByCpf("12345678254")).thenReturn(Optional.empty());
 		when(repository.findByEmail("carlos@email.com")).thenReturn(Optional.of(cliente1));
 		
 		EmailJaCadastradoException ex = assertThrows( EmailJaCadastradoException.class,
@@ -181,8 +183,28 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "marcus.com"})
+	public void salvarCliente_emailInvalido_retornarExecexao(String email) {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setCpf("12345678254");
+		dto.setEmail(email);
+		dto.setNome("Marcus");
+		
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class
+		, () -> service.salvarCliente(dto));
+		
+		assertThat(ex.getMessage()).isEqualTo("Formato inválido do e-mail.");
+		
+		verify(repository).findByCpf(dto.getCpf());
+		verify(repository).findByEmail(email);
+		verify(repository, never()).save(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
+	}
+	
 	@Test
-	public void testarBuscarClientePorId_encontrarCliente() {
+	public void buscarClientePorId_sucesso_encontrarCliente() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -203,7 +225,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarBuscarClientePorId_naoEncontrarCliente() {
+	public void buscarClientePorId_fracasso_naoEncontrarCliente() {
 		when(repository.findById(3L)).thenReturn(Optional.empty());
 		
 		ClienteNotFoundException ex = 

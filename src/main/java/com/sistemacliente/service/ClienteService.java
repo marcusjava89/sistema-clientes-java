@@ -23,7 +23,8 @@ import com.sistemacliente.repository.ClienteRepository;
 
 @Service
 public class ClienteService {
-	
+	/*Por mais que certas verificações são feitas pelo Controller com o @Valid, faremos támbem as verifi-
+	 *cações aqui com mesnagens personalizadas pas os clientes.*/
 	
 	@Autowired
 	private ClienteRepository repository;
@@ -47,9 +48,17 @@ public class ClienteService {
 		if (repository.findByEmail(dto.getEmail()).isPresent()) {
 			throw new EmailJaCadastradoException();
 		}
+		
+		if(dto.getEmail() == null || dto.getEmail().isBlank()) {
+			throw new IllegalArgumentException("Formato inválido do e-mail.");
+		}
+		
+		if(!dto.getEmail().matches(regexEmail)) {
+			throw new IllegalArgumentException("Formato inválido do e-mail.");
+		}
 
 		Cliente cliente = new Cliente(dto);
-		Cliente salvo = repository.save(cliente); 
+		Cliente salvo = repository.save(cliente);
 		return new ClienteResponseDTO(salvo);
 	}
 
@@ -75,6 +84,14 @@ public class ClienteService {
 		
 		if (repository.findByEmail(dto.getEmail()).isPresent()) {
 			throw new EmailJaCadastradoException();
+		}
+		
+		if(!dto.getEmail().matches(regexEmail)) {
+			throw new IllegalArgumentException("Formato inválido do e-mail.");
+		}
+		
+		if(dto.getEmail() == null || dto.getEmail().isBlank()) {
+			throw new IllegalArgumentException("Formato inválido do e-mail.");
 		}
 
 		clienteEncontrado.setNome(dto.getNome());
@@ -228,7 +245,7 @@ public class ClienteService {
 			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
 		
-		if(ordenadoPor == null || ordenadoPor.trim().isBlank()) {
+		if(ordenadoPor == null || ordenadoPor.isBlank()) {
 			throw new IllegalArgumentException("Critério de ordenação não pode ser vazio.");
 		}
 		

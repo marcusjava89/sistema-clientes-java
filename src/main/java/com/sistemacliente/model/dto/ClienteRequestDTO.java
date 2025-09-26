@@ -10,6 +10,7 @@ public class ClienteRequestDTO {
 	
 	@NotBlank(message = "Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio.")
 	@Size(min = 3, max = 60, message = "Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio.")
+	@Column(name = "nome", nullable = false)
 	private String nome;
 	
 	@NotBlank(message = "Formato inválido do e-mail.")
@@ -19,6 +20,7 @@ public class ClienteRequestDTO {
 	
 	@NotBlank(message = "Digite os 11 dígitos do CPF sem ponto e hífen.")
 	@Pattern(regexp = "\\d{11}", message = "Digite os 11 dígitos do CPF sem ponto e hífen.")
+	@Column(name = "cpf", nullable = false, unique = true)
 	private String cpf;
 
 	public String getNome() {
