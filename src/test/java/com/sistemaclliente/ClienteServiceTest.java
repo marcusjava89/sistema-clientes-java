@@ -236,7 +236,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarDeletarClientePor_encontrarClienteDepoisDeletar() {
+	public void deletarClientePorId_sucesso_encontrarClienteDepoisDeletar() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -253,7 +253,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarDeletarClientePor_naoEncontrarCliente() {
+	public void deletarClientePor_fracasso_naoEncontrarCliente() {
 		when(repository.findById(1L)).thenReturn(Optional.empty());
 		ClienteNotFoundException ex = 
 		assertThrows(ClienteNotFoundException.class, () -> service.deletarClientePorId(1L));
@@ -264,7 +264,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarAltualizarCliente_encontrarRetornarDTO() {
+	public void atualizarCliente_sucesso_retornarDTO() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -294,7 +294,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarAltualizarCliente_naoEncontrarCliente() {
+	public void atualizarCliente_naoEncontrarCliente() {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Carlos");
 		dto.setEmail("carlos@email.com");
@@ -306,11 +306,13 @@ public class ClienteServiceTest {
 		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 1 não encontrado.");
 		verify(repository).findById(1L);
+		verify(repository, never()).findByEmail("carlos@email.com");
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
-	public void testarAtualizarCliente_alteraCPF() {
+	public void atualizarCliente_alterarCPF_retornaExcecao() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -329,8 +331,63 @@ public class ClienteServiceTest {
 		
 		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
 		verify(repository).findById(1L);
+		verify(repository, never()).findByEmail("marcus@email.com");
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
+	}
+	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "carlos.com"})
+	public void atualizarCliente_emailIvalido_retornaExcecao(String email) {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcu@email.com");
+		cliente1.setCpf("41526487563");
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Carlos");
+		dto.setEmail(email);
+		dto.setCpf("41526487563");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		()-> service.atualizarCliente(1L, dto));
+		
+		assertThat(ex.getMessage()).isEqualTo("Formato inválido do e-mail.");
+		
+		verify(repository).findById(1L);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
+	}
+
+	@Test
+	public void atualizarCliente_emailExistente_retornaExcecao() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("41526487563");
+		
+		Cliente cliente2 = new Cliente();
+		cliente1.setId(2L);
+		cliente1.setNome("Carlos Flávio");
+		cliente1.setEmail("carlos@email.com");
+		cliente1.setCpf("85462398745");
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Carlos Jorge");
+		dto.setEmail("carlos@email.com");
+		dto.setCpf("41526487563");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		AlteracaoDeCpfException ex = assertThrows(AlteracaoDeCpfException.class,
+		() -> service.atualizarCliente(1L, dto));
+		
+		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
 	}
 	
 	@Test

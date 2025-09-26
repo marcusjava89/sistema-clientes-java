@@ -77,20 +77,22 @@ public class ClienteService {
 	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO dto) {
 		Cliente clienteEncontrado = repository
 		.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
+		
 		/*Garante a não mudança de CPF.*/
 		if (!clienteEncontrado.getCpf().equals(dto.getCpf())) {
 			throw new AlteracaoDeCpfException();
 		}
 		
-		if (repository.findByEmail(dto.getEmail()).isPresent()) {
+		if (repository.findByEmail(dto.getEmail()).isPresent() && 
+		!dto.getEmail().equals(clienteEncontrado.getEmail())) {
 			throw new EmailJaCadastradoException();
 		}
 		
-		if(!dto.getEmail().matches(regexEmail)) {
+		if(dto.getEmail() == null || dto.getEmail().isBlank()) {
 			throw new IllegalArgumentException("Formato inválido do e-mail.");
 		}
 		
-		if(dto.getEmail() == null || dto.getEmail().isBlank()) {
+		if(!dto.getEmail().matches(regexEmail)) {
 			throw new IllegalArgumentException("Formato inválido do e-mail.");
 		}
 
