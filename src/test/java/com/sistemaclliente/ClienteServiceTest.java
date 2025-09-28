@@ -22,6 +22,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
@@ -420,7 +421,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarEncontrarPorCpf_fracasso_naoEncontrarCliente() {
+	public void encontrarPorCpf_fracasso_naoEncontrarCliente() {
 		when(repository.findByCpf("12345678")).thenReturn(Optional.empty());
 		
 		ClienteNotFoundException ex = 
@@ -432,7 +433,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarListaPaginada_retornarListaPaginadaDTO() {
+	public void listaPaginada_sucesso_retornarListaPaginadaDTO() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -446,9 +447,9 @@ public class ClienteServiceTest {
 		cliente2.setCpf("87654321");
 		
 		List<Cliente> lista = List.of(cliente1, cliente2);
-		Page<Cliente> pageMock = new PageImpl<>(lista);
-		
 		PageRequest pageable = PageRequest.of(0, 2);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+
 		when(repository.findAll(any(PageRequest.class))).thenReturn(pageMock);
 		
 		Page<ClienteResponseDTO> page = service.listaPaginada(0, 2);
@@ -458,6 +459,7 @@ public class ClienteServiceTest {
 		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf)
 		.containsExactly("12345678", "87654321");
 
+		assertThat(page.getNumberOfElements()).isEqualTo(2);
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Antônio");
 		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
@@ -466,6 +468,23 @@ public class ClienteServiceTest {
 		verify(repository).findAll(pageable);
 		verifyNoMoreInteractions(repository);
 	}
+	
+	@Test
+	public void listaPaginada_sucesso_retornarListaVazia() {
+		List<Cliente> lista = List.of();
+		PageRequest pageable = PageRequest.of(0, 2);
+		Page pageMock = new PageImpl<>(lista);
+		
+		when(repository.findAll(pageable)).thenReturn(pageMock);
+		
+		Page<ClienteResponseDTO> page = service.listaPaginada(0, 2);
+		
+		assertThat(page.getNumberOfElements()).isEqualTo(0);
+		
+		verify(repository).findAll(pageable);
+		verifyNoMoreInteractions(repository);
+	}
+	
 	
 	@Test
 	public void testarListaPaginadaPorOrdenacao_retornarLista() {
