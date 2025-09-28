@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -485,6 +486,18 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
+	@ParameterizedTest
+	@CsvSource({"-1 , 2" , "0, 0"})
+	public void listaPaginada_paginaItensInvalidos_retornaExcecao(int pagina, int itens) {	
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.listaPaginada(pagina, itens)); 
+					
+		assertThat(ex.getMessage())
+		.isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
+		
+		verify(repository.findAll(any(PageRequest.class)));
+		verifyNoMoreInteractions(repository);
+	}
 	
 	@Test
 	public void testarListaPaginadaPorOrdenacao_retornarLista() {
