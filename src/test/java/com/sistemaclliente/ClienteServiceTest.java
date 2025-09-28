@@ -495,7 +495,7 @@ public class ClienteServiceTest {
 		assertThat(ex.getMessage())
 		.isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
 		
-		verify(repository.findAll(any(PageRequest.class)));
+		verify(repository, never()).findAll(any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
 	}
 	
