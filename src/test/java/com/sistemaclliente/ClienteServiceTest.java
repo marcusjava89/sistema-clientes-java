@@ -97,6 +97,7 @@ public class ClienteServiceTest {
 		
 		List<ClienteResponseDTO> response = service.listagemCliente();
 		
+		assertThat(response).isNotNull();
 		assertThat(response).isEmpty();
 		assertThat(response.size()).isEqualTo(0);
 		
@@ -129,7 +130,6 @@ public class ClienteServiceTest {
 		verify(repository).findByEmail(dto.getEmail());
 		verify(repository).save(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
-		
 	}
 	
 	@Test
@@ -304,7 +304,7 @@ public class ClienteServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.empty());
 
 		ClienteNotFoundException ex = 
-				assertThrows(ClienteNotFoundException.class, () -> service.atualizarCliente(1L, dto));
+		assertThrows(ClienteNotFoundException.class, () -> service.atualizarCliente(1L, dto));
 		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 1 não encontrado.");
 		
@@ -480,6 +480,7 @@ public class ClienteServiceTest {
 		
 		Page<ClienteResponseDTO> page = service.listaPaginada(0, 2);
 		
+		assertThat(page.getContent()).isNotNull();
 		assertThat(page.getNumberOfElements()).isEqualTo(0);
 		
 		verify(repository).findAll(pageable);
@@ -500,7 +501,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarListaPaginadaPorOrdenacao_retornarLista() {
+	public void listaPaginadaPorOrdenacao_sucesso_retornarListaCheia() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
@@ -531,6 +532,23 @@ public class ClienteServiceTest {
 		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
 		
 		verify(repository).findAll(any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
+	public void listaPaginadaPorOrdenacao_sucesso_retornarListaVazia() {
+		List<Cliente> lista = List.of();
+		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome"));
+		Page<Cliente> pageMock = new PageImpl<>(lista); 
+		
+		when(repository.findAll(pageable)).thenReturn(pageMock);
+		
+		Page<ClienteResponseDTO> page = service.listaPaginadaPorOrdenacao(0, 2, "nome");
+		
+		assertThat(page.getContent()).isNotNull();
+		assertThat(page.getContent().size()).isEqualTo(0);
+		
+		verify(repository).findAll(pageable);
 		verifyNoMoreInteractions(repository);
 	}
 	
