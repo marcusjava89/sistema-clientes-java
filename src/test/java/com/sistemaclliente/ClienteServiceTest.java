@@ -546,9 +546,22 @@ public class ClienteServiceTest {
 		Page<ClienteResponseDTO> page = service.listaPaginadaPorOrdenacao(0, 2, "nome");
 		
 		assertThat(page.getContent()).isNotNull();
-		assertThat(page.getContent().size()).isEqualTo(0);
+		assertThat(page.getContent()).isEmpty();
 		
 		verify(repository).findAll(pageable);
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@ParameterizedTest
+	@CsvSource({"-1 , 2" , "0, 0"})
+	public void listaPaginadaPorOrdenacao_paginaItensInvalidos_retornaExcecao(int pagina, int itens) {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+		() -> service.listaPaginadaPorOrdenacao(pagina, itens, "nome"));
+		
+		assertThat(ex.getMessage())
+		.isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
+		
+		verify(repository, never()).findAll(any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
 	}
 	
