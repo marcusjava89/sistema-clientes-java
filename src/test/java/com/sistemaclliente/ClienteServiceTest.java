@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,7 +30,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -633,14 +631,25 @@ public class ClienteServiceTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {" "})
 	public void buscarPorNome_nomeInvalido_retornaExececao(String nome) {
-		PageRequest pageable = PageRequest.of(0, 2);
-		
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 		() -> service.buscarPorNome(nome, 0, 2));
 		
 		assertThat(ex.getMessage()).isEqualTo("Nome para busca não pode ser vazio ou nulo.");
 		
-		verify(repository, never()).findByNomeContainingIgnoreCase(nome, pageable);
+		verify(repository, never()).findByNomeContainingIgnoreCase(eq(nome), any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@ParameterizedTest
+	@CsvSource({"-1, 2", "0, 0"})
+	public void buscarPorNome_nomeInvalido_retornaExececao(int pagina, int itens) {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.buscarPorNome("Marcus", pagina, itens));
+		
+		assertThat(ex.getMessage())
+		.isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
+		
+		verify(repository, never()).findByNomeContainingIgnoreCase(eq("Marcus"), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
 	}
 	
