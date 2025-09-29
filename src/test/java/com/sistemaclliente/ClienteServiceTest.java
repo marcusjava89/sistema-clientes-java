@@ -579,7 +579,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarBuscarPorNome_retornarListaPaginadaPorNome() {
+	public void buscarPorNome_sucesso_retornarPageCheia() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -593,8 +593,8 @@ public class ClienteServiceTest {
 		cliente2.setCpf("87654321");
 		
 		List<Cliente> lista = List.of(cliente1, cliente2);
-		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
 		
 		when(repository.findByNomeContainingIgnoreCase("Marcus", pageable)).thenReturn(pageMock);
 		Page<ClienteResponseDTO> page = service.buscarPorNome("Marcus", 0, 2);
@@ -610,7 +610,25 @@ public class ClienteServiceTest {
 		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
 		
 		verify(repository).findByNomeContainingIgnoreCase("Marcus", pageable);
+		verifyNoMoreInteractions(repository);
 	}
+	
+	@Test
+	public void buscarPorNome_sucesso_retornarPageVazia() {
+		List<Cliente> lista = List.of();
+		PageRequest pageable = PageRequest.of(0, 2);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		
+		when(repository.findByNomeContainingIgnoreCase("Marcus", pageable)).thenReturn(pageMock);
+		Page<ClienteResponseDTO> page = service.buscarPorNome("Marcus", 0, 2);
+		
+		assertThat(page.getContent()).isNotNull();
+		assertThat(page.getContent()).isEmpty();
+		
+		verify(repository).findByNomeContainingIgnoreCase("Marcus", pageable);
+		verifyNoMoreInteractions(repository);
+	}
+	
 	
 	@Test
 	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException, 
