@@ -565,6 +565,19 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" "})
+	public void listaPaginadaPorOrdenacao_ordenadoPorInvalido_retornaExcecao(String ordenadoPor) {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+		() -> service.listaPaginadaPorOrdenacao(0, 2, ordenadoPor));
+		
+		assertThat(ex.getMessage()).isEqualTo("Critério de ordenação não pode ser vazio.");
+		
+		verify(repository, never()).findAll(any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
+	}
+	
 	@Test
 	public void testarBuscarPorNome_retornarListaPaginadaPorNome() {
 		Cliente cliente1 = new Cliente();
