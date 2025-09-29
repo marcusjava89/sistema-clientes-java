@@ -629,6 +629,20 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" "})
+	public void buscarPorNome_nomeInvalido_retornaExececao(String nome) {
+		PageRequest pageable = PageRequest.of(0, 2);
+		
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.buscarPorNome(nome, 0, 2));
+		
+		assertThat(ex.getMessage()).isEqualTo("Nome para busca não pode ser vazio ou nulo.");
+		
+		verify(repository, never()).findByNomeContainingIgnoreCase(nome, pageable);
+		verifyNoMoreInteractions(repository);
+	}
 	
 	@Test
 	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException, 
@@ -636,7 +650,7 @@ public class ClienteServiceTest {
 		when(repository.findById(99L)).thenReturn(Optional.empty());
 		Map<String, Object> updates = Map.of("nome", "Marcus");
 		ClienteNotFoundException ex = 
-				assertThrows(ClienteNotFoundException.class,() -> service.atualizarParcial(99L,updates));
+		assertThrows(ClienteNotFoundException.class,() -> service.atualizarParcial(99L,updates));
 		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 99 não encontrado.");
 		verify(repository).findById(99L);
