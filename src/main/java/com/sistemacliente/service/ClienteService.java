@@ -116,7 +116,7 @@ public class ClienteService {
 		Page<Cliente> page = repository.findAll(pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-	/*testando*/
+	
 	public Page<ClienteResponseDTO> listaPaginadaPorOrdenacao(int pagina, int itens, String ordenadoPor) {
 		if(pagina < 0 || itens <1) {
 			throw new 
@@ -131,7 +131,7 @@ public class ClienteService {
 		Page<Cliente> page = repository.findAll(pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-	
+	/*testando*/
 	public Page<ClienteResponseDTO> buscarPorNome(String nome, int pagina, int itens) {
 		PageRequest pageable = PageRequest.of(pagina, itens);
 		Page<Cliente> page;
@@ -142,11 +142,11 @@ public class ClienteService {
 		}
 		
 		if(nome == null || nome.isBlank()) {
-			page = repository.findAll(pageable);
-		}else {
-			page = repository.findByNomeContainingIgnoreCase(nome, pageable);
+			throw new IllegalArgumentException("Nome pata busca não pode ser vazio ou nulo.");
 		}
 		
+		page = repository.findByNomeContainingIgnoreCase(nome, pageable);
+				
 		return page.map(ClienteResponseDTO::new);
 	}
 
