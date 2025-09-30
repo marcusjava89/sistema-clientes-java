@@ -175,7 +175,7 @@ public class ClienteServiceTest {
 		EmailJaCadastradoException ex = assertThrows( EmailJaCadastradoException.class,
 		() -> service.salvarCliente(dto));
 		assertThat(ex.getMessage())
-		.isEqualTo("E-mail indisponível para uso, está sendo utilizado por outro cliente.");
+		.isEqualTo("E-mail indisponível, já está sendo utilizado.");
 
 		verify(repository).findByCpf(dto.getCpf());
 		verify(repository).findByEmail("carlos@email.com");
@@ -663,6 +663,7 @@ public class ClienteServiceTest {
 		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 99 não encontrado.");
 		verify(repository).findById(99L);
+		verify(repository, never()).findByEmail(anyString());
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
@@ -676,14 +677,14 @@ public class ClienteServiceTest {
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
 		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
+		cliente1.setCpf("12345678111");
 		
 		Map<String, Object> updates = Map.of("nome", "Antônio", "email", "antonio@email.com");
 		Cliente atualizado = new Cliente();
 		atualizado.setNome("Antônio");
 		atualizado.setEmail("antonio@email.com");
 		atualizado.setId(1L);
-		atualizado.setCpf("12345678");
+		atualizado.setCpf("12345678625");
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		when(mapper.updateValue(cliente1, updates)).thenReturn(atualizado);
@@ -711,7 +712,7 @@ public class ClienteServiceTest {
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
 		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
+		cliente1.setCpf("12345678654");
 		
 		Map<String, Object> updates = Map.of("id", 2L, "email", "antonio@email.com");
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
@@ -720,6 +721,7 @@ public class ClienteServiceTest {
 		() -> service.atualizarParcial(1L, updates));
 		assertThat(e.getMessage()).isEqualTo("O campo id não pode ser alterado.");
 		verify(repository).findById(1L);
+		verify(repository, never()).findByEmail("antonio@email.com");
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
@@ -742,7 +744,7 @@ public class ClienteServiceTest {
 		() -> service.atualizarParcial(1L, updates));
 		
 		assertThat(e.getMessage()).isEqualTo("Alteração de CPF não permitida.");
-		
+		verify(repository, never()).findByEmail(anyString());
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -771,6 +773,7 @@ public class ClienteServiceTest {
 		
 		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio ou nulo.");
 		verify(repository).findById(1L);
+		verify(repository, never()).findByEmail(anyString());
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
@@ -778,7 +781,6 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
-
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "marcus.com", "@@@@@@@"})
@@ -787,22 +789,58 @@ public class ClienteServiceTest {
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
 		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
+		cliente1.setCpf("12345678541");
+        	
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("email", email);
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
-				() -> service.atualizarParcial(1L, updates));
+		() -> service.atualizarParcial(1L, updates));
 		
 		assertThat(e.getMessage()).isEqualTo("Formato inválido do e-mail.");
+		
 		verify(repository).findById(1L);
+		verify(repository, never()).findByEmail(email);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
 		verifyNoMoreInteractions(mapper);
 		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
+	public void atualizarParcial_emailJaCadastrado_retornarExcecao() throws JsonMappingException {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		Cliente cliente2 = new Cliente();
+		cliente2.setId(2L);
+		cliente2.setNome("Marcus Antônio");
+		cliente2.setEmail("antonio@email.com");
+		cliente2.setCpf("87654321");
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("email", "antonio@email.com");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		when(repository.findByEmail("antonio@email.com")).thenReturn(Optional.of(cliente2));
+		EmailJaCadastradoException ex = assertThrows(EmailJaCadastradoException.class,
+		() -> service.atualizarParcial(1L, updates));
+		
+		assertThat(ex.getMessage()).isEqualTo("E-mail indisponível, já está sendo utilizado.");
+		
+		verify(repository).findById(1L);
+		verify(repository).findByEmail("antonio@email.com");
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
+		verifyNoMoreInteractions(mapper);
+		verifyNoMoreInteractions(repository);
+		
 	}
 	
 	@Test
