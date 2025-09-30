@@ -131,7 +131,7 @@ public class ClienteService {
 		Page<Cliente> page = repository.findAll(pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-	/*testando*/
+	
 	public Page<ClienteResponseDTO> buscarPorNome(String nome, int pagina, int itens) {
 		if(pagina < 0 || itens <1) {
 			throw new 
@@ -147,7 +147,7 @@ public class ClienteService {
 				
 		return page.map(ClienteResponseDTO::new);
 	}
-
+	/*testando*/
 	public ClienteResponseDTO atualizarParcial(Long id, Map<String, Object> updates) 
 	throws JsonMappingException {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
@@ -170,11 +170,11 @@ public class ClienteService {
 		if(updates.containsKey("email")) {
 			Object email = updates.get("email");
 			if(email == null || email.toString().isBlank()) {
-				throw new IllegalArgumentException("E-mail não pode ser vazio.");
+				throw new IllegalArgumentException("Formato inválido do e-mail.");
 			}
 			
 			if(!email.toString().matches(regexEmail)) {
-				throw new IllegalArgumentException("O formato do email está incorreto.");
+				throw new IllegalArgumentException("Formato inválido do e-mail.");
 			}
 			
 			if (repository.findByEmail(email.toString()).isPresent()) {

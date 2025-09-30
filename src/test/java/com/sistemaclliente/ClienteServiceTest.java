@@ -642,10 +642,10 @@ public class ClienteServiceTest {
 	
 	@ParameterizedTest
 	@CsvSource({"-1, 2", "0, 0"})
-	public void buscarPorNome_nomeInvalido_retornaExececao(int pagina, int itens) {
+	public void buscarPorNome_paginaItensInvalidos_retornaExececao(int pagina, int itens) {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 		() -> service.buscarPorNome("Marcus", pagina, itens));
-		
+			
 		assertThat(ex.getMessage())
 		.isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
 		
@@ -654,7 +654,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarAtualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException, 
+	public void atualizarParcial_clienteNaoEncontrado() throws ClienteNotFoundException, 
 	JsonMappingException{
 		when(repository.findById(99L)).thenReturn(Optional.empty());
 		Map<String, Object> updates = Map.of("nome", "Marcus");
@@ -671,7 +671,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarAtualizarParcial_retornarDTO() throws JsonMappingException {
+	public void atualizarParcial_sucesso_retornarDTO() throws JsonMappingException {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -706,7 +706,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test 
-	public void testarAtualizarParcialComId_retornarExececao() throws JsonMappingException {
+	public void atualizarParcial_contemId_retornarExececao() throws JsonMappingException {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -717,7 +717,7 @@ public class ClienteServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
-				() -> service.atualizarParcial(1L, updates));
+		() -> service.atualizarParcial(1L, updates));
 		assertThat(e.getMessage()).isEqualTo("O campo id não pode ser alterado.");
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
@@ -728,7 +728,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarAtualizarParcialAlterarCpf_retornarExcecao() throws JsonMappingException {
+	public void atualizarParcial_contemCpf_retornarExcecao() throws JsonMappingException {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -739,7 +739,7 @@ public class ClienteServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		AlteracaoDeCpfException e = assertThrows(AlteracaoDeCpfException.class, 
-				() -> service.atualizarParcial(1L, updates));
+		() -> service.atualizarParcial(1L, updates));
 		
 		assertThat(e.getMessage()).isEqualTo("Alteração de CPF não permitida.");
 		
@@ -752,8 +752,10 @@ public class ClienteServiceTest {
 		
 	}
 	
-	@Test
-	public void testarAtualizarParcialNomeNulo_retornarexcecao() throws JsonMappingException {
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" "})
+	public void atualizarParcial_nomeInvalido_retornarExcecao(String nome) throws JsonMappingException {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -761,31 +763,7 @@ public class ClienteServiceTest {
 		cliente1.setCpf("12345678");
 		
 		Map<String, Object> updates = new HashMap<>();
-		updates.put("nome", null);
-		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
-		
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
-				() -> service.atualizarParcial(1L, updates));
-		
-		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio ou nulo.");
-		verify(repository).findById(1L);
-		verify(repository, never()).saveAndFlush(any(Cliente.class));
-		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
-		verifyNoMoreInteractions(mapper);
-		verifyNoMoreInteractions(repository);
-	}
-
-	@Test
-	public void testarAtualizarParcialNomeEmBranco_retornarexcecao() throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("nome", " ");
+		updates.put("nome", nome);
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
