@@ -778,33 +778,11 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
-	/*cpf*/
-	@Test
-	public void testarAtualizarParcialEmailNulo_retornarexcecao() throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("email", null);
-		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
-		
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
-				() -> service.atualizarParcial(1L, updates));
-		
-		assertThat(e.getMessage()).isEqualTo("E-mail não pode ser vazio.");
-		verify(repository).findById(1L);
-		verify(repository, never()).saveAndFlush(any(Cliente.class));
-		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
-		verifyNoMoreInteractions(mapper);
-		verifyNoMoreInteractions(repository);
-	}
 
-	@Test
-	public void testarAtualizarParcialEmailEmBranco_retornarexcecao() throws JsonMappingException {
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "marcus.com", "@@@@@@@"})
+	public void atualizarParcial_emailInvalido_retornarExcecao(String email) throws JsonMappingException {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -812,13 +790,13 @@ public class ClienteServiceTest {
 		cliente1.setCpf("12345678");
 		
 		Map<String, Object> updates = new HashMap<>();
-		updates.put("email", " ");
+		updates.put("email", email);
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
 				() -> service.atualizarParcial(1L, updates));
 		
-		assertThat(e.getMessage()).isEqualTo("E-mail não pode ser vazio.");
+		assertThat(e.getMessage()).isEqualTo("Formato inválido do e-mail.");
 		verify(repository).findById(1L);
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -827,30 +805,6 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
-	@Test
-	public void testarAtualizarParcialEmailFormatoInvalido_retornarexcecao() throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("email", "marcus.email");
-		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
-		
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
-				() -> service.atualizarParcial(1L, updates));
-		
-		assertThat(e.getMessage()).isEqualTo("O formato do email está incorreto.");
-		verify(repository).findById(1L);
-		verify(repository, never()).saveAndFlush(any(Cliente.class));
-		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
-		verifyNoMoreInteractions(mapper);
-		verifyNoMoreInteractions(repository);
-	}
-
 	@Test
 	public void testarBuscaEmailPaginadaOrdenada_retornarListaPaginada() {
 		Cliente cliente1 = new Cliente();
