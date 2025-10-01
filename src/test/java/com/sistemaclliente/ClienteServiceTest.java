@@ -844,7 +844,33 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void testarBuscaEmailPaginadaOrdenada_retornarListaPaginada() {
+	public void buscaEmail_sucesso_retornarPageCheia() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678");
+		
+		List<Cliente> lista = List.of(cliente1);
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		PageRequest pageable = PageRequest.of(0, 2);
+		
+		when(repository.findByEmail("marcus@email.com",pageable)).thenReturn(pageMock);
+		Page<ClienteResponseDTO> page = service.buscarPorEmail("marcus@email.com", 0, 2);
+		
+		assertThat(page.getContent()).isNotNull();
+		assertThat(page.getContent()).isNotEmpty();
+		assertThat(page.getContent().get(0).getId()).isEqualTo(1L);
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
+		assertThat(page.getContent().get(0).getEmail()).isEqualTo("marcus@email.com");
+		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
+		
+		verify(repository).findByEmail("marcus@email.com", pageable);
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
+	public void buscaEmailPaginadaOrdenada_retornarListaPaginada() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -854,7 +880,7 @@ public class ClienteServiceTest {
 		Cliente cliente2 = new Cliente();
 		cliente2.setId(2L);
 		cliente2.setNome("Marcus Antônio");
-		cliente2.setEmail("marcus@email.com.br");
+		cliente2.setEmail("marcus@email.com");
 		cliente2.setCpf("87654321");
 		
 		List<Cliente> lista = List.of(cliente1, cliente2);

@@ -147,7 +147,7 @@ public class ClienteService {
 				
 		return page.map(ClienteResponseDTO::new);
 	}
-	/*testando*/
+	
 	public ClienteResponseDTO atualizarParcial(Long id, Map<String, Object> updates) 
 	throws JsonMappingException {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
@@ -189,14 +189,14 @@ public class ClienteService {
 
 	}
 	
-	/*Páginas podem ser retornadas vazias.*/
+	/*testando*/
 	public Page<ClienteResponseDTO> buscarPorEmail(String email, int pagina, int itens){
 		if(pagina < 0 || itens <1) {
 			throw new 
 			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
 		}
-		/*Podemos receber e-mail em branco e retorno a página vazia.*/
-		if(email == null) {
+		
+		if(email == null) {/*Podemos receber e-mail em branco e retornar a página vazia.*/
 			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
 		
