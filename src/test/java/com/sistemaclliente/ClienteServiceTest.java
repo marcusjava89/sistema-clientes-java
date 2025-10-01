@@ -864,6 +864,23 @@ public class ClienteServiceTest {
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
 		assertThat(page.getContent().get(0).getEmail()).isEqualTo("marcus@email.com");
 		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
+		assertThat(page.getContent().size()).isEqualTo(1);
+		
+		verify(repository).findByEmail("marcus@email.com", pageable);
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
+	public void buscaEmail_naoEncontraCliente_retornarPageVazia() {
+		List<Cliente> lista = List.of();
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		PageRequest pageable = PageRequest.of(0, 2);
+		
+		when(repository.findByEmail("marcus@email.com", pageable)).thenReturn(pageMock);
+		Page<ClienteResponseDTO> page = service.buscarPorEmail("marcus@email.com", 0, 2);
+		
+		assertThat(page.getContent()).isNotNull();
+		assertThat(page.getContent()).isEmpty();
 		
 		verify(repository).findByEmail("marcus@email.com", pageable);
 		verifyNoMoreInteractions(repository);
