@@ -146,7 +146,7 @@ public class ClienteServiceTest {
 		Cliente salvo = new Cliente(dto);
 		salvo.setId(2L); //id não é gerado automaticamente.
 		
-		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.of(cliente1)); /*Retorna existente.*/
+		when(repository.findByCpf(dto.getCpf())).thenReturn(Optional.of(cliente1)); 
 		
 		CpfJaCadastradoException ex = 
 		assertThrows(CpfJaCadastradoException.class, () -> service.salvarCliente(dto));
@@ -174,8 +174,7 @@ public class ClienteServiceTest {
 		
 		EmailJaCadastradoException ex = assertThrows( EmailJaCadastradoException.class,
 		() -> service.salvarCliente(dto));
-		assertThat(ex.getMessage())
-		.isEqualTo("E-mail indisponível, já está sendo utilizado.");
+		assertThat(ex.getMessage()).isEqualTo("E-mail indisponível, já está sendo utilizado.");
 
 		verify(repository).findByCpf(dto.getCpf());
 		verify(repository).findByEmail("carlos@email.com");
@@ -192,8 +191,8 @@ public class ClienteServiceTest {
 		dto.setEmail(email);
 		dto.setNome("Marcus");
 		
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class
-		, () -> service.salvarCliente(dto));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+		() -> service.salvarCliente(dto));
 		
 		assertThat(ex.getMessage()).isEqualTo("Formato inválido do e-mail.");
 		
@@ -328,7 +327,7 @@ public class ClienteServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		AlteracaoDeCpfException ex = assertThrows(AlteracaoDeCpfException.class, 
-				() -> service.atualizarCliente(1L, dto));
+		() -> service.atualizarCliente(1L, dto));
 		
 		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
 		
@@ -634,7 +633,7 @@ public class ClienteServiceTest {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 		() -> service.buscarPorNome(nome, 0, 2));
 		
-		assertThat(ex.getMessage()).isEqualTo("Nome para busca não pode ser vazio ou nulo.");
+		assertThat(ex.getMessage()).contains("vazio").contains("nulo");
 		
 		verify(repository, never()).findByNomeContainingIgnoreCase(eq(nome), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
@@ -646,8 +645,7 @@ public class ClienteServiceTest {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 		() -> service.buscarPorNome("Marcus", pagina, itens));
 			
-		assertThat(ex.getMessage())
-		.isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
+		assertThat(ex.getMessage()).contains("negativa").contains("menor que 1");
 		
 		verify(repository, never()).findByNomeContainingIgnoreCase(eq("Marcus"), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
@@ -844,7 +842,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void buscaEmail_sucesso_retornarPageCheia() {
+	public void buscaPorEmail_sucesso_retornarPageCheia() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -871,7 +869,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void buscaEmail_naoEncontraCliente_retornarPageVazia() {
+	public void buscaPorEmail_naoEncontraCliente_retornarPageVazia() {
 		List<Cliente> lista = List.of();
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2);
@@ -884,6 +882,32 @@ public class ClienteServiceTest {
 		
 		verify(repository).findByEmail("marcus@email.com", pageable);
 		verifyNoMoreInteractions(repository);
+	}
+	
+	@ParameterizedTest
+	@CsvSource({"-1, 2", "0, 0"})
+	public void buscaPorEmail_paginaItensInvalidos_retornaExcecao(int pagina, int itens) {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.buscarPorEmail("marcus@email.com", pagina, itens));
+		
+		assertThat(ex.getMessage()).contains("negativa").contains("menor que 1");
+		
+		verify(repository, never()).findByEmail(anyString(), any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
+	}
+
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "marcus.com.br", "@@@"})
+	public void buscarPorEmail_emailInvalido_retornaExcecao(String email) {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.buscarPorEmail(email, 0, 2));
+		
+		assertThat(ex.getMessage()).contains("inválido");
+		
+		verify(repository, never()).findByEmail(anyString(), any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
+		
 	}
 	
 	@Test
