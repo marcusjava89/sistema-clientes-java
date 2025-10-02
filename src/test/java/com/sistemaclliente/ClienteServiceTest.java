@@ -954,6 +954,30 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 	}
 	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "marcus.com.br", "@@@"})
+	public void atualizarEmail_emailInvalido(String email) {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678514");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.atualizarEmail(1L, email));
+		
+		assertThat(ex.getMessage()).contains("inválido");
+		
+		verify(repository).findById(1L);
+		verify(repository, never()).findByEmail(email);
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
+		
+	}
+	
 	@Test
 	public void buscaEmailPaginadaOrdenada_retornarListaPaginada() {
 		Cliente cliente1 = new Cliente();
