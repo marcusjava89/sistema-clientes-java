@@ -1008,7 +1008,7 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
-	public void buscaEmailPaginadaOrdenada_retornarListaPaginada() {
+	public void buscaEmailPaginadaOrdenada_retornarPageCheia() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus Vinicius");
@@ -1040,6 +1040,26 @@ public class ClienteServiceTest {
 		verifyNoMoreInteractions(repository);
 		
  	}
+	
+
+	@Test
+	public void buscaEmailPaginadaOrdenada_emailNaoEncontrado_retornarPageVazia() {
+		List<Cliente> lista = List.of();
+		Page<Cliente> pageMock = new PageImpl<>(lista);
+		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
+		
+		when(repository.findByEmailContainingIgnoreCase("marcus@email.com", pageable))
+		.thenReturn(pageMock);
+		
+		Page<ClienteResponseDTO> page = 
+		service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
+		
+		assertThat(page).isNotNull();
+		assertThat(page).isEmpty();
+		
+		verify(repository).findByEmailContainingIgnoreCase("marcus@email.com", pageable);
+		verifyNoMoreInteractions(repository);
+	}
 	
 	@Test
 	public void testarBuscaEmailPaginadaOrdenada_PaginaMenorQue0_retornarExcecao() {	
