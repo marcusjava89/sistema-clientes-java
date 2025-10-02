@@ -979,6 +979,35 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
+	public void atualizarEmail_emailJaCadastrado() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678514");
+		
+		Cliente cliente2 = new Cliente();
+		cliente2.setId(2L);
+		cliente2.setNome("Antônio");
+		cliente2.setEmail("antonio@email.com");
+		cliente2.setCpf("87654321765");
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		when(repository.findByEmail("antonio@email.com")).thenReturn(Optional.of(cliente2));
+		
+		EmailJaCadastradoException ex = assertThrows(EmailJaCadastradoException.class,
+		() -> service.atualizarEmail(1L,"antonio@email.com"));
+		
+		assertThat(ex.getMessage()).contains("indisponível");
+		assertThat(cliente1.getEmail()).isEqualTo("marcus@email.com");
+		
+		verify(repository).findById(1L);
+		verify(repository).findByEmail("antonio@email.com");
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
 	public void buscaEmailPaginadaOrdenada_retornarListaPaginada() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
