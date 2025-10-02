@@ -940,6 +940,21 @@ public class ClienteServiceTest {
 	}
 	
 	@Test
+	public void atualizarEmail_clienteNaoEncontrado() {
+		when(repository.findById(99L)).thenReturn(Optional.empty());
+		
+		ClienteNotFoundException ex = assertThrows(ClienteNotFoundException.class,
+		() -> service.atualizarEmail(99L, "vinicius@email.com"));
+		
+		assertThat(ex.getMessage()).contains("não encontrado");
+		
+		verify(repository).findById(99L);
+		verify(repository, never()).findByEmail("vinicius@email.com");
+		verify(repository, never()).saveAndFlush(any(Cliente.class));
+		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
 	public void buscaEmailPaginadaOrdenada_retornarListaPaginada() {
 		Cliente cliente1 = new Cliente();
 		cliente1.setId(1L);
