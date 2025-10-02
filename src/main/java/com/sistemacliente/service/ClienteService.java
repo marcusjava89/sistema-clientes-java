@@ -195,7 +195,7 @@ public class ClienteService {
 			IllegalArgumentException("A página não pode ser negativa e itens não pode ser menor que 1.");
 		}
 		
-		if(email == null) {/*Podemos receber e-mail em branco e retornar a página vazia.*/
+		if(email == null || email.isBlank()) {
 			throw new IllegalArgumentException("Formato do e-mail inválido.");
 		}
 		
@@ -207,7 +207,7 @@ public class ClienteService {
 		Page<Cliente> page = repository.findByEmail(email, pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-	/*testando*/
+	
 	public ClienteResponseDTO atualizarEmail(Long id, String email) {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 		
@@ -228,12 +228,13 @@ public class ClienteService {
 		return new ClienteResponseDTO(clienteAtualizado);
 	}
 	
+	/*testando*/
 	public Page<ClienteResponseDTO> 
 	buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
 		
 		if(pagina <0 || itens <1) {
-			throw new IllegalArgumentException("Número da página não pode ser negativo e de "
-					+ "itens por páginas menor que 1.");
+			throw new IllegalArgumentException("Número da página não pode ser negativo e de itens por"
+					+ " páginas menor que 1.");
 		}
 		
 		if(email == null || email.trim().isBlank()) {
