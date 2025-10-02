@@ -189,7 +189,6 @@ public class ClienteService {
 
 	}
 	
-	/*testando*/
 	public Page<ClienteResponseDTO> buscarPorEmail(String email, int pagina, int itens){
 		if(pagina < 0 || itens <1) {
 			throw new 
@@ -208,7 +207,7 @@ public class ClienteService {
 		Page<Cliente> page = repository.findByEmail(email, pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-	
+	/*testando*/
 	public ClienteResponseDTO atualizarEmail(Long id, String email) {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 		
@@ -225,7 +224,7 @@ public class ClienteService {
 		}
 		
 		cliente.setEmail(email);
-		Cliente clienteAtualizado = repository.saveAndFlush(cliente); // atualiza no banco de dados
+		Cliente clienteAtualizado = repository.saveAndFlush(cliente); 
 		return new ClienteResponseDTO(clienteAtualizado);
 	}
 	

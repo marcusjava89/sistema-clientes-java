@@ -11,7 +11,9 @@ public class ClienteResponseDTO {
 	}
 	
 	public ClienteResponseDTO(Cliente cliente) {
-		BeanUtils.copyProperties(cliente, this);
+		if(cliente != null) {			
+			BeanUtils.copyProperties(cliente, this);
+		}
 	}
 	
 	private Long id;

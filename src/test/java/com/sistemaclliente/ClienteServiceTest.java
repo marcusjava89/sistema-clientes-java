@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.awt.event.InvocationEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -907,7 +908,35 @@ public class ClienteServiceTest {
 		
 		verify(repository, never()).findByEmail(anyString(), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
+	}
+	
+	@Test
+	public void atualizarEmail_sucesso_emailAtualizado() {
+		Cliente cliente1 = new Cliente();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus Vinicius");
+		cliente1.setEmail("marcus@email.com");
+		cliente1.setCpf("12345678514");
 		
+		String email = "vinicius@email.com";
+		
+		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		when(repository.findByEmail(email)).thenReturn(Optional.empty());
+		cliente1.setEmail(email);
+		when(repository.saveAndFlush(cliente1)).thenAnswer(invocation -> invocation.getArgument(0));
+		
+		ClienteResponseDTO atualizado = service.atualizarEmail(1L, email);
+		
+		assertThat(atualizado).isNotNull();
+		assertThat(atualizado.getCpf()).isEqualTo(cliente1.getCpf());
+		assertThat(atualizado.getEmail()).isEqualTo(cliente1.getEmail());
+		assertThat(atualizado.getNome()).isEqualTo(cliente1.getNome());
+		assertThat(atualizado.getId()).isEqualTo(cliente1.getId());
+		
+		verify(repository).findById(1L);
+		verify(repository).findByEmail(email);
+		verify(repository).saveAndFlush(cliente1);
+		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
