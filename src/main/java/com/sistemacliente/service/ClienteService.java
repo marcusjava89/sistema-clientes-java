@@ -234,7 +234,7 @@ public class ClienteService {
 		
 		if(pagina <0 || itens <1) {
 			throw new IllegalArgumentException("Número da página não pode ser negativo e de itens por"
-					+ " páginas menor que 1.");
+			+ " páginas menor que 1.");
 		}
 		
 		if(email == null || email.trim().isBlank()) {
@@ -246,7 +246,7 @@ public class ClienteService {
 		}
 		
 		if(ordenadoPor == null || ordenadoPor.isBlank()) {
-			throw new IllegalArgumentException("Critério de ordenação não pode ser vazio.");
+			throw new IllegalArgumentException("Critério de ordenação não pode ser vazio ou nulo.");
 		}
 		
 		PageRequest pageable = PageRequest.of(pagina, itens, Sort.by(ordenadoPor.trim()).ascending());

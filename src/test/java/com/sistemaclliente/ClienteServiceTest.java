@@ -1072,12 +1072,34 @@ public class ClienteServiceTest {
 		verify(repository, never()).
 		findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
-		
 	}
 	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "marcus.com.br", "@@@"})
+	public void buscaEmailPaginadaOrdenada_emailInvalido(String email) {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.buscaEmailPaginadaOrdenada(email, 0, 2, "nome"));
+		
+		assertThat(ex.getMessage()).contains("inválido");
+		
+		verify(repository, never()).findByEmailContainingIgnoreCase(eq(email), any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
+	}
 	
-	
-	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" "})
+	public void buscaEmailPaginadaOrdenada_ordenadoPorNuloVazio(String ordenadoPor) {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+		() -> service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, ordenadoPor));
+				
+		assertThat(ex.getMessage()).contains("vazio").contains("nulo");
+				
+		verify(repository, never())
+		.findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
+		verifyNoMoreInteractions(repository);
+	}
 	
 }
 
