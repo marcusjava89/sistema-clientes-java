@@ -1094,12 +1094,13 @@ public class ClienteServiceTest {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 		() -> service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, ordenadoPor));
 				
-		assertThat(ex.getMessage()).contains("vazio").contains("nulo");
+		assertThat(ex.getMessage()).contains("não").contains("vazio").contains("nulo");
 				
 		verify(repository, never())
 		.findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
 	}
+	
 	
 }
 
