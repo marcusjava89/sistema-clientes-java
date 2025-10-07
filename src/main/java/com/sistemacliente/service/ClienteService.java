@@ -228,7 +228,6 @@ public class ClienteService {
 		return new ClienteResponseDTO(clienteAtualizado);
 	}
 	
-	/*testando*/
 	public Page<ClienteResponseDTO> 
 	buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
 		

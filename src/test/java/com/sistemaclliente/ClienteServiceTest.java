@@ -48,7 +48,7 @@ import com.sistemacliente.service.ClienteService;
 
 @ExtendWith(MockitoExtension.class)
 public class ClienteServiceTest {
-	/*Os CPF's tem oito dígitos mesmo que o esperado seja 11. Aqui não interfere em nossos testes. */
+	/*Os CPF's têm oito dígitos mesmo que o esperado seja 11. Aqui não interfere em nossos testes.*/
 	@Mock
 	private ClienteRepository repository;
 	

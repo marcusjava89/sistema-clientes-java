@@ -9,10 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.sistemacliente.model.Cliente;
 
-import jakarta.transaction.Transactional;
-
 @Repository
-@Transactional
 public interface ClienteRepository extends JpaRepository<Cliente, Long>{
 
 	public Optional<Cliente> findByCpf(String cpf);
