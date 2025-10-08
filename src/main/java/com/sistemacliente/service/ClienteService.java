@@ -21,10 +21,12 @@ import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.repository.ClienteRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class ClienteService {
 	/*Por mais que certas verificações são feitas pelo Controller com o @Valid, faremos támbem as verifi-
-	 *cações aqui com mesnagens personalizadas pas os clientes.*/
+	 *cações aqui com meNsagens personalizadas pas os clientes.*/
 	
 	@Autowired
 	private ClienteRepository repository;
@@ -32,7 +34,6 @@ public class ClienteService {
 	@Autowired
 	private ObjectMapper mapper;
 	
-	/*Garantia que e-mail está no formato correto.*/
 	String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
 	public List<ClienteResponseDTO> listagemCliente() {
@@ -40,6 +41,7 @@ public class ClienteService {
 		return lista.stream().map(ClienteResponseDTO::new).toList();
 	}
 
+	@Transactional
 	public ClienteResponseDTO salvarCliente(ClienteRequestDTO dto) {
 		if (repository.findByCpf(dto.getCpf()).isPresent()) { /*Garantia de CPF único.*/
 			throw new CpfJaCadastradoException(dto.getCpf());
@@ -68,12 +70,14 @@ public class ClienteService {
 		return new ClienteResponseDTO(clienteEncontrado);
 	}
 
+	@Transactional
 	public void deletarClientePorId(Long id) {
 		Cliente clienteEncontrado = repository.findById(id)
 		.orElseThrow(() -> new ClienteNotFoundException(id));
 		repository.delete(clienteEncontrado);
 	}
 
+	@Transactional
 	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO dto) {
 		Cliente clienteEncontrado = repository
 		.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
@@ -98,7 +102,7 @@ public class ClienteService {
 
 		clienteEncontrado.setNome(dto.getNome());
 		clienteEncontrado.setEmail(dto.getEmail());
-		return new ClienteResponseDTO(repository.saveAndFlush(clienteEncontrado));
+		return new ClienteResponseDTO(repository.save(clienteEncontrado));
 	}
 
 	public ClienteResponseDTO encontrarPorCpf(String cpf) {
@@ -148,6 +152,7 @@ public class ClienteService {
 		return page.map(ClienteResponseDTO::new);
 	}
 	
+	@Transactional
 	public ClienteResponseDTO atualizarParcial(Long id, Map<String, Object> updates) 
 	throws JsonMappingException {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
@@ -184,7 +189,7 @@ public class ClienteService {
 		
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		Cliente atualizado = mapper.updateValue(cliente, updates);
-		Cliente novo = repository.saveAndFlush(atualizado);
+		Cliente novo = repository.save(atualizado);
 		return new ClienteResponseDTO(novo);
 
 	}
@@ -208,6 +213,7 @@ public class ClienteService {
 		return page.map(ClienteResponseDTO::new);
 	}
 	
+	@Transactional
 	public ClienteResponseDTO atualizarEmail(Long id, String email) {
 		Cliente cliente = repository.findById(id).orElseThrow(() -> new ClienteNotFoundException(id));
 		
@@ -224,7 +230,7 @@ public class ClienteService {
 		}
 		
 		cliente.setEmail(email);
-		Cliente clienteAtualizado = repository.saveAndFlush(cliente); 
+		Cliente clienteAtualizado = repository.save(cliente); 
 		return new ClienteResponseDTO(clienteAtualizado);
 	}
 	

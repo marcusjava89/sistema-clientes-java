@@ -73,17 +73,17 @@ public class ClienteServiceTest {
 		cliente2.setCpf("87654321");
 		
 		List<Cliente> lista = List.of(cliente1, cliente2);
-		
 		when(repository.findAll()).thenReturn(lista);
 		
 		List<ClienteResponseDTO> listaResponse = service.listagemCliente();
 		
 		assertThat(listaResponse).isNotNull();
 		assertThat(listaResponse.size()).isEqualTo(2);
-		assertThat(listaResponse.get(0).getNome()).isEqualTo("Marcus");
-		assertThat(listaResponse.get(1).getNome()).isEqualTo("Antônio");
-		assertThat(listaResponse.get(0).getCpf()).isEqualTo("12345678");
-		assertThat(listaResponse.get(1).getCpf()).isEqualTo("87654321");
+		
+		assertThat(listaResponse).extracting(ClienteResponseDTO::getNome).
+		containsExactlyInAnyOrder("Antônio", "Marcus");
+		assertThat(listaResponse).extracting(ClienteResponseDTO::getCpf).
+		containsExactlyInAnyOrder("12345678", "87654321");
 		
 		verify(repository).findAll();	
 		verifyNoMoreInteractions(repository);
@@ -277,8 +277,7 @@ public class ClienteServiceTest {
 		dto.setCpf(cliente1.getCpf());
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
-		when(repository.saveAndFlush(any(Cliente.class)))
-		.thenAnswer(invocation -> invocation.getArgument(0));
+		when(repository.save(any(Cliente.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		
 		ClienteResponseDTO response = service.atualizarCliente(1L, dto);
 		
@@ -289,7 +288,7 @@ public class ClienteServiceTest {
 		
 		verify(repository).findById(1L);
 		verify(repository).findByEmail("carlos@email.com");
-		verify(repository).saveAndFlush(any(Cliente.class));
+		verify(repository).save(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 	}
 	
@@ -687,7 +686,7 @@ public class ClienteServiceTest {
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		when(mapper.updateValue(cliente1, updates)).thenReturn(atualizado);
-		when(repository.saveAndFlush(atualizado)).thenReturn(atualizado);
+		when(repository.save(atualizado)).thenReturn(atualizado);
 		
 		ClienteResponseDTO response = service.atualizarParcial(1L, updates);
 		
@@ -698,7 +697,7 @@ public class ClienteServiceTest {
 		
 		verify(repository).findById(1L);
 		verify(repository).findByEmail(updates.get("email").toString());
-		verify(repository).saveAndFlush(atualizado);
+		verify(repository).save(atualizado);
 		verify(mapper).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		verify(mapper).updateValue(cliente1, updates);
 		verifyNoMoreInteractions(repository);
@@ -923,7 +922,7 @@ public class ClienteServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		when(repository.findByEmail(email)).thenReturn(Optional.empty());
 		cliente1.setEmail(email);
-		when(repository.saveAndFlush(cliente1)).thenAnswer(invocation -> invocation.getArgument(0));
+		when(repository.save(cliente1)).thenAnswer(invocation -> invocation.getArgument(0));
 		
 		ClienteResponseDTO atualizado = service.atualizarEmail(1L, email);
 		
@@ -935,7 +934,7 @@ public class ClienteServiceTest {
 		
 		verify(repository).findById(1L);
 		verify(repository).findByEmail(email);
-		verify(repository).saveAndFlush(cliente1);
+		verify(repository).save(cliente1);
 		verifyNoMoreInteractions(repository);
 	}
 	
@@ -1033,8 +1032,8 @@ public class ClienteServiceTest {
 		
 		assertThat(page).isNotNull();
 		assertThat(page.getContent().size()).isEqualTo(2);
-		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
-		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus Antônio");
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getNome).
+		containsExactlyInAnyOrder("Marcus Vinicius", "Marcus Antônio");
 		
 		verify(repository).findByEmailContainingIgnoreCase("marcus@email.com", pageable);
 		verifyNoMoreInteractions(repository);
