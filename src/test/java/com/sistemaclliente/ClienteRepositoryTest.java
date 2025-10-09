@@ -91,6 +91,15 @@ public class ClienteRepositoryTest {
 		.containsExactlyInAnyOrder("marcus@gmail.com", "antonio@gmail.com");
 	}
 	
+	@Test
+	public void findAll_listaVazia() {
+		repository.deleteAll();
+		List<Cliente> listaClientes = repository.findAll();
+		
+		assertThat(listaClientes).isNotNull();
+		assertThat(listaClientes).isEmpty();
+	}
+	
 }
 
 
