@@ -97,7 +97,6 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-
 	@Test
 	public void listarClientes_listaVazia_retorno200() throws Exception {
 		List<ClienteResponseDTO> lista = List.of();
