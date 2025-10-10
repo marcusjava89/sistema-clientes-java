@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.sistemacliente.SistemaClientesJavaApplication;
@@ -169,6 +171,38 @@ public class ClienteRepositoryTest {
 		
 		assertThat(encontrado).isNotPresent();
 	}
+	
+	@Test
+	public void findAll_page_retornaPageCheia() {
+		PageRequest pageable = PageRequest.of(0, 2);
+		Page<Cliente> page = repository.findAll(pageable);
+		
+		assertThat(page).isNotNull();
+		assertThat(page).isNotEmpty();
+		assertThat(page.getNumberOfElements()).isEqualTo(2);
+		
+		assertThat(page.getContent()).extracting(Cliente::getNome)
+		.containsExactlyInAnyOrder("Marcus", "Antonio");
+		
+		assertThat(page.getContent()).extracting(Cliente::getCpf)
+		.containsExactlyInAnyOrder("20219064674", "23501206586");
+
+		assertThat(page.getContent()).extracting(Cliente::getEmail)
+		.containsExactlyInAnyOrder("marcus@gmail.com", "antonio@gmail.com");
+	}
+	
+	@Test
+	public void findAll_page_retornaPageVazia() {
+		repository.deleteAll();
+		
+		PageRequest pageable = PageRequest.of(0, 2);
+		Page<Cliente> page = repository.findAll(pageable);
+		
+		assertThat(page).isNotNull();
+		assertThat(page).isEmpty();
+		assertThat(page.getTotalPages()).isEqualTo(0);
+	}
+	
 }
 
 
