@@ -123,7 +123,23 @@ public class ClienteRepositoryTest {
 		Optional<Cliente> clienteNaoEncontrado = repository.findByCpf("10101010101");
 		
 		assertThat(clienteNaoEncontrado).isNotPresent();
-		assertThat(clienteNaoEncontrado).isEmpty();
+	}
+	
+	@Test
+	public void findByEmail_retornaCliente() {
+		Optional<Cliente> encontrado = repository.findByEmail("marcus@gmail.com");
+		
+		assertThat(encontrado).isPresent();
+		assertThat(encontrado.get().getNome()).isEqualTo("Marcus");
+		assertThat(encontrado.get().getCpf()).isEqualTo("23501206586");
+	}
+	
+
+	@Test
+	public void findByEmail_clienteNaoEncontrado_retornaVazia() {
+		Optional<Cliente> encontrado = repository.findByEmail("jorge@gmail.com");
+		
+		assertThat(encontrado).isNotPresent();
 	}
 }
 
