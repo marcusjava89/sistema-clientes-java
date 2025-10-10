@@ -1,7 +1,6 @@
 package com.sistemaclliente;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 
 import java.util.List;
 import java.util.Optional;
@@ -158,6 +157,15 @@ public class ClienteRepositoryTest {
 	@Test
 	public void findById_naoEncontraCliente_retornoVazio() {
 		Optional<Cliente> encontrado = repository.findById(99L);
+		
+		assertThat(encontrado).isNotPresent();
+	}
+	
+
+	@Test
+	public void delete_deletaCliente() {
+		repository.delete(cliente1);
+		Optional<Cliente> encontrado = repository.findByEmail("marcus@gmail.com");
 		
 		assertThat(encontrado).isNotPresent();
 	}
