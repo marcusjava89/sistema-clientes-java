@@ -118,6 +118,13 @@ public class ClienteRepositoryTest {
 		assertThat(clienteResgatado.get().getEmail()).isEqualTo("marcus@gmail.com");
 	}
 	
+	@Test
+	public void findByCpf_naoEncontraCliente_retornaVazia() {
+		Optional<Cliente> clienteNaoEncontrado = repository.findByCpf("10101010101");
+		
+		assertThat(clienteNaoEncontrado).isNotPresent();
+		assertThat(clienteNaoEncontrado).isEmpty();
+	}
 }
 
 
