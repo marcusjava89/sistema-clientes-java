@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.sistemacliente.SistemaClientesJavaApplication;
@@ -88,13 +89,9 @@ public class ClienteRepositoryTest {
 	public void findAll_listaCheia() {	
 		List<Cliente> listaClientes = repository.findAll();
 		
-		assertThat(listaClientes).isNotNull();
-		assertThat(listaClientes).isNotEmpty();
-		assertThat(listaClientes.size()).isEqualTo(2);
-		
-		assertThat(listaClientes).extracting(Cliente::getNome)
+		assertThat(listaClientes).isNotNull().isNotEmpty().hasSize(2).extracting(Cliente::getNome)
 		.containsExactlyInAnyOrder("Marcus", "Antonio");
-		
+				
 		assertThat(listaClientes).extracting(Cliente::getCpf)
 		.containsExactlyInAnyOrder("23501206586", "20219064674");
 		
@@ -108,8 +105,7 @@ public class ClienteRepositoryTest {
 		
 		List<Cliente> listaClientes = repository.findAll();
 		
-		assertThat(listaClientes).isNotNull();
-		assertThat(listaClientes).isEmpty();
+		assertThat(listaClientes).isNotNull().isEmpty();
 	}
 	
 	@Test
@@ -177,11 +173,7 @@ public class ClienteRepositoryTest {
 		PageRequest pageable = PageRequest.of(0, 2);
 		Page<Cliente> page = repository.findAll(pageable);
 		
-		assertThat(page).isNotNull();
-		assertThat(page).isNotEmpty();
-		assertThat(page.getNumberOfElements()).isEqualTo(2);
-		
-		assertThat(page.getContent()).extracting(Cliente::getNome)
+		assertThat(page).isNotNull().isNotEmpty().hasSize(2).extracting(Cliente::getNome)
 		.containsExactlyInAnyOrder("Marcus", "Antonio");
 		
 		assertThat(page.getContent()).extracting(Cliente::getCpf)
@@ -198,9 +190,21 @@ public class ClienteRepositoryTest {
 		PageRequest pageable = PageRequest.of(0, 2);
 		Page<Cliente> page = repository.findAll(pageable);
 		
-		assertThat(page).isNotNull();
-		assertThat(page).isEmpty();
+		assertThat(page).isNotNull().isEmpty();;
 		assertThat(page.getTotalPages()).isEqualTo(0);
+	}
+	
+	@Test
+	public void findAll_pageOrdenada_retorna_pageCheia() {
+		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
+		Page<Cliente> page = repository.findAll(pageable);
+		
+		assertThat(page).isNotNull().isNotEmpty();
+		assertThat(page.getNumberOfElements()).isEqualTo(2);
+		/*Aqui vemos que o cliente2, mesmo sendo salvo em segundo no banco está em primeiro na Page por
+		 *conta do critério de ordenação.*/
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Antonio");
+		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus");
 	}
 	
 }
