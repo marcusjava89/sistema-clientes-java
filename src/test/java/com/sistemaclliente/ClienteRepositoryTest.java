@@ -216,6 +216,17 @@ public class ClienteRepositoryTest {
 		assertThat(page).isNotNull().isEmpty();
 	}
 	
+	@Test
+	 public void findByNomeContainingIgnoreCase_sucesso_retornaPageCheia() {
+		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
+		Page<Cliente> page = repository.findByNomeContainingIgnoreCase("Marcus", pageable);
+		
+		assertThat(page).isNotNull().isNotEmpty().hasSize(1).extracting(Cliente::getNome)
+		.containsExactly("Marcus");
+		assertThat(page.getContent().get(0).getEmail()).isEqualTo("marcus@gmail.com");
+		assertThat(page.getContent().get(0).getCpf()).isEqualTo("23501206586");
+	}
+	
 }
 
 
