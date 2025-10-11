@@ -207,6 +207,15 @@ public class ClienteRepositoryTest {
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus");
 	}
 	
+	@Test
+	public void findAll_pageOrdenada_retorna_pageVazia() {
+		repository.deleteAll();
+		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
+		Page<Cliente> page = repository.findAll(pageable);
+
+		assertThat(page).isNotNull().isEmpty();
+	}
+	
 }
 
 
