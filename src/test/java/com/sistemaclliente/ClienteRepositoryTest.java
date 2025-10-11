@@ -105,7 +105,7 @@ public class ClienteRepositoryTest {
 		
 		List<Cliente> listaClientes = repository.findAll();
 		
-		assertThat(listaClientes).isNotNull().isEmpty();
+		assertThat(listaClientes).isEmpty();
 	}
 	
 	@Test
@@ -173,7 +173,7 @@ public class ClienteRepositoryTest {
 		PageRequest pageable = PageRequest.of(0, 2);
 		Page<Cliente> page = repository.findAll(pageable);
 		
-		assertThat(page).isNotNull().isNotEmpty().hasSize(2).extracting(Cliente::getNome)
+		assertThat(page).isNotEmpty().hasSize(2).extracting(Cliente::getNome)
 		.containsExactlyInAnyOrder("Marcus", "Antonio");
 		
 		assertThat(page.getContent()).extracting(Cliente::getCpf)
@@ -190,7 +190,7 @@ public class ClienteRepositoryTest {
 		PageRequest pageable = PageRequest.of(0, 2);
 		Page<Cliente> page = repository.findAll(pageable);
 		
-		assertThat(page).isNotNull().isEmpty();;
+		assertThat(page).isEmpty();;
 		assertThat(page.getTotalPages()).isEqualTo(0);
 	}
 	
@@ -199,7 +199,7 @@ public class ClienteRepositoryTest {
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
 		Page<Cliente> page = repository.findAll(pageable);
 		
-		assertThat(page).isNotNull().isNotEmpty();
+		assertThat(page).isNotEmpty();
 		assertThat(page.getNumberOfElements()).isEqualTo(2);
 		/*Aqui vemos que o cliente2, mesmo sendo salvo em segundo no banco está em primeiro na Page por
 		 *conta do critério de ordenação.*/
@@ -213,41 +213,35 @@ public class ClienteRepositoryTest {
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
 		Page<Cliente> page = repository.findAll(pageable);
 
-		assertThat(page).isNotNull().isEmpty();
+		assertThat(page).isEmpty();
 	}
 	
 	@Test
-	 public void findByNomeContainingIgnoreCase_sucesso_retornaPageCheia() {
+	public void findByNomeContainingIgnoreCase_sucesso_retornaPageCheia() {
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
-		Page<Cliente> page = repository.findByNomeContainingIgnoreCase("Marcus", pageable);
+		Page<Cliente> page = repository.findByNomeContainingIgnoreCase("mar", pageable);
 		
-		assertThat(page).isNotNull().isNotEmpty().hasSize(1).extracting(Cliente::getNome)
+		assertThat(page).isNotEmpty().hasSize(1).extracting(Cliente::getNome)
 		.containsExactly("Marcus");
 		assertThat(page.getContent().get(0).getEmail()).isEqualTo("marcus@gmail.com");
 		assertThat(page.getContent().get(0).getCpf()).isEqualTo("23501206586");
 	}
 	
+	@Test
+	public void findByEmail_sucesso_retornaPageCheia() {
+		PageRequest pageable = PageRequest.of(0, 2);
+		Page<Cliente> page = repository.findByEmail("antonio@gmail.com", pageable);
+		
+		assertThat(page).isNotEmpty().hasSize(1).extracting(Cliente::getNome)
+		.containsExactly("Antonio");
+	}
+	
+	@Test
+	public void findByEmail_emailInexistente_retornaPageVazia() {
+		PageRequest pageable = PageRequest.of(0, 2);
+		Page<Cliente> page = repository.findByEmail("jorge@gmail.com", pageable);
+		
+		assertThat(page).isEmpty();
+	}
+	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

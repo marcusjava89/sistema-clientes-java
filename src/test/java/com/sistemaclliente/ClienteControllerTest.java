@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -62,6 +63,30 @@ import com.sistemacliente.service.ClienteService;
 @Import(ValidationExceptionHandler.class)
 public class ClienteControllerTest {
 	
+	private ClienteResponseDTO cliente1;
+	private ClienteResponseDTO cliente2;
+	private ClienteRequestDTO dto;  
+	
+	@BeforeEach
+	public void setup() {
+		cliente1 = new ClienteResponseDTO();
+		cliente1.setId(1L);
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		cliente2 = new ClienteResponseDTO();
+		cliente2.setId(2L);
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
+		
+		dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+	}
+	
 	@Autowired
 	private MockMvc mvc;
 	
@@ -72,19 +97,7 @@ public class ClienteControllerTest {
 	private ClienteService service;
 	
 	@Test
-	public void listar_listaCheia_retornar200() throws Exception {
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Antonio");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("antonio@gmail.com");
-		
+	public void listarClientes_listaCheia_retornar200() throws Exception {
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		when(service.listagemCliente()).thenReturn(lista);
 		
@@ -121,9 +134,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarClientes_verboHttpIncorreto_retorno405() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		
+	public void salvarClientes_verboHttpIncorreto_retorno405() throws Exception {	
 		mvc.perform(get("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isMethodNotAllowed())
 		.andExpect(header().string("Allow", "POST"));
@@ -134,17 +145,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void salvarCliente_sucesso_retorno200() throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
-		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
 		when(service.salvarCliente(any(ClienteRequestDTO.class))).thenReturn(cliente1);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +161,6 @@ public class ClienteControllerTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
 	public void salvarCliente_nomeInvalido_retorno400(String nome) throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome(nome);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
@@ -178,7 +177,6 @@ public class ClienteControllerTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {"com", " ", "marcus@marcus@"})
 	public void salvarCliente_emailInvalido_retorno400(String email) throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setEmail(email);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
@@ -193,7 +191,6 @@ public class ClienteControllerTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
 	public void salvarCliente_cpfInvalido_retornar400(String cpf) throws Exception {
-		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf(cpf);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
@@ -206,13 +203,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void salvarCliente_cpfExistente_retornar409() throws Exception {
-		
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
 		ClienteRequestDTO dto1 = new ClienteRequestDTO();
 		dto1.setNome("Carlos");
 		dto1.setCpf("23501206586");
@@ -231,11 +221,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void salvarCliente_erroDeServidor_retrno500() throws Exception{
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
-		
 		when(service.salvarCliente(any(ClienteRequestDTO.class))).thenThrow(new RuntimeException());
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
@@ -249,12 +234,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void encontrarClientePorId_sucesso_retorno200() throws Exception {
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
 		when(service.buscarClientePorId(1L)).thenReturn(cliente1);
 		
 		mvc.perform(get("/encontrarcliente/1")).andExpect(status().isOk())
@@ -337,17 +316,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void atualizarCliente_sucesso_retorno200() throws Exception{
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
-		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
 		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class))).thenReturn(cliente1);
 		
 		mvc.perform(put("/clientes/1").contentType(MediaType.APPLICATION_JSON)
@@ -363,11 +331,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void atualizarCliente_clienteNaoEncontrado_retorno404() throws Exception{
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
-		
 		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
 		.thenThrow(new ClienteNotFoundException());
 		
@@ -381,8 +344,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void atualizarCliente_verboIncorreto_retorno405() throws Exception{
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		
 		mvc.perform(post("/clientes/1").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isMethodNotAllowed())
 		.andExpect(header().string("Allow", "PUT"));
@@ -393,11 +354,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void atualizarCliente_trocaDeCpf_retorno409() throws Exception{
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("26359874014");
-		dto.setEmail("marcus@gmail.com");
-		
 		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
 		.thenThrow(new AlteracaoDeCpfException());
 		
@@ -411,11 +367,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void atualizarCliente_erroDeServidor_retorno500() throws Exception{
-		ClienteRequestDTO dto = new ClienteRequestDTO();
-		dto.setNome("Marcus");
-		dto.setCpf("23501206586");
-		dto.setEmail("marcus@gmail.com");
-		
 		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
 		.thenThrow(new RuntimeException());
 		
@@ -429,12 +380,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void encontrarClientePorCpf_sucesso_retorno200() throws Exception{
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
 		when(service.encontrarPorCpf("23501206586")).thenReturn(cliente1);
 		
 		mvc.perform(get("/clientecpf/23501206586")).andExpect(status().isOk())
@@ -481,18 +426,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void listaPaginada_sucessoComParâmetros_retorno200() throws Exception{
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Antonio");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("antonio@gmail.com");
-		
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
@@ -515,18 +448,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void listaPaginada_sucessoSemParâmetros_retorno200() throws Exception{
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Antonio");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("antonio@gmail.com");
-		
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
@@ -582,18 +503,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void listaPaginadaOrdenada_sucessoSemParâmetros_retorno200() throws Exception{
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Antonio");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("antonio@gmail.com");
-		
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
@@ -614,18 +523,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void listaPaginadaOrdenada_sucessoComParâmetros_retorno200() throws Exception{
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Antonio");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("antonio@gmail.com");
-		
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
@@ -683,19 +580,13 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void buscarPorNomePagina_sucessoComParametro_retorno200() throws Exception {
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Marcelo");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("marcelo@gmail.com");
+		ClienteResponseDTO cliente3 = new ClienteResponseDTO();
+		cliente3.setId(3L);
+		cliente3.setNome("Marcelo");
+		cliente3.setCpf("20219064674");
+		cliente3.setEmail("marcelo@gmail.com");
 		
-		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
+		List<ClienteResponseDTO> lista = List.of(cliente1, cliente3);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
 		when(service.buscarPorNome("mar", 0, 2)).thenReturn(page);
@@ -716,19 +607,13 @@ public class ClienteControllerTest {
 	@Test
 	public void buscarPorNomePagina_sucessoSemParametro_retorno200() throws Exception {
 		/*Sem parâmetro em nome, página e itens.*/
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Marcelo");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("marcelo@gmail.com");
+		ClienteResponseDTO cliente3 = new ClienteResponseDTO();
+		cliente3.setId(3L);
+		cliente3.setNome("Marcelo");
+		cliente3.setCpf("20219064674");
+		cliente3.setEmail("marcelo@gmail.com");
 		
-		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
+		List<ClienteResponseDTO> lista = List.of(cliente1, cliente3);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
 		when(service.buscarPorNome(null, 0, 3)).thenReturn(page);
@@ -803,8 +688,6 @@ public class ClienteControllerTest {
 		updates.put("nome", "Marcus");
 		updates.put("email", "marcus@gmail.com");
 		
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
 		cliente1.setNome(updates.get("nome").toString());
 		cliente1.setCpf("23501206586");
 		cliente1.setEmail(updates.get("email").toString());
@@ -843,8 +726,7 @@ public class ClienteControllerTest {
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("cpf", "23501206586");
 		
-		when(service.atualizarParcial(eq(1L) ,anyMap()))
-		.thenThrow(new AlteracaoDeCpfException());
+		when(service.atualizarParcial(eq(1L) ,anyMap())).thenThrow(new AlteracaoDeCpfException());
 		
 		mvc.perform(patch("/parcial/1").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(updates))).andExpect(status().isConflict())
@@ -903,12 +785,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void buscaPorEmail_sucessoPaginaCheia_comParametros_retorno200() throws Exception{
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
 		List<ClienteResponseDTO> lista = List.of(cliente1);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
@@ -926,14 +802,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void buscaPorEmail_sucessoPaginaCheia_semParametros_retorno200() throws Exception{
-		/*Sem parâmetro de página e itens.*/
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
+	public void buscaPorEmail_sucessoPaginaCheia_semParametros_retorno200() throws Exception{	
 		List<ClienteResponseDTO> lista = List.of(cliente1);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
@@ -1016,12 +885,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void atualizarEmail_sucesso_retorno200() throws Exception{
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-		
 		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenReturn(cliente1);
 		
 		mvc.perform(patch("/atualizaremail/1").param("email", "marcus@gmail.com"))
@@ -1090,18 +953,6 @@ public class ClienteControllerTest {
 	
 	@Test
 	public void buscarPorEmailOrdenada_sucessoPageCheia_retorno200() throws Exception {
-		ClienteResponseDTO cliente1 = new ClienteResponseDTO();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setCpf("23501206586");
-		cliente1.setEmail("marcus@gmail.com");
-
-		ClienteResponseDTO cliente2 = new ClienteResponseDTO();
-		cliente2.setId(2L);
-		cliente2.setNome("Marcus Antônio");
-		cliente2.setCpf("20219064674");
-		cliente2.setEmail("marcus@gmail.com");
-		
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
