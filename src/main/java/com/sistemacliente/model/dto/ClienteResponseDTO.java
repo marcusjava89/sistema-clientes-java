@@ -9,18 +9,16 @@ public class ClienteResponseDTO {
 	public ClienteResponseDTO() {
 
 	}
-	
+
 	public ClienteResponseDTO(Cliente cliente) {
-		if(cliente != null) {			
-			BeanUtils.copyProperties(cliente, this);
-		}
+		BeanUtils.copyProperties(cliente, this);
 	}
-	
+
 	private Long id;
 	private String nome;
 	private String email;
 	private String cpf;
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -51,5 +49,5 @@ public class ClienteResponseDTO {
 
 	public void setCpf(String cpf) {
 		this.cpf = cpf;
-	}	
+	}
 }

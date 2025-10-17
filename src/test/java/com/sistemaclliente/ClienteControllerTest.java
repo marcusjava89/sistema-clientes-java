@@ -171,8 +171,7 @@ public class ClienteControllerTest {
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);
 	}
-	
-	/*Testa e-mails vazio, nulo e no formato inválido.*/
+
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {"com", " ", "marcus@marcus@"})
@@ -224,8 +223,7 @@ public class ClienteControllerTest {
 		when(service.salvarCliente(any(ClienteRequestDTO.class))).thenThrow(new RuntimeException());
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
-		.content(mapper.writeValueAsString(dto)))
-		.andExpect(status().isInternalServerError())
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isInternalServerError())
 		.andExpect(content().string("Erro interno no servidor."));
 		
 		verify(service).salvarCliente(any(ClienteRequestDTO.class));
@@ -298,7 +296,7 @@ public class ClienteControllerTest {
 	@Test
 	public void deletarClientePorId_verboIncorreto_retorno405() throws Exception{
 		mvc.perform(get("/deletarporid/1")).andExpect(status().isMethodNotAllowed())
-		.andExpect(header().string("Allow", containsString("DELETE")));
+		.andExpect(header().string("Allow", "DELETE"));
 
 		verify(service, never()).deletarClientePorId(anyLong());
 		verifyNoMoreInteractions(service);
@@ -559,8 +557,7 @@ public class ClienteControllerTest {
 	@Test
 	public void listaPaginadaOrdenada_verboIncorreto_retorno405() throws Exception{
 		mvc.perform(post("/paginadaordem?pagina=1&itens=2&ordenadoPor=id"))
-		.andExpect(status().isMethodNotAllowed())
-		.andExpect(header().string("Allow", "GET"));
+		.andExpect(status().isMethodNotAllowed()).andExpect(header().string("Allow", "GET"));
 		
 		verify(service, never()).listaPaginadaPorOrdenacao(1, 2, "id");
 		verifyNoMoreInteractions(service);
@@ -1041,24 +1038,3 @@ public class ClienteControllerTest {
 	static class TestConfig {}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

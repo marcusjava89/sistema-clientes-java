@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,30 +59,37 @@ public class ClienteServiceTest {
 	@InjectMocks
 	private ClienteService service;
 	
-	@Test
-	public void listagemCliente_retornarListaDTO() {
-		Cliente cliente1 = new Cliente();
+	private Cliente cliente1;
+	private Cliente cliente2;
+	
+	@BeforeEach
+	public void setup() {
+		cliente1 = new Cliente();
 		cliente1.setId(1L);
 		cliente1.setNome("Marcus");
 		cliente1.setEmail("marcus@email.com");
 		cliente1.setCpf("12345678");
 		
-		Cliente cliente2 = new Cliente();
+		cliente2 = new Cliente();
 		cliente2.setId(2L);
 		cliente2.setNome("Antônio");
 		cliente2.setEmail("antonio@email.com");
 		cliente2.setCpf("87654321");
-		
+	}
+	
+	
+	@Test
+	public void listagemCliente_retornarListaDTO() {
 		List<Cliente> lista = List.of(cliente1, cliente2);
 		when(repository.findAll()).thenReturn(lista);
 		
 		List<ClienteResponseDTO> listaResponse = service.listagemCliente();
 		
-		assertThat(listaResponse).isNotNull();
+		assertThat(listaResponse).isNotEmpty().extracting(ClienteResponseDTO::getNome).
+		containsExactlyInAnyOrder("Antônio", "Marcus");
+		
 		assertThat(listaResponse.size()).isEqualTo(2);
 		
-		assertThat(listaResponse).extracting(ClienteResponseDTO::getNome).
-		containsExactlyInAnyOrder("Antônio", "Marcus");
 		assertThat(listaResponse).extracting(ClienteResponseDTO::getCpf).
 		containsExactlyInAnyOrder("12345678", "87654321");
 		
@@ -96,7 +104,6 @@ public class ClienteServiceTest {
 		
 		List<ClienteResponseDTO> response = service.listagemCliente();
 		
-		assertThat(response).isNotNull();
 		assertThat(response).isEmpty();
 		assertThat(response.size()).isEqualTo(0);
 		
@@ -133,12 +140,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void salvarCliente_CpfJaExistente_retornarExcecao() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Carlos");
-		cliente1.setEmail("carlos@email.com");
-		cliente1.setCpf("12345678");
-		
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf("12345678");
 		dto.setEmail("marcus@email.com");
@@ -160,12 +161,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void salvarCliente_emailExistente_retornarExcecao() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Carlos");
-		cliente1.setEmail("carlos@email.com");
-		cliente1.setCpf("12345678789");
-		
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setCpf("12345678254");
 		dto.setEmail("carlos@email.com");
@@ -205,12 +200,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void buscarClientePorId_sucesso_encontrarCliente() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
 		when(repository.findById(anyLong())).thenReturn(Optional.of(cliente1));
 		
 		ClienteResponseDTO response = service.buscarClientePorId(1L);
@@ -237,12 +226,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void deletarClientePorId_sucesso_encontrarClienteDepoisDeletar() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		assertDoesNotThrow(() -> service.deletarClientePorId(1L));
@@ -257,7 +240,9 @@ public class ClienteServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.empty());
 		ClienteNotFoundException ex = 
 		assertThrows(ClienteNotFoundException.class, () -> service.deletarClientePorId(1L));
+		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 1 não encontrado.");
+		
 		verify(repository).findById(1L);
 		verify(repository, never()).delete(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
@@ -265,12 +250,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void atualizarCliente_sucesso_retornarDTO() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-        
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Carlos");
 		dto.setEmail("carlos@email.com");
@@ -313,12 +292,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void atualizarCliente_alterarCPF_retornaExcecao() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Carlos");
 		dto.setEmail("carlos@email.com");
@@ -341,16 +314,10 @@ public class ClienteServiceTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "carlos.com"})
 	public void atualizarCliente_emailIvalido_retornaExcecao(String email) {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcu@email.com");
-		cliente1.setCpf("41526487563");
-		
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Carlos");
 		dto.setEmail(email);
-		dto.setCpf("41526487563");
+		dto.setCpf("12345678");
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
@@ -367,44 +334,27 @@ public class ClienteServiceTest {
 
 	@Test
 	public void atualizarCliente_emailExistente_retornaExcecao() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("41526487563");
-		
-		Cliente cliente2 = new Cliente();
-		cliente1.setId(2L);
-		cliente1.setNome("Carlos Flávio");
-		cliente1.setEmail("carlos@email.com");
-		cliente1.setCpf("85462398745");
-		
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Carlos Jorge");
-		dto.setEmail("carlos@email.com");
-		dto.setCpf("41526487563");
+		dto.setEmail("antonio@email.com");
+		dto.setCpf("12345678");
 		
-		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
+		when(repository.findById(cliente1.getId())).thenReturn(Optional.of(cliente1));
+		when(repository.findByEmail("antonio@email.com")).thenReturn(Optional.of(cliente2));
 		
-		AlteracaoDeCpfException ex = assertThrows(AlteracaoDeCpfException.class,
-		() -> service.atualizarCliente(1L, dto));
+		EmailJaCadastradoException ex = assertThrows(EmailJaCadastradoException.class,
+		() -> service.atualizarCliente(cliente1.getId(), dto));
 		
-		assertThat(ex.getMessage()).isEqualTo("Alteração de CPF não permitida.");
+		assertThat(ex.getMessage()).isEqualTo("E-mail indisponível, já está sendo utilizado.");
 		
-		verify(repository).findById(1L);
-		verify(repository, never()).findByEmail("carlos@email.com");
+		verify(repository).findById(cliente1.getId());
+		verify(repository).findByEmail("antonio@email.com");
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
 		verifyNoMoreInteractions(repository);
 	}
 	
 	@Test
 	public void encontrarPorCpf_sucesso_encontrarCliente() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
 		when(repository.findByCpf("12345678")).thenReturn(Optional.of(cliente1));
 		ClienteResponseDTO response = service.encontrarPorCpf("12345678");
 			
@@ -432,18 +382,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void listaPaginada_sucesso_retornarListaPaginadaDTO() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
-		Cliente cliente2 = new Cliente();
-		cliente2.setId(2L);
-		cliente2.setNome("Antônio");
-		cliente2.setEmail("antonio@email.com");
-		cliente2.setCpf("87654321");
-		
 		List<Cliente> lista = List.of(cliente1, cliente2);
 		PageRequest pageable = PageRequest.of(0, 2);
 		Page<Cliente> pageMock = new PageImpl<>(lista);
@@ -452,17 +390,12 @@ public class ClienteServiceTest {
 		
 		Page<ClienteResponseDTO> page = service.listaPaginada(0, 2);
 		
-		assertThat(page).isNotNull();
-		assertThat(page.getContent()).hasSize(2);		
-		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf)
+		assertThat(page).isNotEmpty().hasSize(2).extracting(ClienteResponseDTO::getCpf)
 		.containsExactly("12345678", "87654321");
-
-		assertThat(page.getNumberOfElements()).isEqualTo(2);
-		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
-		assertThat(page.getContent().get(1).getNome()).isEqualTo("Antônio");
-		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
-		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
 		
+		assertThat(page.getContent()).extracting(ClienteResponseDTO::getNome)
+		.containsExactlyInAnyOrder("Marcus", "Antônio");
+
 		verify(repository).findAll(pageable);
 		verifyNoMoreInteractions(repository);
 	}
@@ -477,8 +410,7 @@ public class ClienteServiceTest {
 		
 		Page<ClienteResponseDTO> page = service.listaPaginada(0, 2);
 		
-		assertThat(page.getContent()).isNotNull();
-		assertThat(page.getNumberOfElements()).isEqualTo(0);
+		assertThat(page.getContent()).isEmpty();
 		
 		verify(repository).findAll(pageable);
 		verifyNoMoreInteractions(repository);
@@ -499,18 +431,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void listaPaginadaPorOrdenacao_sucesso_retornarListaCheia() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
-		Cliente cliente2 = new Cliente();
-		cliente2.setId(2L);
-		cliente2.setNome("Antônio");
-		cliente2.setEmail("antonio@email.com");
-		cliente2.setCpf("87654321");
-		
 		List<Cliente> lista = List.of(cliente1, cliente2);
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
@@ -518,15 +438,11 @@ public class ClienteServiceTest {
 		
 		Page<ClienteResponseDTO> page = service.listaPaginadaPorOrdenacao(0, 2, "nome");
 		
-		assertThat(page).isNotNull();
-		assertThat(page.getContent()).hasSize(2);
-		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf)
+		assertThat(page).isNotEmpty().hasSize(2).extracting(ClienteResponseDTO::getCpf)
 		.containsExactly("12345678", "87654321");
 
 		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Antônio");
-		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
-		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
 		
 		verify(repository).findAll(any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
@@ -542,8 +458,7 @@ public class ClienteServiceTest {
 		
 		Page<ClienteResponseDTO> page = service.listaPaginadaPorOrdenacao(0, 2, "nome");
 		
-		assertThat(page.getContent()).isNotNull();
-		assertThat(page.getContent()).isEmpty();
+		assertThat(page).isEmpty();
 		
 		verify(repository).findAll(pageable);
 		verifyNoMoreInteractions(repository);
@@ -577,35 +492,25 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void buscarPorNome_sucesso_retornarPageCheia() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
+		Cliente cliente3 = new Cliente();
+		cliente3.setId(3L);
+		cliente3.setNome("Marcus Antônio");
+		cliente3.setEmail("antonio@email.com");
+		cliente3.setCpf("87654321");
 		
-		Cliente cliente2 = new Cliente();
-		cliente2.setId(2L);
-		cliente2.setNome("Marcus Antônio");
-		cliente2.setEmail("antonio@email.com");
-		cliente2.setCpf("87654321");
-		
-		List<Cliente> lista = List.of(cliente1, cliente2);
+		List<Cliente> lista = List.of(cliente1, cliente3);
 		PageRequest pageable = PageRequest.of(0, 2);
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		
 		when(repository.findByNomeContainingIgnoreCase("Marcus", pageable)).thenReturn(pageMock);
 		Page<ClienteResponseDTO> page = service.buscarPorNome("Marcus", 0, 2);
 		
-		assertThat(page).isNotNull();
-		assertThat(page.getContent()).hasSize(2);
-		assertThat(page.getContent()).extracting(ClienteResponseDTO::getCpf)
+		assertThat(page).isNotEmpty().hasSize(2).extracting(ClienteResponseDTO::getCpf)
 		.containsExactly("12345678", "87654321");
 
-		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
 		assertThat(page.getContent().get(1).getNome()).isEqualTo("Marcus Antônio");
-		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
-		assertThat(page.getContent().get(1).getCpf()).isEqualTo("87654321");
-		
+
 		verify(repository).findByNomeContainingIgnoreCase("Marcus", pageable);
 		verifyNoMoreInteractions(repository);
 	}
@@ -619,8 +524,7 @@ public class ClienteServiceTest {
 		when(repository.findByNomeContainingIgnoreCase("Marcus", pageable)).thenReturn(pageMock);
 		Page<ClienteResponseDTO> page = service.buscarPorNome("Marcus", 0, 2);
 		
-		assertThat(page.getContent()).isNotNull();
-		assertThat(page.getContent()).isEmpty();
+		assertThat(page).isEmpty();
 		
 		verify(repository).findByNomeContainingIgnoreCase("Marcus", pageable);
 		verifyNoMoreInteractions(repository);
@@ -656,10 +560,12 @@ public class ClienteServiceTest {
 	JsonMappingException{
 		when(repository.findById(99L)).thenReturn(Optional.empty());
 		Map<String, Object> updates = Map.of("nome", "Marcus");
+		
 		ClienteNotFoundException ex = 
 		assertThrows(ClienteNotFoundException.class,() -> service.atualizarParcial(99L,updates));
 		
 		assertThat(ex.getMessage()).isEqualTo("Cliente com o id = 99 não encontrado.");
+		
 		verify(repository).findById(99L);
 		verify(repository, never()).findByEmail(anyString());
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
@@ -671,12 +577,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void atualizarParcial_sucesso_retornarDTO() throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678111");
-		
 		Map<String, Object> updates = Map.of("nome", "Antônio", "email", "antonio@email.com");
 		Cliente atualizado = new Cliente();
 		atualizado.setNome("Antônio");
@@ -706,18 +606,13 @@ public class ClienteServiceTest {
 	
 	@Test 
 	public void atualizarParcial_contemId_retornarExececao() throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678654");
-		
 		Map<String, Object> updates = Map.of("id", 2L, "email", "antonio@email.com");
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
 		() -> service.atualizarParcial(1L, updates));
 		assertThat(e.getMessage()).isEqualTo("O campo id não pode ser alterado.");
+		
 		verify(repository).findById(1L);
 		verify(repository, never()).findByEmail("antonio@email.com");
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
@@ -729,12 +624,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void atualizarParcial_contemCpf_retornarExcecao() throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
 		Map<String, Object> updates = Map.of("cpf", "32165487");
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
@@ -748,28 +637,22 @@ public class ClienteServiceTest {
 		verify(mapper, never()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		verify(mapper, never()).updateValue(any(Cliente.class), anyMap());
 		verifyNoMoreInteractions(mapper);
-		verifyNoMoreInteractions(repository);
-		
+		verifyNoMoreInteractions(repository);	
 	}
 	
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" "})
 	public void atualizarParcial_nomeInvalido_retornarExcecao(String nome) throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("nome", nome);
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, 
-				() -> service.atualizarParcial(1L, updates));
+		() -> service.atualizarParcial(1L, updates));
 		
 		assertThat(e.getMessage()).isEqualTo("Nome não pode ser vazio ou nulo.");
+		
 		verify(repository).findById(1L);
 		verify(repository, never()).findByEmail(anyString());
 		verify(repository, never()).saveAndFlush(any(Cliente.class));
@@ -783,12 +666,6 @@ public class ClienteServiceTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "marcus.com", "@@@@@@@"})
 	public void atualizarParcial_emailInvalido_retornarExcecao(String email) throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678541");
-        	
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("email", email);
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
@@ -809,23 +686,12 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void atualizarParcial_emailJaCadastrado_retornarExcecao() throws JsonMappingException {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
-		Cliente cliente2 = new Cliente();
-		cliente2.setId(2L);
-		cliente2.setNome("Marcus Antônio");
-		cliente2.setEmail("antonio@email.com");
-		cliente2.setCpf("87654321");
-		
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("email", "antonio@email.com");
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		when(repository.findByEmail("antonio@email.com")).thenReturn(Optional.of(cliente2));
+		
 		EmailJaCadastradoException ex = assertThrows(EmailJaCadastradoException.class,
 		() -> service.atualizarParcial(1L, updates));
 		
@@ -843,12 +709,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void buscaPorEmail_sucesso_retornarPageCheia() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
 		List<Cliente> lista = List.of(cliente1);
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2);
@@ -856,13 +716,11 @@ public class ClienteServiceTest {
 		when(repository.findByEmail("marcus@email.com",pageable)).thenReturn(pageMock);
 		Page<ClienteResponseDTO> page = service.buscarPorEmail("marcus@email.com", 0, 2);
 		
-		assertThat(page.getContent()).isNotNull();
-		assertThat(page.getContent()).isNotEmpty();
+		assertThat(page).isNotEmpty().hasSize(1);
 		assertThat(page.getContent().get(0).getId()).isEqualTo(1L);
-		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus Vinicius");
+		assertThat(page.getContent().get(0).getNome()).isEqualTo("Marcus");
 		assertThat(page.getContent().get(0).getEmail()).isEqualTo("marcus@email.com");
 		assertThat(page.getContent().get(0).getCpf()).isEqualTo("12345678");
-		assertThat(page.getContent().size()).isEqualTo(1);
 		
 		verify(repository).findByEmail("marcus@email.com", pageable);
 		verifyNoMoreInteractions(repository);
@@ -877,8 +735,7 @@ public class ClienteServiceTest {
 		when(repository.findByEmail("marcus@email.com", pageable)).thenReturn(pageMock);
 		Page<ClienteResponseDTO> page = service.buscarPorEmail("marcus@email.com", 0, 2);
 		
-		assertThat(page.getContent()).isNotNull();
-		assertThat(page.getContent()).isEmpty();
+		assertThat(page).isEmpty();
 		
 		verify(repository).findByEmail("marcus@email.com", pageable);
 		verifyNoMoreInteractions(repository);
@@ -911,12 +768,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void atualizarEmail_sucesso_emailAtualizado() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678514");
-		
 		String email = "vinicius@email.com";
 		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
@@ -957,12 +808,6 @@ public class ClienteServiceTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "marcus.com.br", "@@@"})
 	public void atualizarEmail_emailInvalido(String email) {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678514");
-		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -979,18 +824,6 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void atualizarEmail_emailJaCadastrado() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678514");
-		
-		Cliente cliente2 = new Cliente();
-		cliente2.setId(2L);
-		cliente2.setNome("Antônio");
-		cliente2.setEmail("antonio@email.com");
-		cliente2.setCpf("87654321765");
-		
 		when(repository.findById(1L)).thenReturn(Optional.of(cliente1));
 		when(repository.findByEmail("antonio@email.com")).thenReturn(Optional.of(cliente2));
 		
@@ -1008,38 +841,22 @@ public class ClienteServiceTest {
 	
 	@Test
 	public void buscaEmailPaginadaOrdenada_retornarPageCheia() {
-		Cliente cliente1 = new Cliente();
-		cliente1.setId(1L);
-		cliente1.setNome("Marcus Vinicius");
-		cliente1.setEmail("marcus@email.com");
-		cliente1.setCpf("12345678");
-		
-		Cliente cliente2 = new Cliente();
-		cliente2.setId(2L);
-		cliente2.setNome("Marcus Antônio");
-		cliente2.setEmail("marcus@email.com");
-		cliente2.setCpf("87654321");
-		
-		List<Cliente> lista = List.of(cliente1, cliente2);
+		List<Cliente> lista = List.of(cliente1);
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
 		
 		when(repository.findByEmailContainingIgnoreCase("marcus@email.com", pageable))
 		.thenReturn(pageMock);
-		
+
 		Page<ClienteResponseDTO> page = 
 		service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
 		
-		assertThat(page).isNotNull();
-		assertThat(page.getContent().size()).isEqualTo(2);
-		assertThat(page.getContent()).extracting(ClienteResponseDTO::getNome).
-		containsExactlyInAnyOrder("Marcus Vinicius", "Marcus Antônio");
+		assertThat(page).isNotEmpty().hasSize(1).extracting(ClienteResponseDTO::getNome).
+		containsExactly("Marcus");
 		
 		verify(repository).findByEmailContainingIgnoreCase("marcus@email.com", pageable);
-		verifyNoMoreInteractions(repository);
-		
+		verifyNoMoreInteractions(repository);	
  	}
-	
 
 	@Test
 	public void buscaEmailPaginadaOrdenada_emailNaoEncontrado_retornarPageVazia() {
@@ -1053,7 +870,6 @@ public class ClienteServiceTest {
 		Page<ClienteResponseDTO> page = 
 		service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
 		
-		assertThat(page).isNotNull();
 		assertThat(page).isEmpty();
 		
 		verify(repository).findByEmailContainingIgnoreCase("marcus@email.com", pageable);
@@ -1098,28 +914,5 @@ public class ClienteServiceTest {
 		verify(repository, never())
 		.findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
-	}
-	
-	
+	}	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
