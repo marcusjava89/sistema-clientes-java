@@ -131,7 +131,7 @@
 				</executions>
 			</plugin>
 			
-			<!--Para o JaCoCo-->
+			<!--Sufire para o JaCoCo-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
