@@ -1,0 +1,29 @@
+name: Build e Testes com Jacoco
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v3
+
+    - name: Configurar JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Build e testes
+      run: mvn clean test
+
+    - name: Gerar relatório Jacoco
+      run: mvn jacoco:report
