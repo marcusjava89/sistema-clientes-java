@@ -490,7 +490,8 @@ public class ClienteServiceTest {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 				() -> service.listaPaginadaPorOrdenacao(pagina, itens, "nome"));
 
-		assertThat(ex.getMessage()).isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
+		assertThat(ex.getMessage())
+		.isEqualTo("A página não pode ser negativa e itens não pode ser menor que 1.");
 
 		verify(repository, never()).findAll(any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
@@ -863,11 +864,14 @@ public class ClienteServiceTest {
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
 
-		when(repository.findByEmailContainingIgnoreCase("marcus@email.com", pageable)).thenReturn(pageMock);
+		when(repository.findByEmailContainingIgnoreCase("marcus@email.com", pageable))
+		.thenReturn(pageMock);
 
-		Page<ClienteResponseDTO> page = service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
+		Page<ClienteResponseDTO> page = 
+				service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
 
-		assertThat(page).isNotEmpty().hasSize(1).extracting(ClienteResponseDTO::getNome).containsExactly("Marcus");
+		assertThat(page).isNotEmpty().hasSize(1).extracting(ClienteResponseDTO::getNome)
+		.containsExactly("Marcus");
 
 		verify(repository).findByEmailContainingIgnoreCase("marcus@email.com", pageable);
 		verifyNoMoreInteractions(repository);
@@ -879,9 +883,11 @@ public class ClienteServiceTest {
 		Page<Cliente> pageMock = new PageImpl<>(lista);
 		PageRequest pageable = PageRequest.of(0, 2, Sort.by("nome").ascending());
 
-		when(repository.findByEmailContainingIgnoreCase("marcus@email.com", pageable)).thenReturn(pageMock);
+		when(repository.findByEmailContainingIgnoreCase("marcus@email.com", pageable))
+		.thenReturn(pageMock);
 
-		Page<ClienteResponseDTO> page = service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
+		Page<ClienteResponseDTO> page = 
+				service.buscaEmailPaginadaOrdenada("marcus@email.com", 0, 2, "nome");
 
 		assertThat(page).isEmpty();
 
@@ -897,7 +903,8 @@ public class ClienteServiceTest {
 
 		assertThat(ex.getMessage()).contains("negativo").contains("menor que 1");
 
-		verify(repository, never()).findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
+		verify(repository, never())
+		.findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
 	}
 
@@ -923,7 +930,8 @@ public class ClienteServiceTest {
 
 		assertThat(ex.getMessage()).contains("não").contains("vazio").contains("nulo");
 
-		verify(repository, never()).findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
+		verify(repository, never()).findByEmailContainingIgnoreCase(eq("marcus@email.com"), 
+				any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
 	}
 	
