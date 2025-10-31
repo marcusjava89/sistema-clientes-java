@@ -264,5 +264,4 @@ public class ClienteService {
 		Page<Cliente> page = repository.findByEmailContainingIgnoreCase(email, pageable);
 		return page.map(ClienteResponseDTO::new);
 	}
-	
 }
