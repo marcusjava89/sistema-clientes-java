@@ -926,4 +926,5 @@ public class ClienteServiceTest {
 		verify(repository, never()).findByEmailContainingIgnoreCase(eq("marcus@email.com"), any(PageRequest.class));
 		verifyNoMoreInteractions(repository);
 	}
+	
 }
