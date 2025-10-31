@@ -39,7 +39,7 @@ public class ClienteControllerIntegrationTest {
 	
 	@Test
 	@Transactional
-	@DisplayName("")
+	@DisplayName("Retorna 200 e lista de todos os clientes do banco de dados.")
 	public void listarClientes_listaCheia_retornar200() throws Exception {
 		repository.deleteAll();
 		
@@ -58,7 +58,16 @@ public class ClienteControllerIntegrationTest {
 		
 		mvc.perform(get("/listarclientes")).andExpect(status().isOk())
 		.andExpect(jsonPath("$[0].nome").value("Marcus"))
-		.andExpect(jsonPath("$[1].nome").value("Antonio")).andExpect(jsonPath("$.length()").value(2));;
+		.andExpect(jsonPath("$[1].nome").value("Antonio")).andExpect(jsonPath("$.length()").value(2));
+	}
+	
+	@Test
+	@Transactional
+	@DisplayName("Retorna 200 e lista vazia, pois o banco foi limpo.")
+	public void listarClientes_listaVazia_retorno200() throws Exception {
+		repository.deleteAll();
+		mvc.perform(get("/listarclientes")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.length()").value(0));
 	}
 	
 }

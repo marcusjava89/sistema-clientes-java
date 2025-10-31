@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -97,6 +98,7 @@ public class ClienteControllerTest {
 	private ClienteService service;
 	
 	@Test
+	@DisplayName("Retorna 200 e lista de todos os clientes do banco de dados.")
 	public void listarClientes_listaCheia_retornar200() throws Exception {
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		when(service.listagemCliente()).thenReturn(lista);
