@@ -87,17 +87,23 @@ public class ClienteService {
 			throw new AlteracaoDeCpfException();
 		}
 		
-		if (repository.findByEmail(dto.getEmail()).isPresent() && 
-		!dto.getEmail().equals(clienteEncontrado.getEmail())) {
-			throw new EmailJaCadastradoException();
+		if(dto.getEmail() == null) {
+			throw new NullPointerException();
 		}
 		
-		if(dto.getEmail() == null || dto.getEmail().isBlank()) {
+		if(dto.getEmail().isBlank()) {
 			throw new IllegalArgumentException("Formato inválido do e-mail.");
 		}
 		
 		if(!dto.getEmail().matches(regexEmail)) {
 			throw new IllegalArgumentException("Formato inválido do e-mail.");
+		}
+		
+		boolean emailExistente = repository.findByEmail(dto.getEmail()).isPresent();
+		boolean emailDiferente = !dto.getEmail().equals(clienteEncontrado.getEmail());
+		
+		if (emailExistente && emailDiferente) {
+			throw new EmailJaCadastradoException();
 		}
 
 		clienteEncontrado.setNome(dto.getNome());
