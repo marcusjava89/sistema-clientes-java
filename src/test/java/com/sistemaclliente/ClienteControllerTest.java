@@ -195,6 +195,7 @@ public class ClienteControllerTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
+	@DisplayName("Returns 400, tries to save a client with an invalid.")
 	public void salvarCliente_cpfInvalido_retornar400(String cpf) throws Exception {
 		dto.setCpf(cpf);
 		

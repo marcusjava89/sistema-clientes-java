@@ -98,7 +98,7 @@ public class ClienteControllerIntegrationTest {
 	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
 	@DisplayName("Returns 400, tries to save a client with an invalid name. A name is invalid if it"
 	+" is empty, null, have  less then 3 characters or more then 60 characters.")
-	public void salvarCliente_invalidName_returns400(String name) throws JsonProcessingException, Exception {
+	public void salvarCliente_invalidName_returns400(String name) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome(name);
 		dto.setCpf("23501206586");
@@ -114,7 +114,7 @@ public class ClienteControllerIntegrationTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {"com", " ", "marcus@marcus@"})
 	@DisplayName("Returns 400 when trying to save a client with an invalid email adress.")
-	public void salvarCliente_emailInvalido_retorno400(String email) throws Exception {
+	public void salvarCliente_invalidEmail_retorno400(String email) throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("23501206586");
@@ -125,6 +125,20 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.email").value(containsString("inválido")));
 	}
 	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
+	@DisplayName("Returns 400, tries to save a client with an invalid.")
+	public void salvarCliente_InvalidCpf_returns400(String cpf) throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf(cpf);
+		dto.setEmail("marcus@email.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.cpf").value(containsString("11 dígitos do CPF")));
+	}
 	
 }
 
