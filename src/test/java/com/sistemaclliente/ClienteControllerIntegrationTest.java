@@ -3,6 +3,7 @@ package com.sistemaclliente;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -140,6 +141,24 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.cpf").value(containsString("11 dígitos do CPF")));
 	}
 	
+	@Test
+	@DisplayName("Returns 409, tries to save a client with an existing CPF.")
+	public void salvarCliente_existingCPF_returns409() throws Exception {
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		ClienteRequestDTO dto1 = new ClienteRequestDTO();
+		dto1.setNome("Carlos");
+		dto1.setCpf("23501206586");
+		dto1.setEmail("carlos@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto1))).andExpect(status().isConflict())
+		.andExpect(content().string("O CPF 23501206586 já está cadastrado."));
+	}
 }
 
 

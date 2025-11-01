@@ -208,6 +208,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Returns 409, tries to save a client with an existing CPF.")
 	public void salvarCliente_cpfExistente_retornar409() throws Exception {
 		ClienteRequestDTO dto1 = new ClienteRequestDTO();
 		dto1.setNome("Carlos");
