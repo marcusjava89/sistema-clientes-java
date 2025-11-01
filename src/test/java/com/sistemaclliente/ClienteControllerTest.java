@@ -146,7 +146,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void salvarCliente_sucesso_retorno200() throws Exception {
+	public void salvarCliente_sucesso_retorno201() throws Exception {
 		when(service.salvarCliente(any(ClienteRequestDTO.class))).thenReturn(cliente1);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)

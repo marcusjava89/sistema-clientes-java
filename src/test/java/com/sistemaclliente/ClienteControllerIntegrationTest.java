@@ -1,6 +1,7 @@
 package com.sistemaclliente;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -9,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.SistemaClientesJavaApplication;
 import com.sistemacliente.model.Cliente;
+import com.sistemacliente.model.dto.ClienteRequestDTO;
 import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.repository.ClienteRepository;
 
@@ -39,8 +42,8 @@ public class ClienteControllerIntegrationTest {
 	
 	@Test
 	@Transactional
-	@DisplayName("Retorna 200 e lista de todos os clientes do banco de dados.")
-	public void listarClientes_listaCheia_retornar200() throws Exception {
+	@DisplayName("Returns 200 and a list of the clients from the database.")
+	public void listarClientes_fullList_return200() throws Exception {
 		repository.deleteAll();
 		
 		Cliente cliente1 = new Cliente();
@@ -63,15 +66,29 @@ public class ClienteControllerIntegrationTest {
 	
 	@Test
 	@Transactional
-	@DisplayName("Retorna 200 e lista vazia, pois o banco foi limpo.")
-	public void listarClientes_listaVazia_retorno200() throws Exception {
+	@DisplayName("Returns 200 and an empty list because we clened the database.")
+	public void listarClientes_emptyList_return200() throws Exception {
 		repository.deleteAll();
 		mvc.perform(get("/listarclientes")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.length()").value(0));
 	}
 	
+	@Test
+	@Transactional
+	@DisplayName("Returns 200 when saving DTO client.")
+	public void salvarCliente_success_return201() throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").content(mapper.writeValueAsString(dto))
+		.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated())
+		.andExpect(jsonPath("$.nome").value("Marcus")).andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
+	}
+	
 }
-
 
 
 
