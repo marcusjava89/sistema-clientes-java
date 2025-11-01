@@ -163,7 +163,7 @@ public class ClienteControllerTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
-	@DisplayName("Returns 400 when trying to save a client with an invalid name. A name is invalid if it"
+	@DisplayName("Returns 400 when tries to save a client with an invalid name. A name is invalid if it"
 	+" is empty, null, have  less then 3 characters or more then 60 characters.")
 	public void salvarCliente_nomeInvalido_retorno400(String nome) throws Exception {
 		dto.setNome(nome);
@@ -180,12 +180,13 @@ public class ClienteControllerTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {"com", " ", "marcus@marcus@"})
+	@DisplayName("Returns 400 when trying to save a client with an invalid email adress.")
 	public void salvarCliente_emailInvalido_retorno400(String email) throws Exception {
 		dto.setEmail(email);
 		
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
-		.andExpect(jsonPath("$.email").value(containsString("inválido")));;
+		.andExpect(jsonPath("$.email").value(containsString("inválido")));
 
 		verify(service, never()).salvarCliente(any());
 		verifyNoMoreInteractions(service);

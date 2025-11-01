@@ -1,5 +1,6 @@
 package com.sistemaclliente;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -95,7 +96,7 @@ public class ClienteControllerIntegrationTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
-	@DisplayName("Returns 400 when trying to save a client with an invalid name. A name is invalid if it"
+	@DisplayName("Returns 400, tries to save a client with an invalid name. A name is invalid if it"
 	+" is empty, null, have  less then 3 characters or more then 60 characters.")
 	public void salvarCliente_invalidName_returns400(String name) throws JsonProcessingException, Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
@@ -107,6 +108,21 @@ public class ClienteControllerIntegrationTest {
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.nome")
 		.value("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
+	}
+	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {"com", " ", "marcus@marcus@"})
+	@DisplayName("Returns 400 when trying to save a client with an invalid email adress.")
+	public void salvarCliente_emailInvalido_retorno400(String email) throws Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail(email);
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.email").value(containsString("inválido")));
 	}
 	
 	
