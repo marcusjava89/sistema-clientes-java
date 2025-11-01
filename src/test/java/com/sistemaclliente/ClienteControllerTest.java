@@ -146,6 +146,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Returns 201 when saving DTO client.")
 	public void salvarCliente_sucesso_retorno201() throws Exception {
 		when(service.salvarCliente(any(ClienteRequestDTO.class))).thenReturn(cliente1);
 		
@@ -162,6 +163,8 @@ public class ClienteControllerTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
+	@DisplayName("Returns 400 when trying to save a client with an invalid name. A name is invalid if it"
+	+" is empty, null, have  less then 3 characters or more then 60 characters.")
 	public void salvarCliente_nomeInvalido_retorno400(String nome) throws Exception {
 		dto.setNome(nome);
 		

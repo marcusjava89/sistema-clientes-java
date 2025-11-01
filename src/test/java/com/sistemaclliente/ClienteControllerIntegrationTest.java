@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.SistemaClientesJavaApplication;
 import com.sistemacliente.model.Cliente;
@@ -75,7 +79,7 @@ public class ClienteControllerIntegrationTest {
 	
 	@Test
 	@Transactional
-	@DisplayName("Returns 200 when saving DTO client.")
+	@DisplayName("Returns 201 when saving DTO client.")
 	public void salvarCliente_success_return201() throws Exception {
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
@@ -87,6 +91,24 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.nome").value("Marcus")).andExpect(jsonPath("$.cpf").value("23501206586"))
 		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
 	}
+	
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {" ", "ab", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901"})
+	@DisplayName("Returns 400 when trying to save a client with an invalid name. A name is invalid if it"
+	+" is empty, null, have  less then 3 characters or more then 60 characters.")
+	public void salvarCliente_invalidName_returns400(String name) throws JsonProcessingException, Exception {
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome(name);
+		dto.setCpf("23501206586");
+		dto.setEmail("marcus@gmail.com");
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.nome")
+		.value("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
+	}
+	
 	
 }
 
