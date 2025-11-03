@@ -1,6 +1,8 @@
 package com.sistemaclliente;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -176,10 +178,25 @@ public class ClienteControllerIntegrationTest {
 	}
 	
 	@Test
-	@DisplayName("Search for a client that doesn't exist, returns 404")
+	@DisplayName("Searches for a client that doesn't exist, returns 404")
 	public void encontrarClientePorId_notFound_returns404() throws Exception {
 		mvc.perform(get("/encontrarcliente/999")).andExpect(status().isNotFound());
 	}
+	
+	@Test @Transactional
+	@DisplayName("Returns 204, deletes an existing client by ID from database.")
+	public void deletarClientePorId_success_returns204() throws Exception {
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		mvc.perform(delete("/deletarporid/"+cliente1.getId())).andExpect(status().isNoContent());
+		
+		assertThat(repository.findById(cliente1.getId())).isNotPresent();
+	}
+	
 }
 
 

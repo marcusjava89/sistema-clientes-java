@@ -253,6 +253,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Searches for a client that doesn't exist, returns 404")
 	public void encontrarClientePorId_notFound_retorno404() throws Exception {
 		when(service.buscarClientePorId(anyLong())).thenThrow(new ClienteNotFoundException());
 		
@@ -284,6 +285,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Returns 204, deletes an existing client by ID from database.")
 	public void deletarClientePorId_sucesso_retorno204() throws Exception {
 		mvc.perform(delete("/deletarporid/1")).andExpect(status().isNoContent());
 		
