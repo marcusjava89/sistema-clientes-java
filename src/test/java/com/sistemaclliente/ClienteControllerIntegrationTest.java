@@ -227,6 +227,18 @@ public class ClienteControllerIntegrationTest {
 		
 		assertThat(encontrado.getEmail()).isEqualTo("carlos@gmail.com");
 	}
+	
+	@Test
+	@DisplayName("Tries to update and don't find client by ID, returns 404.")
+	public void atualizarCliente_clienteNaoEncontrado_retorno404() throws Exception{
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("carlos@gmail.com");
+		
+		mvc.perform(put("/clientes/999").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isNotFound());
+	}
 }
 
 

@@ -341,7 +341,8 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void atualizarCliente_clienteNaoEncontrado_retorno404() throws Exception{
+	@DisplayName("Tries to update and don't find client by ID, returns 404.")
+	public void atualizarCliente_clienteNaoEncontrado_retorno404() throws Exception{		
 		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
 		.thenThrow(new ClienteNotFoundException());
 		
