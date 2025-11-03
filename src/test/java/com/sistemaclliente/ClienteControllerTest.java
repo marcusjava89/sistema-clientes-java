@@ -325,6 +325,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Updates client according to the DTO object, returns 200.")
 	public void atualizarCliente_sucesso_retorno200() throws Exception{
 		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class))).thenReturn(cliente1);
 		

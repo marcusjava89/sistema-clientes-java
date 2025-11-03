@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -198,11 +199,33 @@ public class ClienteControllerIntegrationTest {
 	}
 	
 	@Test @Transactional
-	@DisplayName("Deletes a client by a non-existing ID and returns 404")
+	@DisplayName("Deletes a client by a non-existing ID and returns 404.")
 	public void deletarClientePorId_clientNotFound_returns404() throws Exception{
 		mvc.perform(delete("/deletarporid/999")).andExpect(status().isNotFound());
 		
 		assertThat(repository.findById(999L)).isNotPresent();
+	}
+	
+	@Test @Transactional
+	@DisplayName("Updates client according to the DTO object, returns 200.")
+	public void atualizarCliente_success_returns200() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("23501206586");
+		dto.setEmail("carlos@gmail.com");
+		
+		mvc.perform(put("/clientes/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isOk());
+		
+		Cliente encontrado = repository.findById(cliente1.getId()).get();
+		
+		assertThat(encontrado.getEmail()).isEqualTo("carlos@gmail.com");
 	}
 }
 
