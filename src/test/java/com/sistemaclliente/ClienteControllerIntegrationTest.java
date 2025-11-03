@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,12 +47,15 @@ public class ClienteControllerIntegrationTest {
 	@Test
 	public void contextLoads(){}
 	
+	@BeforeEach
+	public void setup() {
+		repository.deleteAll();
+	}
+	
 	@Test
 	@Transactional
 	@DisplayName("Returns 200 and a list of the clients from the database.")
 	public void listarClientes_fullList_return200() throws Exception {
-		repository.deleteAll();
-		
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
 		cliente1.setCpf("23501206586");
@@ -74,7 +78,6 @@ public class ClienteControllerIntegrationTest {
 	@Transactional
 	@DisplayName("Returns 200 and an empty list because we clened the database.")
 	public void listarClientes_emptyList_return200() throws Exception {
-		repository.deleteAll();
 		mvc.perform(get("/listarclientes")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.length()").value(0));
 	}
@@ -111,8 +114,7 @@ public class ClienteControllerIntegrationTest {
 		.value("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));
 	}
 	
-	@ParameterizedTest
-	@NullAndEmptySource
+	@ParameterizedTest @NullAndEmptySource
 	@ValueSource(strings = {"com", " ", "marcus@marcus@"})
 	@DisplayName("Returns 400 when trying to save a client with an invalid email adress.")
 	public void salvarCliente_invalidEmail_retorno400(String email) throws Exception {
@@ -126,8 +128,7 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.email").value(containsString("inválido")));
 	}
 	
-	@ParameterizedTest
-	@NullAndEmptySource
+	@ParameterizedTest @NullAndEmptySource
 	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
 	@DisplayName("Returns 400, tries to save a client with an invalid.")
 	public void salvarCliente_InvalidCpf_returns400(String cpf) throws Exception {
@@ -141,7 +142,7 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.cpf").value(containsString("11 dígitos do CPF")));
 	}
 	
-	@Test
+	@Test @Transactional
 	@DisplayName("Returns 409, tries to save a client with an existing CPF.")
 	public void salvarCliente_existingCPF_returns409() throws Exception {
 		Cliente cliente1 = new Cliente();
@@ -158,6 +159,26 @@ public class ClienteControllerIntegrationTest {
 		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto1))).andExpect(status().isConflict())
 		.andExpect(content().string("O CPF 23501206586 já está cadastrado."));
+	}
+	
+	@Test @Transactional
+	@DisplayName("Search for a client by ID in the database.")
+	public void encontrarClientePorId_success_returns200() throws Exception {
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		mvc.perform(get("/encontrarcliente/"+cliente1.getId())).andExpect(status().isOk())
+		.andExpect(jsonPath("$.nome").value("Marcus")).andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
+	}
+	
+	@Test
+	@DisplayName("Search for a client that doesn't exist, returns 404")
+	public void encontrarClientePorId_notFound_returns404() throws Exception {
+		mvc.perform(get("/encontrarcliente/999")).andExpect(status().isNotFound());
 	}
 }
 

@@ -239,6 +239,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Search for a client by ID in the database.")
 	public void encontrarClientePorId_sucesso_retorno200() throws Exception {
 		when(service.buscarClientePorId(1L)).thenReturn(cliente1);
 		
