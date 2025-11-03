@@ -164,8 +164,7 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(content().string("O CPF 23501206586 já está cadastrado."));
 	}
 	
-	@Test @Transactional
-	@DisplayName("Search for a client by ID in the database.")
+	@Test @Transactional @DisplayName("Search for a client by ID in the database.")
 	public void encontrarClientePorId_success_returns200() throws Exception {
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
@@ -178,14 +177,12 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
 	}
 	
-	@Test
-	@DisplayName("Searches for a client that doesn't exist, returns 404")
+	@Test @DisplayName("Searches for a client that doesn't exist, returns 404")
 	public void encontrarClientePorId_notFound_returns404() throws Exception {
 		mvc.perform(get("/encontrarcliente/999")).andExpect(status().isNotFound());
 	}
 	
-	@Test @Transactional
-	@DisplayName("Returns 204, deletes an existing client by ID from database.")
+	@Test @Transactional @DisplayName("Returns 204, deletes an existing client by ID from database.")
 	public void deletarClientePorId_success_returns204() throws Exception {
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
@@ -198,16 +195,14 @@ public class ClienteControllerIntegrationTest {
 		assertThat(repository.findById(cliente1.getId())).isNotPresent();
 	}
 	
-	@Test @Transactional
-	@DisplayName("Deletes a client by a non-existing ID and returns 404.")
+	@Test @Transactional @DisplayName("Deletes a client by a non-existing ID and returns 404.")
 	public void deletarClientePorId_clientNotFound_returns404() throws Exception{
 		mvc.perform(delete("/deletarporid/999")).andExpect(status().isNotFound());
 		
 		assertThat(repository.findById(999L)).isNotPresent();
 	}
 	
-	@Test @Transactional
-	@DisplayName("Updates client according to the DTO object, returns 200.")
+	@Test @Transactional @DisplayName("Updates client according to the DTO object, returns 200.")
 	public void atualizarCliente_success_returns200() throws Exception{
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
@@ -228,8 +223,7 @@ public class ClienteControllerIntegrationTest {
 		assertThat(encontrado.getEmail()).isEqualTo("carlos@gmail.com");
 	}
 	
-	@Test
-	@DisplayName("Tries to update and don't find client by ID, returns 404.")
+	@Test @DisplayName("Tries to update and don't find client by ID, returns 404.")
 	public void atualizarCliente_clienteNaoEncontrado_retorno404() throws Exception{
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
@@ -238,6 +232,25 @@ public class ClienteControllerIntegrationTest {
 		
 		mvc.perform(put("/clientes/999").contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isNotFound());
+	}
+	
+	@Test @Transactional
+	@DisplayName("Tries to update client, but it is not allowed change the CPF. Returns 409.")
+	public void atualizarCliente_changeCpf_returns409() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		ClienteRequestDTO dto = new ClienteRequestDTO();
+		dto.setNome("Marcus");
+		dto.setCpf("52364587425");
+		dto.setEmail("carlos@gmail.com");
+		
+		mvc.perform(put("/clientes/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto))).andExpect(status().isConflict())
+		.andExpect(content().string("Alteração de CPF não permitida."));
 	}
 }
 

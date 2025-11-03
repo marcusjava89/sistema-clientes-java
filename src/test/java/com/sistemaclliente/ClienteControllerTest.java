@@ -364,7 +364,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Tries to update client, but it is not allowed change the CPF. Returns 409.")
 	public void atualizarCliente_trocaDeCpf_retorno409() throws Exception{
 		when(service.atualizarCliente(anyLong(), any(ClienteRequestDTO.class)))
 		.thenThrow(new AlteracaoDeCpfException());
