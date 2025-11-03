@@ -2,6 +2,7 @@ package com.sistemaclliente;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -224,7 +225,7 @@ public class ClienteControllerIntegrationTest {
 	}
 	
 	@Test @DisplayName("Tries to update and don't find client by ID, returns 404.")
-	public void atualizarCliente_clienteNaoEncontrado_retorno404() throws Exception{
+	public void atualizarCliente_clientNotFound_returns404() throws Exception{
 		ClienteRequestDTO dto = new ClienteRequestDTO();
 		dto.setNome("Marcus");
 		dto.setCpf("23501206586");
@@ -252,6 +253,19 @@ public class ClienteControllerIntegrationTest {
 		.content(mapper.writeValueAsString(dto))).andExpect(status().isConflict())
 		.andExpect(content().string("Alteração de CPF não permitida."));
 	}
+	
+	@Test @Transactional @DisplayName("Finds client by CPF, returns 200.")
+	public void encontrarClientePorCpf_success_returns200() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		mvc.perform(get("/clientecpf/23501206586")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.nome").value("Marcus")).andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
+	}	
 }
 
 

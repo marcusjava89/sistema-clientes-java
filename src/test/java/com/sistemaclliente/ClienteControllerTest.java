@@ -390,7 +390,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Finds client by CPF, returns 200.")	
 	public void encontrarClientePorCpf_sucesso_retorno200() throws Exception{
 		when(service.encontrarPorCpf("23501206586")).thenReturn(cliente1);
 		
