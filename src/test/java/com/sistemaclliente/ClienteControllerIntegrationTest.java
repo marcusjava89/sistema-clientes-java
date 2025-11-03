@@ -197,6 +197,13 @@ public class ClienteControllerIntegrationTest {
 		assertThat(repository.findById(cliente1.getId())).isNotPresent();
 	}
 	
+	@Test @Transactional
+	@DisplayName("Deletes a client by a non-existing ID and returns 404")
+	public void deletarClientePorId_clientNotFound_returns404() throws Exception{
+		mvc.perform(delete("/deletarporid/999")).andExpect(status().isNotFound());
+		
+		assertThat(repository.findById(999L)).isNotPresent();
+	}
 }
 
 

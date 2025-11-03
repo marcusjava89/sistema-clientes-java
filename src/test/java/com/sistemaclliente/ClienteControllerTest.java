@@ -294,6 +294,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Deletes a client by a non-existing ID and returns 404")
 	public void deletarClientePorId_clienteNaoEncontrado_retorno404() throws Exception{
 		doThrow(new ClienteNotFoundException()).when(service).deletarClientePorId(anyLong());
 		
