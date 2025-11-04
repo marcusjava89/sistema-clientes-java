@@ -266,6 +266,14 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.nome").value("Marcus")).andExpect(jsonPath("$.cpf").value("23501206586"))
 		.andExpect(jsonPath("$.email").value("marcus@gmail.com"));
 	}	
+	
+	@Test @Transactional @DisplayName("Tries to find client by CPF but fails. Returns 404")
+	public void encontrarClientePorCpf_clientNotFound_returns404() throws Exception{
+		mvc.perform(get("/clientecpf/23501206586")).andExpect(status().isNotFound())
+		.andExpect(content().string("Cliente com o CPF = 23501206586 não encontrado."));
+		
+		assertThat(repository.findByCpf("23501206586")).isNotPresent();
+	}
 }
 
 

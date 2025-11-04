@@ -403,7 +403,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Tries to find client by CPF but fails. Returns 404")
 	public void encontrarClientePorCpf_clienteNotFound_retorno404() throws Exception{
 		when(service.encontrarPorCpf("23501206586"))
 		.thenThrow(new ClienteNotFoundException("23501206586"));
