@@ -482,8 +482,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@ParameterizedTest
-	@CsvSource({"-1 , 2","0 , 0"})
+	@ParameterizedTest @CsvSource({"-1 , 2","0 , 0"}) @DisplayName("Invalid parameters, returns 400.")
 	public void listaPaginada_parametrosInvalidos_retorno400(int pagina, int itens) throws Exception {
 		when(service.listaPaginada(pagina, itens)).thenThrow(new IllegalArgumentException
 		("A página não pode ser negativa e itens não pode ser menor que 1."));

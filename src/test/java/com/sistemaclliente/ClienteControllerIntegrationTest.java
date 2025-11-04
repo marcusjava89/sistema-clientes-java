@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -326,6 +327,13 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.content[1].email").value("antonio@gmail.com"))
 		.andExpect(jsonPath("$.content.length()").value(2));
 	}
+	
+	@ParameterizedTest @CsvSource({"-1 , 2", "0 , 0"}) @DisplayName("Invalid parameters, returns 400.")
+	public void listaPaginada_invalidParameters_returns400(int pagina, int itens) throws Exception {
+		mvc.perform(get("/paginada?pagina="+pagina+"&itens="+itens)).andExpect(status().isBadRequest())
+		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
+	}
+	
 }
 
 
