@@ -619,6 +619,8 @@ public class ClienteControllerTest {
 	}
 
 	@Test
+	@DisplayName("Searches for clients using part of their names and returns a paginated list, "
+	+ "page parameters are not provided. Returns 200.")
 	public void buscarPorNomePagina_sucessoSemParametro_retorno200() throws Exception {
 		/*Sem parâmetro em nome, página e itens.*/
 		ClienteResponseDTO cliente3 = new ClienteResponseDTO();

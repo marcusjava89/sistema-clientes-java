@@ -392,7 +392,8 @@ public class ClienteControllerIntegrationTest {
 	}
 	
 	@Test @Transactional 
-	@DisplayName("Searches for clients using part of their names and returns a paginated list, retuns 200")
+	@DisplayName("Searches for clients using part of their names and returns a paginated list, "
+			+ "parameters are provided. Returns 200.")
 	public void buscarPorNomePagina_successWithParameters_returns200() throws Exception {
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
@@ -414,6 +415,39 @@ public class ClienteControllerIntegrationTest {
 		repository.saveAndFlush(cliente3);
 		
 		mvc.perform(get("/buscapornome?nome=mar&pagina=0&itens=2")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content[1].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[0].nome").value("Marcelo"))
+		.andExpect(jsonPath("$.content[1].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content[0].cpf").value("47852136582"))
+		.andExpect(jsonPath("$.content[1].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[0].email").value("marcelo@gmail.com"))
+		.andExpect(jsonPath("$.content.length()").value(2));
+	}
+	
+	@Test @Transactional
+	@DisplayName("Searches for clients using part of their names and returns a paginated list, "
+	+ "page parameters are not provided. Returns 200.")
+	public void buscarPorNomePagina_successNoParameters_returns200() throws Exception {
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		Cliente cliente2 = new Cliente();
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
+		
+		Cliente cliente3 = new Cliente();
+		cliente3.setNome("Marcelo");
+		cliente3.setCpf("47852136582");
+		cliente3.setEmail("marcelo@gmail.com");
+		
+		repository.saveAndFlush(cliente1);
+		repository.saveAndFlush(cliente2);
+		repository.saveAndFlush(cliente3);
+		
+		mvc.perform(get("/buscapornome?nome=mar")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.content[1].nome").value("Marcus"))
 		.andExpect(jsonPath("$.content[0].nome").value("Marcelo"))
 		.andExpect(jsonPath("$.content[1].cpf").value("23501206586"))
