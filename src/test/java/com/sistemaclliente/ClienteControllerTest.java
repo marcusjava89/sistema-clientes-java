@@ -519,9 +519,9 @@ public class ClienteControllerTest {
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
-		when(service.listaPaginadaPorOrdenacao(0, 3, "nome")).thenReturn(page);
+		when(service.listaPaginadaPorOrdenacao(0, 3, "id")).thenReturn(page);
 		
-		mvc.perform(get("/paginadaordem").param("ordenadoPor", "nome")).andExpect(status().isOk())
+		mvc.perform(get("/paginadaordem").param("ordenadoPor", "id")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
 		.andExpect(jsonPath("$.content[1].nome").value("Antonio"))
 		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
@@ -530,7 +530,7 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.content[1].email").value("antonio@gmail.com"))
 		.andExpect(jsonPath("$.content.length()").value(2));
 		
-		verify(service).listaPaginadaPorOrdenacao(0, 3, "nome");
+		verify(service).listaPaginadaPorOrdenacao(0, 3, "id");
 		verifyNoMoreInteractions(service);
 	}
 	
