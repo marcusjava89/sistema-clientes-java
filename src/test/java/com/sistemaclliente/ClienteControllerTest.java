@@ -459,6 +459,8 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Returns Page and 200. We didn't give the parameters, we use the defaultValue from the"
+	+ "endpoint.")
 	public void listaPaginada_sucessoSemParâmetros_retorno200() throws Exception{
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
