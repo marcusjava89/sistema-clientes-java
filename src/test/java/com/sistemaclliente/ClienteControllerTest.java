@@ -436,7 +436,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Returns Page and 200. We gave the parameters to the Page.")
 	public void listaPaginada_sucessoComParâmetros_retorno200() throws Exception{
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
