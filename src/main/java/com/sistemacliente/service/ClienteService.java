@@ -152,7 +152,7 @@ public class ClienteService {
 			throw new IllegalArgumentException("Nome para busca não pode ser vazio ou nulo.");
 		}
 		
-		PageRequest pageable = PageRequest.of(pagina, itens);
+		PageRequest pageable = PageRequest.of(pagina, itens, Sort.by("nome").ascending());
 		Page<Cliente> page = repository.findByNomeContainingIgnoreCase(nome, pageable);
 				
 		return page.map(ClienteResponseDTO::new);

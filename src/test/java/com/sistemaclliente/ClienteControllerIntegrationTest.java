@@ -2,7 +2,6 @@ package com.sistemaclliente;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.SistemaClientesJavaApplication;
 import com.sistemacliente.model.Cliente;
@@ -391,6 +389,38 @@ public class ClienteControllerIntegrationTest {
 		mvc.perform(get("/paginadaordem?pagina="+pagina+"&itens="+itens+"&ordenadoPor=id"))
 		.andExpect(status().isBadRequest())
 		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
+	}
+	
+	@Test @Transactional 
+	@DisplayName("Searches for clients using part of their names and returns a paginated list, retuns 200")
+	public void buscarPorNomePagina_successWithParameters_returns200() throws Exception {
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		Cliente cliente2 = new Cliente();
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
+		
+		Cliente cliente3 = new Cliente();
+		cliente3.setNome("Marcelo");
+		cliente3.setCpf("47852136582");
+		cliente3.setEmail("marcelo@gmail.com");
+		
+		repository.saveAndFlush(cliente1);
+		repository.saveAndFlush(cliente2);
+		repository.saveAndFlush(cliente3);
+		
+		mvc.perform(get("/buscapornome?nome=mar&pagina=0&itens=2")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content[1].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[0].nome").value("Marcelo"))
+		.andExpect(jsonPath("$.content[1].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content[0].cpf").value("47852136582"))
+		.andExpect(jsonPath("$.content[1].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[0].email").value("marcelo@gmail.com"))
+		.andExpect(jsonPath("$.content.length()").value(2));
 	}
 }
 

@@ -591,6 +591,8 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Searches for clients using part of their names and returns a paginated list, "
+	+ "retuns 200")
 	public void buscarPorNomePagina_sucessoComParametro_retorno200() throws Exception {
 		ClienteResponseDTO cliente3 = new ClienteResponseDTO();
 		cliente3.setId(3L);
