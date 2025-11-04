@@ -554,8 +554,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
-	@ParameterizedTest
-	@CsvSource({"-1 , 2","0 , 0"})
+	@ParameterizedTest @CsvSource({"-1 , 2","0 , 0"}) 
+	@DisplayName("Returns 400, invalid parameters of the page.")
 	public void listaPaginadaOrdenada_parametrosInvalidos_retorno400(int pagina, int itens) 
 	throws Exception {
 		when(service.listaPaginadaPorOrdenacao(pagina, itens, "id")).thenThrow(new 

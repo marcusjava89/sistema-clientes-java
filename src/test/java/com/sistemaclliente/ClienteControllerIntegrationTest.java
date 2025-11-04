@@ -384,6 +384,14 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.content.length()").value(2));
 	}
 	
+	@ParameterizedTest @CsvSource({"-1,2", "0,0"})
+	@DisplayName("Returns 400, invalid parameters of the page.")
+	public void listaPaginadaOrdenada_invalidParameters_returns400(int pagina, int itens) 
+	throws Exception {
+		mvc.perform(get("/paginadaordem?pagina="+pagina+"&itens="+itens+"&ordenadoPor=id"))
+		.andExpect(status().isBadRequest())
+		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
+	}
 }
 
 
