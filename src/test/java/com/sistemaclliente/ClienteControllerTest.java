@@ -514,7 +514,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Returns 200 and paginated list. No Page parameters are provided.")
 	public void listaPaginadaOrdenada_sucessoSemParâmetros_retorno200() throws Exception{
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
@@ -534,14 +534,14 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Returns 200 and paginated list. Parameters are provided.")
 	public void listaPaginadaOrdenada_sucessoComParâmetros_retorno200() throws Exception{
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
 		
-		when(service.listaPaginadaPorOrdenacao(1, 2, "id")).thenReturn(page);
+		when(service.listaPaginadaPorOrdenacao(0, 2, "id")).thenReturn(page);
 		
-		mvc.perform(get("/paginadaordem?pagina=1&itens=2&ordenadoPor=id")).andExpect(status().isOk())
+		mvc.perform(get("/paginadaordem?pagina=0&itens=2&ordenadoPor=id")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
 		.andExpect(jsonPath("$.content[1].nome").value("Antonio"))
 		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
@@ -550,7 +550,7 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.content[1].email").value("antonio@gmail.com"))
 		.andExpect(jsonPath("$.content.length()").value(2));
 		
-		verify(service).listaPaginadaPorOrdenacao(1, 2, "id");
+		verify(service).listaPaginadaPorOrdenacao(0, 2, "id");
 		verifyNoMoreInteractions(service);	
 	}
 	

@@ -359,6 +359,31 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.content.length()").value(2));
 	}
 	
+	@Test @Transactional @DisplayName("Returns 200 and paginated list. Parameters are provided.")
+	public void listaPaginadaOrdenada_successWithParameters_returns200() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		Cliente cliente2 = new Cliente();
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
+		
+		repository.saveAndFlush(cliente1);
+		repository.saveAndFlush(cliente2);
+		
+		mvc.perform(get("/paginadaordem?pagina=0&itens=2&ordenadoPor=id")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[1].nome").value("Antonio"))
+		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content[1].cpf").value("20219064674"))
+		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[1].email").value("antonio@gmail.com"))
+		.andExpect(jsonPath("$.content.length()").value(2));
+	}
+	
 }
 
 
