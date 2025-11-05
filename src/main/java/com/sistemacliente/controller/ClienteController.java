@@ -77,8 +77,7 @@ public class ClienteController {
 	
 	@GetMapping(value = "/paginadaordem")
 	public ResponseEntity<Page<ClienteResponseDTO>> listaPaginadaOrdenada
-	(@RequestParam(defaultValue = "0") int pagina,
-	@RequestParam(defaultValue = "3") int itens,
+	(@RequestParam(defaultValue = "0") int pagina, @RequestParam(defaultValue = "3") int itens, 
 	@RequestParam(required = false) String ordenadoPor){
 		Page<ClienteResponseDTO> lista = service.listaPaginadaPorOrdenacao(pagina, itens, ordenadoPor);
 		return ResponseEntity.ok(lista);
@@ -86,7 +85,7 @@ public class ClienteController {
 	
 	@GetMapping(value = "/buscapornome")
 	public ResponseEntity<Page<ClienteResponseDTO>> buscarPorNomePagina(
-	@RequestParam(defaultValue = "nome") String nome, @RequestParam(defaultValue = "0") int pagina, 
+	@RequestParam(required = false) String nome, @RequestParam(defaultValue = "0") int pagina, 
 	@RequestParam(defaultValue = "3") int itens){
 		Page<ClienteResponseDTO> page = service.buscarPorNome(nome, pagina, itens);
 		return ResponseEntity.ok(page);

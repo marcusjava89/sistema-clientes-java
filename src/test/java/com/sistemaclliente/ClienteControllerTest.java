@@ -662,9 +662,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 
-	@ParameterizedTest
-	@NullAndEmptySource
-	@ValueSource(strings = " ")
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = " ")
+	@DisplayName("Returns 400. Invalid parameters (invalid name).")
 	public void buscarPorNomePagina_nomeInvalido_retorno400(String nome) throws Exception{
 		when(service.buscarPorNome(nome, 0, 2)).thenThrow(new 
 		IllegalArgumentException("Nome deve ter entre 3 e 60 caracteres, não pode ser nulo ou vazio."));

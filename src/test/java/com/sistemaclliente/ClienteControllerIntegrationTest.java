@@ -15,20 +15,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemacliente.SistemaClientesJavaApplication;
+import com.sistemacliente.exception.ValidationExceptionHandler;
 import com.sistemacliente.model.Cliente;
 import com.sistemacliente.model.dto.ClienteRequestDTO;
-import com.sistemacliente.model.dto.ClienteResponseDTO;
 import com.sistemacliente.repository.ClienteRepository;
 
 import jakarta.transaction.Transactional;
@@ -36,6 +39,7 @@ import jakarta.transaction.Transactional;
 @SpringBootTest(classes = SistemaClientesJavaApplication.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(ValidationExceptionHandler.class)
 public class ClienteControllerIntegrationTest {
 
 	@Autowired
@@ -55,9 +59,7 @@ public class ClienteControllerIntegrationTest {
 		repository.deleteAll();
 	}
 	
-	@Test
-	@Transactional
-	@DisplayName("Returns 200 and a list of the clients from the database.")
+	@Test @Transactional @DisplayName("Returns 200 and a list of the clients from the database.")
 	public void listarClientes_fullList_return200() throws Exception {
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
@@ -465,6 +467,17 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(status().isBadRequest())
 		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
 	}
+	
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = " ")
+	@DisplayName("Returns 400. Invalid parameters (invalid name).")
+	public void buscarPorNomePagina_invalidName_returns400(String nome) throws Exception{
+		mvc.perform(get("/buscapornome?pagina=0&itens=2").param("nome", nome))
+		.andExpect(status().isBadRequest()).andExpect(content()
+		.string("Nome para busca não pode ser vazio ou nulo."));
+	}
+	
+	
+	
 }
 
 
