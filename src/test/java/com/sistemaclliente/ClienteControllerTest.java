@@ -697,7 +697,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Returns 200. Partial update of client information.")
 	public void atualizarParcial_sucesso_retorno200() throws Exception {
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("nome", "Marcus");

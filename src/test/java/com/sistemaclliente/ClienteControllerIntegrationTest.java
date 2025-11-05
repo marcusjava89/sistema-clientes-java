@@ -4,11 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -476,7 +480,24 @@ public class ClienteControllerIntegrationTest {
 		.string("Nome para busca não pode ser vazio ou nulo."));
 	}
 	
-	
+	@Test @Transactional @DisplayName("Returns 200. Partial update of client information.")
+	public void atualizarParcial_success_return200() throws Exception {
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", "Antonio");
+		updates.put("email", "antonio@email.com");
+		
+		mvc.perform(patch("/parcial/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isOk())
+		.andExpect(jsonPath("$.nome").value("Antonio"))
+		.andExpect(jsonPath("$.cpf").value("23501206586"))
+		.andExpect(jsonPath("$.email").value("antonio@email.com"));
+	}
 	
 }
 
