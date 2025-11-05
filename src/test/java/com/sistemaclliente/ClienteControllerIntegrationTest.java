@@ -499,6 +499,22 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.email").value("antonio@email.com"));
 	}
 	
+	@Test @Transactional @DisplayName("Returns 400 when it tries to update client's ID.")
+	public void atualizarParcial_updatingId_returns400() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("id", 2L);
+		
+		mvc.perform(patch("/parcial/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("O campo id não pode ser alterado."));	
+	}
+	
 }
 
 

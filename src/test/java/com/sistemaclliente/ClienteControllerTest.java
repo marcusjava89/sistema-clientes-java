@@ -719,7 +719,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
  	}
 	
-	@Test
+	@Test @DisplayName("Returns 400 when it tries to update client's ID.")
 	public void atualizarParcial_presencaDoId_retorno400() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("id", 2L);
