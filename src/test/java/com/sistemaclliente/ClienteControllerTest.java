@@ -647,8 +647,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
-	@ParameterizedTest
-	@CsvSource({"mar, -1, 2", "marc, 0, 0", })
+	@ParameterizedTest @CsvSource({"mar, -1, 2", "marc, 0, 0", })
+	@DisplayName("Returns 400. Invalid parameters of the page (negative page, items less then 1).")
 	public void buscarPorNomePagina_paginaItensInvalidos_retorno400(String nome, int pagina, int itens) 
 	throws Exception {
 		when(service.buscarPorNome(nome, pagina, itens))

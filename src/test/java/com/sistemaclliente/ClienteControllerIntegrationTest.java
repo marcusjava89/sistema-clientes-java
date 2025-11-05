@@ -456,6 +456,15 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.content[0].email").value("marcelo@gmail.com"))
 		.andExpect(jsonPath("$.content.length()").value(2));
 	}
+	
+	@ParameterizedTest @CsvSource({"mar, -1, 2", "marc, 0, 0", })
+	@DisplayName("Returns 400. Invalid parameters of the page (negative page, items less then 1).")
+	public void buscarPorNomePagina_invalidParameters_returns400(String nome, int pagina, int itens) 
+	throws Exception {
+		mvc.perform(get("/buscapornome?nome="+nome+"&pagina="+pagina+"&itens="+itens))
+		.andExpect(status().isBadRequest())
+		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
+	}
 }
 
 
