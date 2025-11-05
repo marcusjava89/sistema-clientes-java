@@ -500,7 +500,7 @@ public class ClienteControllerIntegrationTest {
 	}
 	
 	@Test @Transactional @DisplayName("Returns 400 when it tries to update client's ID.")
-	public void atualizarParcial_updatingId_returns400() throws Exception{
+	public void atualizarParcial_invalidIdUpdanting_returns400() throws Exception{
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
 		cliente1.setCpf("23501206586");
@@ -515,6 +515,22 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(content().string("O campo id não pode ser alterado."));	
 	}
 	
+	@Test @Transactional
+	public void atualizarParcial_invalidCpfUpdating_returns409() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("cpf", "58652104789");
+		
+		mvc.perform(patch("/parcial/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isConflict())
+		.andExpect(content().string("Alteração de CPF não permitida."));
+	}
+
 }
 
 
