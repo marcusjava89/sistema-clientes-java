@@ -736,7 +736,7 @@ public class ClienteControllerTest {
 	}
 	
 	
-	@Test
+	@Test @DisplayName("Returns 409 when it tries to update client's CPF.")
 	public void atualizarParcial_presencaDoCpf_retorno409() throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("cpf", "23501206586");
@@ -751,9 +751,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@ParameterizedTest
-	@NullAndEmptySource
-	@ValueSource(strings = " ")
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = " ")
+	@DisplayName("It tries to update client's name with a empty string and a null value.")
 	public void atualizarParcial_nomeNuloVazio_retorno400(String nome) throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("nome", nome);

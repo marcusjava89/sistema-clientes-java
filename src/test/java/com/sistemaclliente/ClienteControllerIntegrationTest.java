@@ -515,7 +515,7 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(content().string("O campo id não pode ser alterado."));	
 	}
 	
-	@Test @Transactional
+	@Test @Transactional @DisplayName("Returns 409 when it tries to update client's CPF.")
 	public void atualizarParcial_invalidCpfUpdating_returns409() throws Exception{
 		Cliente cliente1 = new Cliente();
 		cliente1.setNome("Marcus");
@@ -529,6 +529,23 @@ public class ClienteControllerIntegrationTest {
 		mvc.perform(patch("/parcial/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
 		.content(mapper.writeValueAsString(updates))).andExpect(status().isConflict())
 		.andExpect(content().string("Alteração de CPF não permitida."));
+	}
+	
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = " ") @Transactional
+	@DisplayName("It tries to update client's name with an empty string and a null value.")
+	public void atualizarParcial_invalidName_returns400(String nome) throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("nome", nome);
+		
+		mvc.perform(patch("/parcial/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string("Nome não pode ser vazio ou nulo."));
 	}
 
 }
