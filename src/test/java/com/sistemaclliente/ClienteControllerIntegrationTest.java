@@ -531,7 +531,7 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(content().string("Alteração de CPF não permitida."));
 	}
 	
-	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = " ") @Transactional
+	@ParameterizedTest @NullAndEmptySource @Transactional @ValueSource(strings = " ") 
 	@DisplayName("It tries to update client's name with an empty string and a null value.")
 	public void atualizarParcial_invalidName_returns400(String nome) throws Exception{
 		Cliente cliente1 = new Cliente();
@@ -547,6 +547,27 @@ public class ClienteControllerIntegrationTest {
 		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
 		.andExpect(content().string("Nome não pode ser vazio ou nulo."));
 	}
+	
+	@ParameterizedTest @NullAndEmptySource @Transactional
+	@ValueSource(strings = {" ", "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
+	@DisplayName("It tries to update partial information of the client with an invalid e-mail address and"
+	+ "returns 400.")
+	public void atualizarParcial_invalidEmailAdress_returns400(String email) throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("email", email);
+		
+		mvc.perform(patch("/parcial/"+cliente1.getId()).contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(updates))).andExpect(status().isBadRequest())
+		.andExpect(content().string(containsString("inválido")));
+	}
+	
+	
 
 }
 

@@ -768,9 +768,10 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@ParameterizedTest
-	@NullAndEmptySource
+	@ParameterizedTest @NullAndEmptySource
 	@ValueSource(strings = {" ", "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
+	@DisplayName("It tries to update partial information of the client with an invalid e-mail address and"
+	+ "returns 400.")
 	public void atualizarParcial_emailInvalido_retorno400(String email) throws Exception{
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("email", email);
