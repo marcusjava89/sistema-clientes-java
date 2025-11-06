@@ -567,7 +567,40 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(content().string(containsString("inválido")));
 	}
 	
-	
+	@Test @Transactional() @DisplayName("Searches for an e-mail address and returns a page with the"
+	+ "client from that e-mail.")
+	public void buscaPorEmail_successPage_withPageParameters_return200() throws Exception{
+		/*This is only a test to make sure that the correct content is returned. The e-mail address is 
+		 *unique and we can't have two clients with the same e-mail. For that reason the real Page only
+		 *return one client.*/
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		Cliente cliente2 = new Cliente();
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
+		
+		Cliente cliente3 = new Cliente();
+		cliente3.setNome("Marcelo");
+		cliente3.setCpf("47852136582");
+		cliente3.setEmail("marcus@gmail.com");
+		
+		repository.saveAndFlush(cliente1);
+		repository.saveAndFlush(cliente2);
+		repository.saveAndFlush(cliente3);
+		
+		mvc.perform(get("/buscaemail?email=marcus@gmail.com&pagina=0&itens=3")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content[0].nome").value("Marcus"))
+		.andExpect(jsonPath("$.content[0].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[0].cpf").value("23501206586"))
+		.andExpect(jsonPath("$.content[1].nome").value("Marcelo"))
+		.andExpect(jsonPath("$.content[1].email").value("marcus@gmail.com"))
+		.andExpect(jsonPath("$.content[1].cpf").value("47852136582"))
+		.andExpect(jsonPath("$.content.length()").value(2));
+	}
 
 }
 

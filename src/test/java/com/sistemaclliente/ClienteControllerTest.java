@@ -125,7 +125,7 @@ public class ClienteControllerTest {
 	}
 	
 	@Test
-	public void listarClientes_retornao500() throws Exception {
+	public void listarClientes_retorna500() throws Exception {
 		when(service.listagemCliente()).thenThrow(new RuntimeException());
 		
 		mvc.perform(get("/listarclientes")).andExpect(status().isInternalServerError())
@@ -798,7 +798,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
-	@Test
+	@Test @DisplayName("Searches for an e-mail address and returns a page with the"
+	+ "client from that e-mail.")
 	public void buscaPorEmail_sucessoPaginaCheia_comParametros_retorno200() throws Exception{
 		List<ClienteResponseDTO> lista = List.of(cliente1);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
