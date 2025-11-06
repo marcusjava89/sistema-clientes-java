@@ -195,7 +195,7 @@ public class ClienteControllerTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@ValueSource(strings = {" ", "101089757er", "101089757", "25013569874965"})
-	@DisplayName("Returns 400, tries to save a client with an invalid.")
+	@DisplayName("Returns 400, tries to save a client with an invalid CPF.")
 	public void salvarCliente_cpfInvalido_retornar400(String cpf) throws Exception {
 		dto.setCpf(cpf);
 		
@@ -204,6 +204,25 @@ public class ClienteControllerTest {
 		.andExpect(jsonPath("$.cpf").value(containsString("11 dígitos do CPF")));
 		
 		verify(service, never()).salvarCliente(any());
+		verifyNoMoreInteractions(service);
+	}
+	
+	@Test 
+	@DisplayName("Attempts to save a client in database with an existing e-mail address. Returns 409.")
+	public void salvarCliente_existingEmail_returns409() throws Exception{
+		ClienteRequestDTO dto1 = new ClienteRequestDTO();
+		dto1.setNome("Diego");
+		dto1.setCpf("52639854712");
+		dto1.setEmail("marcus@gmail.com");
+		
+		when(service.salvarCliente(any(ClienteRequestDTO.class)))
+		.thenThrow(new EmailJaCadastradoException());
+		
+		mvc.perform(post("/salvarcliente").contentType(MediaType.APPLICATION_JSON)
+		.content(mapper.writeValueAsString(dto1))).andExpect(status().isConflict())
+		.andExpect(content().string("E-mail indisponível, já está sendo utilizado."));
+		
+		verify(service).salvarCliente(any(ClienteRequestDTO.class));
 		verifyNoMoreInteractions(service);
 	}
 	
