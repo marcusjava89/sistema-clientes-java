@@ -870,8 +870,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
-	@ParameterizedTest
-	@NullSource
+	@ParameterizedTest @NullSource @DisplayName("Attempts to find a client, but the email address doesn't"
+	+ "matches regex and returns 400.")
 	@ValueSource(strings = {"marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
 	public void buscaPorEmail_formatoInvalido_retorno400(String email) throws Exception{
 		when(service.buscarPorEmail(email, 0, 3))

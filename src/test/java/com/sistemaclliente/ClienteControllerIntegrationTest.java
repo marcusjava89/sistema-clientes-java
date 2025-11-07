@@ -550,7 +550,7 @@ public class ClienteControllerIntegrationTest {
 	
 	@ParameterizedTest @NullAndEmptySource @Transactional
 	@ValueSource(strings = {" ", "marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
-	@DisplayName("It tries to update partial information of the client with an invalid email address and"
+	@DisplayName("Attempts to update partial information of the client with an invalid email address and"
 	+ "returns 400.")
 	public void atualizarParcial_invalidEmailAdress_returns400(String email) throws Exception{
 		Cliente cliente1 = new Cliente();
@@ -637,11 +637,19 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.content.length()").value(2));
 	}
 	
-	@Test @DisplayName("Attempts to search for the client that matches the email and finds none. "
+	@Test @DisplayName("Attempts to search for a client that matches the email and finds none. "
 	+ "Returns 200.")
 	public void buscaPorEmail_successEmptyPage_returns200() throws Exception{
 		mvc.perform(get("/buscaemail?email=marcus@gmail.com")).andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(0));
+	}
+	
+	@ParameterizedTest @NullSource @DisplayName("Attempts to find a client, but the email address doesn't"
+	+ "matches regex and returns 400.")
+	@ValueSource(strings = {"marcus@marcus@marcus", "marcus.com", "@marcus.com", "marcus@"})
+	public void buscaPorEmail_invalidEmailFormat_returns400(String email) throws Exception{
+		mvc.perform(get("/buscaemail").param("email", email)).andExpect(status().isBadRequest())
+		.andExpect(content().string(containsString("inválido")));
 	}
 
 }
