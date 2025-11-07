@@ -236,7 +236,7 @@ public class ClienteService {
 		}
 		
 		cliente.setEmail(email);
-		Cliente clienteAtualizado = repository.save(cliente); 
+		Cliente clienteAtualizado = repository.saveAndFlush(cliente); 
 		return new ClienteResponseDTO(clienteAtualizado);
 	}
 	

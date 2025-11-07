@@ -920,14 +920,14 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Updates the client's email address. Returns 200.")
 	public void atualizarEmail_sucesso_retorno200() throws Exception{
-		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenReturn(cliente1);
+		when(service.atualizarEmail(1L, "marcelo@gmail.com")).thenReturn(cliente1);
 		
-		mvc.perform(patch("/atualizaremail/1").param("email", "marcus@gmail.com"))
+		mvc.perform(patch("/atualizaremail/1").param("email", "marcelo@gmail.com"))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.nome").value("Marcus"));
 		
-		verify(service).atualizarEmail(1L, "marcus@gmail.com");
+		verify(service).atualizarEmail(1L, "marcelo@gmail.com");
 		verifyNoMoreInteractions(service);	
 	}
 	

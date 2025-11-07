@@ -661,6 +661,19 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
 	}
 	
+	@Test @Transactional @DisplayName("Updates the client's email address. Returns 200.")
+	public void atualizarEmail_successfullEmailUpdating_returns200() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		mvc.perform(patch("/atualizaremail/"+cliente1.getId()).param("email", "marcelo@gmail.com"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.nome").value("Marcus"))
+		.andExpect(jsonPath("$.email").value("marcelo@gmail.com"));
+	}
+	
 }
 
 
