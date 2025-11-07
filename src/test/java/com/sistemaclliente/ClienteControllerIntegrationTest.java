@@ -754,12 +754,20 @@ public class ClienteControllerIntegrationTest {
 	}
 	
 	@ParameterizedTest @CsvSource({"-1,2", "0,0"})
-	@DisplayName("Attempts to search for a client with invalid pagination parameters. Returns 400.")
+	@DisplayName("Attempts to search for a client with invalid pagination values. Returns 400.")
 	public void buscarPorEmailOrdenada_paginaItensInvalidos_retorno400 (int pagina, int itens) 
 	throws Exception{
 		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
 		.param("pagina", String.valueOf(pagina)).param("itens", String.valueOf(itens))
 		.param("ordenadoPor", "id")).andExpect(status().isBadRequest());
+	}
+	
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = {" ", "marcus@marcus@", "marcus.com"})
+	@DisplayName("Attempts to search for a client by email with an invalid email format. Returns 400.")
+	public void buscarPorEmailOrdenada_emailInvalido_retorno400(String email) throws Exception{
+		mvc.perform(get("/buscarporemail").param("email", email)
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isBadRequest()).andExpect(content().string(containsString("inválido")));
 	}
 	
 }

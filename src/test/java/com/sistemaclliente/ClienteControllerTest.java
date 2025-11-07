@@ -1037,9 +1037,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@ParameterizedTest
-	@NullAndEmptySource
-	@ValueSource(strings = {" ", "marcus@marcus@", "marcus.com"})
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = {" ", "marcus@marcus@", "marcus.com"})
+	@DisplayName("Attempts to search for a client by email with an invalid email format. Returns 400.")
 	public void buscarPorEmailOrdenada_emailInvalido_retorno400(String email) throws Exception{
 		when(service.buscaEmailPaginadaOrdenada(email, 0, 2, "id"))
 		.thenThrow(new IllegalArgumentException("Formato inválido do e-mail."));
