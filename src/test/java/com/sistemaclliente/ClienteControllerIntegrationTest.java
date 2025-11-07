@@ -747,10 +747,19 @@ public class ClienteControllerIntegrationTest {
 	}
 	
 	@Test @DisplayName("Attempts to search for a client by the given email, but finds none.")
-	public void buscarPorEmailOrdenada_sucessoPageVazia_retorno200() throws Exception {
+	public void buscarPorEmailOrdenada_successEmptyPage_returns200() throws Exception {
 		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
 		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.content.length()").value(0));
+	}
+	
+	@ParameterizedTest @CsvSource({"-1,2", "0,0"})
+	@DisplayName("Attempts to search for a client with invalid pagination parameters. Returns 400.")
+	public void buscarPorEmailOrdenada_paginaItensInvalidos_retorno400 (int pagina, int itens) 
+	throws Exception{
+		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", String.valueOf(pagina)).param("itens", String.valueOf(itens))
+		.param("ordenadoPor", "id")).andExpect(status().isBadRequest());
 	}
 	
 }

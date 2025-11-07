@@ -1022,8 +1022,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@ParameterizedTest(name = "Página negativa e itens menor que 1.")
-	@CsvSource({"-1,2", "0,0"})
+	@ParameterizedTest(name = "Página negativa e itens menor que 1.") @CsvSource({"-1,2", "0,0"})
+	@DisplayName("Attempts to search for a client with invalid pagination parameters. Returns 400.")
 	public void buscarPorEmailOrdenada_paginaItensInvalidos_retorno400
 	(int pagina, int itens) throws Exception{
 		when(service.buscaEmailPaginadaOrdenada("marcus@gmail.com", pagina, itens, "id"))
