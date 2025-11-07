@@ -651,7 +651,16 @@ public class ClienteControllerIntegrationTest {
 		mvc.perform(get("/buscaemail").param("email", email)).andExpect(status().isBadRequest())
 		.andExpect(content().string(containsString("inválido")));
 	}
-
+	
+	@ParameterizedTest @CsvSource({"-1,2", "0,0"}) @DisplayName("Attempts to search for a client by email,"
+	+ "but with invalid Page parameters. Returns 400.")
+	public void buscaPorEmail_invalidPageParameters_returns400(int pagina, int itens) throws Exception{
+		mvc.perform(get("/buscaemail").param("email", "marcus@gmail.com")
+		.param("pagina", String.valueOf(pagina)).param("itens", String.valueOf(itens)))
+		.andExpect(status().isBadRequest())
+		.andExpect(content().string("A página não pode ser negativa e itens não pode ser menor que 1."));
+	}
+	
 }
 
 

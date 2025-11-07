@@ -884,8 +884,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@ParameterizedTest
-	@CsvSource({"-1,2", "0,0"})
+	@ParameterizedTest @CsvSource({"-1,2","0,0"}) @DisplayName("Attempts to search for a client by email,"
+			+ "but with invalid Page parameters. Returns 400.")
 	public void buscaPorEmail_paginaItensInvalidos_retorno400(int pagina, int itens) throws Exception{
 		when(service.buscarPorEmail("marcus@gmail.com", pagina, itens)).thenThrow(new 
 		IllegalArgumentException("Página não pode ser negativa e itens não pode ser menor que 1."));
