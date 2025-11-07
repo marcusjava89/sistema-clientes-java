@@ -605,7 +605,7 @@ public class ClienteControllerIntegrationTest {
 	@Test @Transactional @DisplayName("Searches for an e-mail address and returns a page with the"
 	+ "client from that email. Page parameters are NOT provided.") 
 	public void buscaPorEmail_successFullPage_noParameters_returns200() throws Exception{	
-		/*This is only a test to make sure that the correct content is returned. The email address is 
+		/*This is only a test to ensure that the correct content is returned. The email address is 
 		 *unique and we can't have two clients with the same e-mail. For that reason the real Page only
 		 *return one client.*/
 		Cliente cliente1 = new Cliente();
@@ -712,7 +712,36 @@ public class ClienteControllerIntegrationTest {
 		
 		mvc.perform(patch("/atualizaremail/"+cliente1.getId()).param("email", "antonio@gmail.com"))
 		.andExpect(status().isConflict()).andExpect(content().string(containsString("indisponível")));
+	}
+	
+	@Test @Transactional @DisplayName("Searches for the client by email and returns a Page with that "
+	+ "client. Returns 200.")
+	public void buscarPorEmailOrdenada_successFullPage_returns200() throws Exception {
+		/*This is only a test to ensure that the correct content is returned. The email address is 
+		 *unique and we cannot have two clients with the same e-mail. For that reason the real Page only
+		 *return one client.*/
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		Cliente cliente2 = new Cliente();
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
 		
+		Cliente cliente3 = new Cliente();
+		cliente3.setNome("Marcelo");
+		cliente3.setCpf("47852136582");
+		cliente3.setEmail("marcus@gmail.com");
+		
+		repository.saveAndFlush(cliente1);
+		repository.saveAndFlush(cliente2);
+		repository.saveAndFlush(cliente3);
+		
+		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].nome").value("Marcus"));
 	}
 	
 }

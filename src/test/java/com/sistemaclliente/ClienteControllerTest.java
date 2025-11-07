@@ -987,7 +987,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Searches for the client by email and returns a Page with that client. "
+	+ "Returns 200.")
 	public void buscarPorEmailOrdenada_sucessoPageCheia_retorno200() throws Exception {
 		List<ClienteResponseDTO> lista = List.of(cliente1, cliente2);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
