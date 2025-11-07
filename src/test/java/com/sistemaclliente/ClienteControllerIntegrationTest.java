@@ -714,6 +714,8 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(status().isConflict()).andExpect(content().string(containsString("indisponível")));
 	}
 	
+	/*Those tests below are only for training, because the email address is unique.*/
+	
 	@Test @Transactional @DisplayName("Searches for the client by email and returns a Page with that "
 	+ "client. Returns 200.")
 	public void buscarPorEmailOrdenada_successFullPage_returns200() throws Exception {
@@ -742,6 +744,13 @@ public class ClienteControllerIntegrationTest {
 		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
 		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].nome").value("Marcus"));
+	}
+	
+	@Test @DisplayName("Attempts to search for a client by the given email, but finds none.")
+	public void buscarPorEmailOrdenada_sucessoPageVazia_retorno200() throws Exception {
+		mvc.perform(get("/buscarporemail").param("email", "marcus@gmail.com")
+		.param("pagina", "0").param("itens", "2").param("ordenadoPor", "id"))
+		.andExpect(status().isOk()).andExpect(jsonPath("$.content.length()").value(0));
 	}
 	
 }

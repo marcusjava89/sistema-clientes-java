@@ -987,6 +987,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
+	/*Those tests below are only for training, because the email address is unique.*/
+	
 	@Test @DisplayName("Searches for the client by email and returns a Page with that client. "
 	+ "Returns 200.")
 	public void buscarPorEmailOrdenada_sucessoPageCheia_retorno200() throws Exception {
@@ -1005,7 +1007,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Attempts to search for a client by the given email, but finds none.")
 	public void buscarPorEmailOrdenada_sucessoPageVazia_retorno200() throws Exception {
 		List<ClienteResponseDTO> lista = List.of();
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);

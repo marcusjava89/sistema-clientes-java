@@ -240,6 +240,8 @@ public class ClienteService {
 		return new ClienteResponseDTO(clienteAtualizado);
 	}
 	
+	/*This method is only to improve my skills and to learn Java, because the email address is unique and 
+	 *any search by email will return a single client. We won't have a page with two or more clients.*/
 	public Page<ClienteResponseDTO> 
 	buscaEmailPaginadaOrdenada(String email, int pagina, int itens, String ordenadoPor){
 		
