@@ -931,9 +931,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);	
 	}
 	
-	@ParameterizedTest
-	@NullAndEmptySource
-	@ValueSource(strings = {" ", "mar", "mar@mar@", "mar.com"})
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = {" ", "mar", "mar@mar@", "mar.com"})
+	@DisplayName("Attempts to update the client's email with an invalid email address. Returns 400.")
 	public void atualizarEmail_emailInvalido_retorno400(String email) throws Exception{
 		when(service.atualizarEmail(1L, email))
 		.thenThrow(new IllegalArgumentException("Formato do e-mail inválido."));

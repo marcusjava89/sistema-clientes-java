@@ -674,6 +674,19 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.email").value("marcelo@gmail.com"));
 	}
 	
+	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = {" ", "mar", "mar@mar@", "mar.com"})
+	@DisplayName("Attempts to update the client's email with an invalid email address. Returns 400.")
+	public void atualizarEmail_invalidEmail_returns400(String email) throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+		repository.saveAndFlush(cliente1);
+		
+		mvc.perform(patch("/atualizaremail/"+cliente1.getId()).param("email", email))
+		.andExpect(status().isBadRequest()).andExpect(content().string(containsString("inválido")));
+    }
+	
 }
 
 
