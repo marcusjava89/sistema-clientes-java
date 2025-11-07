@@ -836,7 +836,8 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Searches for an e-mail address and returns a page with the client from that"
+	+ " email. Page parameters are NOT provided.")
 	public void buscaPorEmail_sucessoPaginaCheia_semParametros_retorno200() throws Exception{	
 		List<ClienteResponseDTO> lista = List.of(cliente1);
 		Page<ClienteResponseDTO> page = new PageImpl<>(lista);
