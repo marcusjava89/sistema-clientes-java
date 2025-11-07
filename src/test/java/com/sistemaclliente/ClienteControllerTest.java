@@ -964,14 +964,14 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Attempts to update a client's email with an existing email address. Returns 409.")
 	public void atualizarEmail_emailExistente_retorno409() throws Exception{
-		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenThrow(new EmailJaCadastradoException());
+		when(service.atualizarEmail(1L, "antonio@gmail.com")).thenThrow(new EmailJaCadastradoException());
 		
-		mvc.perform(patch("/atualizaremail/1").param("email", "marcus@gmail.com"))
+		mvc.perform(patch("/atualizaremail/1").param("email", "antonio@gmail.com"))
 		.andExpect(status().isConflict()).andExpect(content().string(containsString("indisponível")));
 		
-		verify(service).atualizarEmail(1L, "marcus@gmail.com");	
+		verify(service).atualizarEmail(1L, "antonio@gmail.com");	
 		verifyNoMoreInteractions(service);
 	}
 	

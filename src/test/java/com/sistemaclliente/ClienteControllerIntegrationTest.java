@@ -689,9 +689,30 @@ public class ClienteControllerIntegrationTest {
     }
 	
 	@Test @DisplayName("Attempts to find the client to update his email and finds none. Returns 400.")
-	public void atualizarEmail_naoEncontrado_retorno404() throws Exception{
+	public void atualizarEmail_clientNotFound_returns404() throws Exception{
 		mvc.perform(patch("/atualizaremail/999").param("email", "marcus@gmail.com"))
 		.andExpect(status().isNotFound()).andExpect(content().string(containsString("não encontrado")));
+	}
+	
+	@Test @Transactional @DisplayName("Attempts to update a client's email with an existing email address."
+	+ "Returns 409.")
+	public void atualizarEmail_existingEmail_returns409() throws Exception{
+		Cliente cliente1 = new Cliente();
+		cliente1.setNome("Marcus");
+		cliente1.setCpf("23501206586");
+		cliente1.setEmail("marcus@gmail.com");
+
+		Cliente cliente2 = new Cliente();
+		cliente2.setNome("Antonio");
+		cliente2.setCpf("20219064674");
+		cliente2.setEmail("antonio@gmail.com");
+		
+		repository.saveAndFlush(cliente1);
+		repository.saveAndFlush(cliente2);
+		
+		mvc.perform(patch("/atualizaremail/"+cliente1.getId()).param("email", "antonio@gmail.com"))
+		.andExpect(status().isConflict()).andExpect(content().string(containsString("indisponível")));
+		
 	}
 	
 }
