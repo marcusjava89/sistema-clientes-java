@@ -636,6 +636,13 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.content[1].cpf").value("47852136582"))
 		.andExpect(jsonPath("$.content.length()").value(2));
 	}
+	
+	@Test @DisplayName("Attempts to search for the client that matches the email and finds none. "
+	+ "Returns 200.")
+	public void buscaPorEmail_successEmptyPage_returns200() throws Exception{
+		mvc.perform(get("/buscaemail?email=marcus@gmail.com")).andExpect(status().isOk())
+		.andExpect(jsonPath("$.content.length()").value(0));
+	}
 
 }
 
