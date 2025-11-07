@@ -674,7 +674,8 @@ public class ClienteControllerIntegrationTest {
 		.andExpect(jsonPath("$.email").value("marcelo@gmail.com"));
 	}
 	
-	@ParameterizedTest @NullAndEmptySource @ValueSource(strings = {" ", "mar", "mar@mar@", "mar.com"})
+	@ParameterizedTest @NullAndEmptySource @Transactional
+	@ValueSource(strings = {" ", "mar", "mar@mar@", "mar.com"})
 	@DisplayName("Attempts to update the client's email with an invalid email address. Returns 400.")
 	public void atualizarEmail_invalidEmail_returns400(String email) throws Exception{
 		Cliente cliente1 = new Cliente();
@@ -686,6 +687,12 @@ public class ClienteControllerIntegrationTest {
 		mvc.perform(patch("/atualizaremail/"+cliente1.getId()).param("email", email))
 		.andExpect(status().isBadRequest()).andExpect(content().string(containsString("inválido")));
     }
+	
+	@Test @DisplayName("Attempts to find the client to update his email and finds none. Returns 400.")
+	public void atualizarEmail_naoEncontrado_retorno404() throws Exception{
+		mvc.perform(patch("/atualizaremail/999").param("email", "marcus@gmail.com"))
+		.andExpect(status().isNotFound()).andExpect(content().string(containsString("não encontrado")));
+	}
 	
 }
 

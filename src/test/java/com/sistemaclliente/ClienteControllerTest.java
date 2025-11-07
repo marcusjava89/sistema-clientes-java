@@ -944,7 +944,7 @@ public class ClienteControllerTest {
 		verifyNoMoreInteractions(service);
 	}
 	
-	@Test
+	@Test @DisplayName("Attempts to find the client to update his email and finds none. Returns 400.")
 	public void atualizarEmail_naoEncontrado_retorno404() throws Exception{
 		when(service.atualizarEmail(1L, "marcus@gmail.com")).thenThrow(new ClienteNotFoundException());
 		
