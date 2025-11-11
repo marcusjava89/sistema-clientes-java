@@ -27,8 +27,11 @@ import jakarta.validation.Valid;
 @RestController
 public class ClienteController {
 
-	@Autowired
-	private ClienteService service;
+	private final ClienteService service;
+	
+	public ClienteController(ClienteService service) {
+		this.service = service;
+	}
 	
 	@GetMapping(value = "/listarclientes")
 	public ResponseEntity<List<ClienteResponseDTO>> listarClientes(){

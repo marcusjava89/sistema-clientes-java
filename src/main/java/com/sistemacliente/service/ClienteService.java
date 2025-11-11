@@ -28,11 +28,14 @@ public class ClienteService {
 	/*Por mais que certas verificações são feitas pelo Controller com o @Valid, faremos támbem as verifi-
 	 *cações aqui com meNsagens personalizadas pas os clientes.*/
 	
-	@Autowired
-	private ClienteRepository repository;
+	private final ClienteRepository repository;
 	
-	@Autowired
-	private ObjectMapper mapper;
+	private final ObjectMapper mapper;
+	
+	public ClienteService(ClienteRepository repository, ObjectMapper mapper) {
+		this.repository = repository;
+		this.mapper = mapper;
+	}
 	
 	String regexEmail = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
