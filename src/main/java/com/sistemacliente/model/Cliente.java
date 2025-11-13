@@ -14,19 +14,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity
-@Table(name = "cliente")
+@Entity @Table(name = "cliente") @Getter @Setter
 @SequenceGenerator(name = "seq_cliente", sequenceName = "seq_cliente", initialValue = 1, 
 allocationSize = 1)
 public class Cliente implements Serializable{
 	
-	public Cliente() {
-
-	}
+	public Cliente() {}
 
 	public Cliente(ClienteRequestDTO dto) {
 		BeanUtils.copyProperties(dto, this);
@@ -46,38 +42,6 @@ public class Cliente implements Serializable{
 	
 	@Column(name = "cpf", nullable = false, unique = true, updatable = false)
 	private String cpf;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getNome() {
-		return nome;
-	}
-
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	
-	public String getCpf() {
-		return cpf;
-	}
-	
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
-	}
 
 	@Override
 	public int hashCode() {
